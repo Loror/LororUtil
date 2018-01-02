@@ -1,3 +1,10 @@
+Studio中引入项目
+
+dependencies {
+	   compile 'com.github.Loror:LororUtil:1.0.2'
+}
+
+
 image包
 
 类ImageUtil
