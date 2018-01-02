@@ -8,7 +8,7 @@ dependencies {
 }
 
 
-##image包
+## image包
 
 * 类ImageUtil
     * 方法with(Context context) 获取ImageUtil对象
@@ -40,7 +40,7 @@ ImageUtil回调接口
     * 抽象方法readImage(String path, int widthLimit) 子类重写读取图片方法
     * 已实现的实现类ReadHttpImage，读取网络图片，ReadSDCardImage，读取sd卡图片，ReadSDCardVideo，读取sd卡视频缩略图。
 
-##http包
+## http包
 
 * 类HttpClient
     * 方法setTimeOut(int timeOut) 设置http连接超时时间
@@ -93,7 +93,7 @@ HttpClient HttpsClient使用参数类
     * 构造方法FileBody(String filePath, String fileName, String contentType) 构造一个FileBody对象，post提交时会提交名字与文件流，fileName为空时默认以文件名构造，contentType为空时默认以"application/octet-stream"构造
 
 
-##view包
+## view包
 
 * 注解Find
 需配合工具类ViewUtil使用
@@ -105,7 +105,7 @@ HttpClient HttpsClient使用参数类
     * 静态方法find(Object holder, View view) 查找holder中注解并为控件初始化，需传入父控件view
 
 
-##asynctask包
+## asynctask包
 
 
 * 类AsyncUtil
