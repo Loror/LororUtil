@@ -78,7 +78,7 @@ HttpsClient使用参数类
     * 方法packetOutParmas() 打包参数，HttpClient类调用
 
 
-* 类Responce属性 
+* 类Responce 
     * 属性result 返回字节数组结果
     * 方法getHeaders() 获取http头
     * 方法getCookies() 获取cookies
