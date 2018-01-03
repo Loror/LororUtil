@@ -57,6 +57,27 @@ public class ImageUtil implements Cloneable {
     }
 
     /**
+     * 设置全局加载方法
+     */
+    public static void setGlobalReadImage(ReadImage globalReadImage) {
+        ImageUtil.globalReadImage = globalReadImage;
+    }
+
+    /**
+     * 设置全局占位图
+     */
+    public static void setGlobalDefaultImage(int globalDefaultImage) {
+        ImageUtil.globalDefaultImage = globalDefaultImage;
+    }
+
+    /**
+     * 设置全局错误占位图
+     */
+    public static void setGlobalErrorImage(int globalErrorImage) {
+        ImageUtil.globalErrorImage = globalErrorImage;
+    }
+
+    /**
      * 获取实例
      */
     public static ImageUtil with(Context context) {
