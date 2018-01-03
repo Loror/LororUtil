@@ -82,7 +82,7 @@ public class ImageUtil implements Cloneable {
      */
     public static ImageUtil with(Context context) {
         if (imageUtil == null) {
-            imageUtil = new ImageUtil(context);
+            imageUtil = new ImageUtil(null);
         }
         try {
             ImageUtil imageUtil = (ImageUtil) ImageUtil.imageUtil.clone();
