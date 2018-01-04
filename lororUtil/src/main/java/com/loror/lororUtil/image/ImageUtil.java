@@ -40,7 +40,7 @@ public class ImageUtil implements Cloneable {
     private Animation loadAnimation;
     private Context context;
     private static ImageUtil imageUtil;
-    private static ExecutorService server = Executors.newFixedThreadPool(3);
+    private static ExecutorService server;
 
     private ImageUtil(Context context) {
         this.context = context;
@@ -145,6 +145,7 @@ public class ImageUtil implements Cloneable {
         return this;
     }
 
+    @Deprecated
     public ImageUtil setCallback(ImageUtilCallBack callback) {
         this.callback = callback;
         return this;
@@ -155,9 +156,9 @@ public class ImageUtil implements Cloneable {
         return this;
     }
 
-    public ImageUtil setTargetDir(File targetDir) {
+    public ImageUtil setTargetDir(String targetDir) {
         if (targetDir != null) {
-            this.targetDirPath = targetDir.getAbsolutePath();
+            this.targetDirPath = targetDir;
         }
         return this;
     }
@@ -185,180 +186,189 @@ public class ImageUtil implements Cloneable {
      */
     public void loadImage() {
         final Context context = this.context;
-        init(context);
-        final Animation loadAnimation = this.loadAnimation;
-        final ImageUtilCallBack callback = this.callback;
         final int widthLimit = this.widthLimit;
-        final ReadImage readImage = this.readImage != null ? this.readImage : globalReadImage;
-        final String targetDirPath = this.targetDirPath;
-        final String targetName = this.targetName;
         final int defaultImage = this.defaultImage != 0 ? this.defaultImage : globalDefaultImage;
         final int errorImage = this.errorImage != 0 ? this.errorImage : globalErrorImage;
         final boolean isGif = this.isGif;
         final String path = this.path;
         final boolean removeOldTask = this.removeOldTask;
         final ImageUtilCallBack onLoadListener = this.onLoadListener;
-        EfficientImageUtil.loadImage(imageView, path, widthLimit, new ReadImage() {
+        final Animation loadAnimation = this.loadAnimation;
 
-            @Override
-            public ReadImageResult readImage(String path, int widthLimit) {
-                if (readImage != null) {
-                    return readImage.readImage(path, widthLimit);
-                }
-                String targetFile;
-                if (path.startsWith("http")) {
-                    File targetDir = new File(targetDirPath);
-                    if (!targetDir.exists()) {
-                        targetDir.mkdirs();
-                    }
-                    String targetDirPath = targetDir.getAbsolutePath();
-                    targetFile = (targetDirPath.endsWith("/") ? targetDirPath : (targetDirPath + "/")) + targetName;
-                } else {
-                    targetFile = path;
-                }
-                return new SmartReadImage(context, targetFile).readImage(path, widthLimit);
-            }
-        }, callback == null ? new ImageUtilCallBack() {
+        ReadImage readImage = this.readImage != null ? this.readImage : globalReadImage;
+        if (readImage == null) {
+            init(context);
+            final String targetDirPath = this.targetDirPath;
+            final String targetName = this.targetName;
+            readImage = new ReadImage() {
 
-            private WeakReference<ImageView> weakReference;
-            private String tag;
-            private int index;
-
-            @Override
-            public void onStart(ImageView imageView) {
-                if (imageView != null) {
-                    tag = String.valueOf(imageView.getTag(tagKey));
-                    Animation animation = imageView.getAnimation();
-                    if (animation != null) {
-                        imageView.clearAnimation();
-                    }
-                    if (defaultImage != 0) {
-                        imageView.setImageResource(defaultImage);
-                    }
-                }
-                if (onLoadListener != null) {
-                    onLoadListener.onStart(imageView);
-                }
-            }
-
-            @Override
-            public void onLoadCach(ImageView imageView, Bitmap bitmap) {
-                if (imageView != null) {
-                    imageView.setImageBitmap(bitmap);
-                    if (cachUseAnimation && loadAnimation != null) {
-                        imageView.startAnimation(loadAnimation);
-                    }
-                }
-                if (onLoadListener != null) {
-                    onLoadListener.onLoadCach(imageView, bitmap);
-                }
-            }
-
-            private final void loadGif(final Handler handler, ReadImageResult readImageResult) {
-                try {
-                    final GifDecoder decoder = new GifDecoder(new FileInputStream(new File(readImageResult.getPath())));
-                    decoder.setWidthLimit(widthLimit);
-                    decoder.decode();
-                    if (decoder.getStatus() == GifDecoder.STATUS_FINISH) {
-                        final int size = decoder.getFrameCount();
-                        final boolean calledAnimation[] = {false};
-                        Runnable runnable = new Runnable() {
-
-                            @Override
-                            public void run() {
-                                ImageView imageView = weakReference.get();
-                                if (imageView == null) {
-                                    return;
-                                }
-                                EfficientImageUtil.lock.lock();
-                                boolean useful = tag.equals(imageView.getTag(tagKey));
-                                EfficientImageUtil.lock.unlock();
-                                if (useful) {
-                                    imageView.setImageBitmap(decoder.getFrame(index % size).image);
-                                    if (!calledAnimation[0] && index == 0 && loadAnimation != null) {
-                                        calledAnimation[0] = true;
-                                        imageView.startAnimation(loadAnimation);
-                                    }
-                                    long delay = decoder.getDelay(index % size);
-                                    handler.postDelayed(this, delay != 0 ? delay : 100);
-                                    index++;
-                                }
-                            }
-                        };
-                        handler.post(runnable);
+                @Override
+                public ReadImageResult readImage(String path, int widthLimit) {
+                    String targetFile;
+                    if (path.startsWith("http")) {
+                        File targetDir = new File(targetDirPath);
+                        if (!targetDir.exists()) {
+                            targetDir.mkdirs();
+                        }
+                        String targetDirPath = targetDir.getAbsolutePath();
+                        targetFile = (targetDirPath.endsWith("/") ? targetDirPath : (targetDirPath + "/")) + targetName;
                     } else {
-                        handler.post(new Runnable() {
-
-                            @Override
-                            public void run() {
-                                onFailed(imageView, path);
-                            }
-                        });
+                        targetFile = path;
                     }
-                } catch (Exception e) {
-                    e.printStackTrace();
+                    return new SmartReadImage(context, targetFile).readImage(path, widthLimit);
                 }
-            }
+            };
+        }
 
-            @Override
-            public void onFinish(final ImageView imageView, final ReadImageResult readImageResult) {
-                if (imageView != null) {
-                    if (!isGif) {
-                        if (loadAnimation != null) {
+        ImageUtilCallBack callback = this.callback;
+        if (callback == null) {
+            if (server == null) {
+                server = Executors.newFixedThreadPool(3);
+            }
+            callback = new ImageUtilCallBack() {
+
+                private WeakReference<ImageView> weakReference;
+                private String tag;
+                private int index;
+
+                @Override
+                public void onStart(ImageView imageView) {
+                    if (imageView != null) {
+                        tag = String.valueOf(imageView.getTag(tagKey));
+                        Animation animation = imageView.getAnimation();
+                        if (animation != null) {
+                            imageView.clearAnimation();
+                        }
+                        if (defaultImage != 0) {
+                            imageView.setImageResource(defaultImage);
+                        }
+                    }
+                    if (onLoadListener != null) {
+                        onLoadListener.onStart(imageView);
+                    }
+                }
+
+                @Override
+                public void onLoadCach(ImageView imageView, Bitmap bitmap) {
+                    if (imageView != null) {
+                        imageView.setImageBitmap(bitmap);
+                        if (cachUseAnimation && loadAnimation != null) {
                             imageView.startAnimation(loadAnimation);
                         }
-                        imageView.setImageBitmap(readImageResult.getBitmap());
-                    } else {
-                        weakReference = new WeakReference<ImageView>(imageView);
-                        server.execute(new Runnable() {
+                    }
+                    if (onLoadListener != null) {
+                        onLoadListener.onLoadCach(imageView, bitmap);
+                    }
+                }
 
-                            @Override
-                            public void run() {
-                                final Handler handler = ObjectPool.getInstance().getHandler();
-                                if (readImageResult.getPath() != null) {
-                                    String type = BitmapUtil.getBitmapType(readImageResult.getPath());
-                                    if (type != null && type.contains("gif")) {
-                                        loadGif(handler, readImageResult);
+                private final void loadGif(final Handler handler, ReadImageResult readImageResult) {
+                    try {
+                        final GifDecoder decoder = new GifDecoder(new FileInputStream(new File(readImageResult.getPath())));
+                        decoder.setWidthLimit(widthLimit);
+                        decoder.decode();
+                        if (decoder.getStatus() == GifDecoder.STATUS_FINISH) {
+                            final int size = decoder.getFrameCount();
+                            final boolean calledAnimation[] = {false};
+                            Runnable runnable = new Runnable() {
+
+                                @Override
+                                public void run() {
+                                    ImageView imageView = weakReference.get();
+                                    if (imageView == null) {
+                                        return;
+                                    }
+                                    EfficientImageUtil.lock.lock();
+                                    boolean useful = tag.equals(imageView.getTag(tagKey));
+                                    EfficientImageUtil.lock.unlock();
+                                    if (useful) {
+                                        imageView.setImageBitmap(decoder.getFrame(index % size).image);
+                                        if (!calledAnimation[0] && index == 0 && loadAnimation != null) {
+                                            calledAnimation[0] = true;
+                                            imageView.startAnimation(loadAnimation);
+                                        }
+                                        long delay = decoder.getDelay(index % size);
+                                        handler.postDelayed(this, delay != 0 ? delay : 100);
+                                        index++;
+                                    }
+                                }
+                            };
+                            handler.post(runnable);
+                        } else {
+                            handler.post(new Runnable() {
+
+                                @Override
+                                public void run() {
+                                    onFailed(imageView, path);
+                                }
+                            });
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                @Override
+                public void onFinish(final ImageView imageView, final ReadImageResult readImageResult) {
+                    if (imageView != null) {
+                        if (!isGif) {
+                            if (loadAnimation != null) {
+                                imageView.startAnimation(loadAnimation);
+                            }
+                            imageView.setImageBitmap(readImageResult.getBitmap());
+                        } else {
+                            weakReference = new WeakReference<ImageView>(imageView);
+                            server.execute(new Runnable() {
+
+                                @Override
+                                public void run() {
+                                    final Handler handler = ObjectPool.getInstance().getHandler();
+                                    if (readImageResult.getPath() != null) {
+                                        String type = BitmapUtil.getBitmapType(readImageResult.getPath());
+                                        if (type != null && type.contains("gif")) {
+                                            loadGif(handler, readImageResult);
+                                        } else {
+                                            handler.post(new Runnable() {
+
+                                                @Override
+                                                public void run() {
+                                                    if (loadAnimation != null) {
+                                                        imageView.startAnimation(loadAnimation);
+                                                    }
+                                                    imageView.setImageBitmap(readImageResult.getBitmap());
+                                                }
+                                            });
+                                        }
                                     } else {
                                         handler.post(new Runnable() {
 
                                             @Override
                                             public void run() {
-                                                if (loadAnimation != null) {
-                                                    imageView.startAnimation(loadAnimation);
-                                                }
-                                                imageView.setImageBitmap(readImageResult.getBitmap());
+                                                onFailed(imageView, path);
                                             }
                                         });
                                     }
-                                } else {
-                                    handler.post(new Runnable() {
-
-                                        @Override
-                                        public void run() {
-                                            onFailed(imageView, path);
-                                        }
-                                    });
                                 }
-                            }
-                        });
+                            });
+                        }
+                    }
+                    if (onLoadListener != null) {
+                        onLoadListener.onFinish(imageView, readImageResult);
                     }
                 }
-                if (onLoadListener != null) {
-                    onLoadListener.onFinish(imageView, readImageResult);
-                }
-            }
 
-            @Override
-            public void onFailed(ImageView imageView, String path) {
-                if (imageView != null && errorImage != 0) {
-                    imageView.setImageResource(errorImage);
+                @Override
+                public void onFailed(ImageView imageView, String path) {
+                    if (imageView != null && errorImage != 0) {
+                        imageView.setImageResource(errorImage);
+                    }
+                    if (onLoadListener != null) {
+                        onLoadListener.onFailed(imageView, path);
+                    }
                 }
-                if (onLoadListener != null) {
-                    onLoadListener.onFailed(imageView, path);
-                }
-            }
-        } : callback, null, removeOldTask, !isGif);
+            };
+        }
+
+        EfficientImageUtil.loadImage(imageView, path, widthLimit, readImage, callback, null, removeOldTask, !isGif);
     }
 
     public static void releseTag(View view) {
