@@ -4,7 +4,15 @@
 dependencies {
 
     compile 'com.github.Loror:LororUtil:1.0.4'
-    
+ 
+}
+
+allprojects {
+
+	repositories {
+		...
+		maven { url 'https://jitpack.io' }
+	}
 }
 
 
