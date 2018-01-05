@@ -1,11 +1,12 @@
 package com.loror.lororUtil.http;
 
+import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class Responce {
-    protected String url;
+    protected URL url;
     protected int code;
     public byte[] result;
     protected HashMap<String, String> cookies = new HashMap<>();
@@ -16,7 +17,7 @@ public class Responce {
     /**
      * 获取最终url路径
      */
-    public String getUrl() {
+    public URL getUrl() {
         return url;
     }
 

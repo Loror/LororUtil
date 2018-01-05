@@ -122,7 +122,7 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
             if (responce.code == HttpURLConnection.HTTP_OK) {
                 initHeaders(conn, responce);
             }
-            responce.url = conn.getURL().toString();
+            responce.url = conn.getURL();
             responce.result = getResponce(conn);
             conn.disconnect();
         } catch (Throwable e) {
@@ -172,7 +172,7 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
                     pw.close();
                 }
             }
-            responce.url = conn.getURL().toString();
+            responce.url = conn.getURL();
             responce.code = conn.getResponseCode();
             if (responce.code == HttpURLConnection.HTTP_OK) {
                 initHeaders(conn, responce);
@@ -215,7 +215,7 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
             out.write(end_data);
             out.flush();
             out.close();
-            responce.url = conn.getURL().toString();
+            responce.url = conn.getURL();
             responce.code = conn.getResponseCode();
             if (responce.code == HttpURLConnection.HTTP_OK) {
                 initHeaders(conn, responce);
@@ -406,6 +406,7 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
             prepareGet(conn, timeOut, readTimeOut, null);
             long length = conn.getContentLength();
             File file = getFile(conn, path, urlStr);
+            responce.url = conn.getURL();
             responce.code = conn.getResponseCode();
             if (file.exists() && !cover && file.length() == length) {
                 conn.disconnect();
@@ -461,6 +462,7 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
             conn.setRequestProperty("Range", "bytes=" + start + "-" + end);
             conn.setDoInput(true);
             File file = getFile(conn, path, urlStr);
+            responce.url = conn.getURL();
             responce.code = conn.getResponseCode();
             downloadFile(file, conn.getContentLength(), conn.getInputStream());
             if (responce.code == HttpURLConnection.HTTP_PARTIAL) {
