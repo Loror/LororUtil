@@ -122,6 +122,7 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
             if (responce.code == HttpURLConnection.HTTP_OK) {
                 initHeaders(conn, responce);
             }
+            responce.url = conn.getURL().toString();
             responce.result = getResponce(conn);
             conn.disconnect();
         } catch (Throwable e) {
@@ -171,6 +172,7 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
                     pw.close();
                 }
             }
+            responce.url = conn.getURL().toString();
             responce.code = conn.getResponseCode();
             if (responce.code == HttpURLConnection.HTTP_OK) {
                 initHeaders(conn, responce);
@@ -213,6 +215,7 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
             out.write(end_data);
             out.flush();
             out.close();
+            responce.url = conn.getURL().toString();
             responce.code = conn.getResponseCode();
             if (responce.code == HttpURLConnection.HTTP_OK) {
                 initHeaders(conn, responce);
