@@ -3,7 +3,7 @@
 
 dependencies {
 
-    compile 'com.github.Loror:LororUtil:1.0.6'
+    compile 'com.github.Loror:LororUtil:1.0.7'
  
 }
 
@@ -78,6 +78,8 @@ HttpsClient监听器
 
 * 类RequestParmas HttpClient 
 HttpsClient使用参数类
+    * 方法fromObject(Object object) 添加参数
+    * 方法fromKeyValue(String params) 添加参数
     * 方法addParmas(String key, String value) 添加参数
     * 方法addParmas(String key, FileBody value) 添加参数
     * 方法getParmas() 获取参数类中所有参数
