@@ -4,7 +4,6 @@ import java.util.Vector;
 
 public class ThreadPool implements RemoveableThreadPool {
 
-    private boolean isEnd;// 是否所有任务结束
     private int excuteType;// 执行模式
     private Thread[] threads;// 线程组
     private boolean[] alive;// 线程活动状态
@@ -19,19 +18,6 @@ public class ThreadPool implements RemoveableThreadPool {
         threads = new Thread[threadNumber];
         alive = new boolean[threadNumber];
         tasks = new Vector<Runnable>();
-        initThreadPool();
-    }
-
-    /**
-     * 初始化线程池线程
-     */
-    private void initThreadPool() {
-        isEnd = false;
-        for (int i = 0; i < threads.length; i++) {
-            threads[i] = initThread(i);
-        }
-        alive[0] = true;
-        threads[0].start();
     }
 
     /**
@@ -41,7 +27,7 @@ public class ThreadPool implements RemoveableThreadPool {
         Thread thread = new Thread() {
             @Override
             public void run() {
-                for (; ; ) {
+                for (;;) {
                     try {
                         sleep(delay);
                     } catch (InterruptedException e) {
@@ -50,18 +36,10 @@ public class ThreadPool implements RemoveableThreadPool {
                     Runnable runnable = null;
                     synchronized (ThreadPool.this) {
                         int size = tasks.size();
-                        if (size == 0) {
-                            if (index != 0) {
-                                alive[index] = false;
-                                threads[index] = initThread(index);
-                            } else {
-                                isEnd = true;
-                            }
+                        if (size == 0 || size < index) {
+                            alive[index] = false;
                             break;
                         } else {// 无任务，标记并线程结束
-                            if (index == 0) {
-                                awakeThreads(size);
-                            }
                             try {
                                 switch (excuteType) {
                                     case EXCUTETYPE_ORDER:
@@ -101,8 +79,9 @@ public class ThreadPool implements RemoveableThreadPool {
      * 唤醒线程
      */
     private void awakeThreads(int size) {
-        for (int i = 1; i < threads.length && i < size / 3 + 1; i++) {
+        for (int i = 1; i < threads.length && i < size; i++) {
             if (!alive[i]) {
+                threads[i] = initThread(i);
                 alive[i] = true;
                 threads[i].start();
             }
@@ -125,10 +104,8 @@ public class ThreadPool implements RemoveableThreadPool {
      */
     public synchronized void excute(Runnable task, int excuteType) throws IllegalStateException {
         this.excuteType = excuteType;
-        if (isEnd) {
-            initThreadPool();// 已结束重新实例线程池
-        }
         tasks.add(task);
+        awakeThreads(tasks.size());
     }
 
     /**
