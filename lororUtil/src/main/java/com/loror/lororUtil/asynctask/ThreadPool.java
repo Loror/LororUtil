@@ -79,7 +79,7 @@ public class ThreadPool implements RemoveableThreadPool {
      * 唤醒线程
      */
     private void awakeThreads(int size) {
-        for (int i = 1; i < threads.length && i < size; i++) {
+        for (int i = 0; i < threads.length && i < size; i++) {
             if (!alive[i]) {
                 threads[i] = initThread(i);
                 alive[i] = true;
