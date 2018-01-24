@@ -23,7 +23,7 @@ public class ReadSDCardImage implements ReadImage {
 		Bitmap bitmap = BitmapUtil.compessBitmap(path, widthLimit);
 		bitmap = BitmapUtil.compessBitmap(bitmap, widthLimit, true);
 		ReadImageResult result = new ReadImageResult();
-		result.setBitmap(bitmap);
+		result.addFrame(new Frame(bitmap, 0, widthLimit));
 		result.setPath(path);
 		return result;
 	}

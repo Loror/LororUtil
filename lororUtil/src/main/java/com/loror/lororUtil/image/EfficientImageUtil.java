@@ -45,14 +45,14 @@ public class EfficientImageUtil {
      * 获取缓存
      */
     public static Bitmap getBitmapByPath(String path) {
-        return ImageCach.getFromCache(path + 200);
+        return ImageCach.getFromCache(path + 200).getBitmap();
     }
 
     /**
      * 获取缓存
      */
     public static Bitmap getBitmapByPath(String path, int widthLimit) {
-        return ImageCach.getFromCache(path + widthLimit);
+        return ImageCach.getFromCache(path + widthLimit).getBitmap();
     }
 
     /**
@@ -67,21 +67,21 @@ public class EfficientImageUtil {
      * 重载
      */
     public static void loadImage(ImageView imageView, String path, ReadImage readImage) {
-        loadImage(imageView, path, 200, readImage, null, null, true, true);
+        loadImage(imageView, path, 200, readImage, null, null, true);
     }
 
     /**
      * 重载
      */
     public static void loadImage(ImageView imageView, String path, int widthLimit, ReadImage readImage) {
-        loadImage(imageView, path, widthLimit, readImage, null, null, true, true);
+        loadImage(imageView, path, widthLimit, readImage, null, null, true);
     }
 
     /**
      * 重载
      */
     public static void loadImage(ImageView imageView, String path, ReadImage readImage, ImageUtilCallBack callback) {
-        loadImage(imageView, path, 200, readImage, callback, null, true, true);
+        loadImage(imageView, path, 200, readImage, callback, null, true);
     }
 
     /**
@@ -89,7 +89,7 @@ public class EfficientImageUtil {
      */
     public static void loadImage(ImageView imageView, String path, int widthLimit, ReadImage readImage,
                                  ImageUtilCallBack callback) {
-        loadImage(imageView, path, widthLimit, readImage, callback, null, true, true);
+        loadImage(imageView, path, widthLimit, readImage, callback, null, true);
     }
 
     /**
@@ -97,23 +97,15 @@ public class EfficientImageUtil {
      */
     public static void loadImage(ImageView imageView, String path, int widthLimit, ReadImage readImage,
                                  ImageUtilCallBack callback, Bitmap defaultImage) {
-        loadImage(imageView, path, widthLimit, readImage, callback, defaultImage, true, true);
-    }
-
-    /**
-     * 重载
-     */
-    public static void loadImage(final ImageView imageView, final String path, final int widthLimit,
-                                 final ReadImage readImage, final ImageUtilCallBack callback, Bitmap defaultImage, boolean removeOldTask) {
-        loadImage(imageView, path, widthLimit, readImage, callback, defaultImage, removeOldTask, true);
+        loadImage(imageView, path, widthLimit, readImage, callback, defaultImage, true);
     }
 
     /**
      * 加载，参数，1，imageView，2，地址，3，宽度限制，4，读取图片接口，5，回掉，6，是否移除滑出的任务
      */
-    protected static void loadImage(final ImageView imageView, final String path, final int widthLimit,
-                                    final ReadImage readImage, final ImageUtilCallBack callback, Bitmap defaultImage,
-                                    final boolean removeOldTask, final boolean cachAble) {
+    public static void loadImage(final ImageView imageView, final String path, final int widthLimit,
+                                 final ReadImage readImage, final ImageUtilCallBack callback, Bitmap defaultImage,
+                                 final boolean removeOldTask) {
         if (!TextUtil.isEmpty(path)) {
             final String tag = String.valueOf(EfficientImageUtil.tag++);
             final String cachKey = path + widthLimit;
@@ -148,17 +140,17 @@ public class EfficientImageUtil {
                     callback.onStart(imageView);
                 }
 
-                Bitmap bitmap = ImageCach.getFromCache(cachKey);
-                if (bitmap != null) {
+                ReadImageResult result = ImageCach.getFromCache(cachKey);
+                if (result != null) {
                     lock.lock();
                     boolean useful = !hasImageView || tag.equals(imageView.getTag(tagKey));
                     lock.unlock();
                     if (useful) {
                         if (callback != null) {
-                            callback.onLoadCach(imageView, bitmap);
+                            callback.onLoadCach(imageView, result);
                         } else {
                             if (hasImageView) {
-                                imageView.setImageBitmap(bitmap);
+                                imageView.setImageBitmap(result.getBitmap());
                             }
                         }
                     }
@@ -183,9 +175,7 @@ public class EfficientImageUtil {
                                     });
                                 }
                             } else {
-                                if (cachAble) {
-                                    ImageCach.pushToCach(cachKey, readImageResult.getBitmap());
-                                }
+                                ImageCach.pushToCach(cachKey, readImageResult);
                                 handler.post(new Runnable() {
                                     public void run() {
                                         EfficientImageUtil.lock.lock();

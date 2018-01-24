@@ -23,7 +23,7 @@ public class ReadSDCardVideo implements ReadImage {
 	public ReadImageResult readImage(String path, int widthLimit) {
 		Bitmap bitmap = BitmapUtil.compessBitmap(ThumbnailUtils.createVideoThumbnail(path, 320), widthLimit, true);
 		ReadImageResult result = new ReadImageResult();
-		result.setBitmap(bitmap);
+		result.addFrame(new Frame(bitmap, 0, widthLimit));
 		result.setPath(path);
 		return result;
 	}

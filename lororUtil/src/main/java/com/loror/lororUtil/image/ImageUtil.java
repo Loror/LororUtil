@@ -1,7 +1,6 @@
 package com.loror.lororUtil.image;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.lang.ref.WeakReference;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -59,6 +58,7 @@ public class ImageUtil implements Cloneable {
     /**
      * 设置全局加载方法
      */
+    @Deprecated
     public static void setGlobalReadImage(ReadImage globalReadImage) {
         ImageUtil.globalReadImage = globalReadImage;
     }
@@ -123,6 +123,7 @@ public class ImageUtil implements Cloneable {
         return this;
     }
 
+    @Deprecated
     public ImageUtil setReadImage(ReadImage readImage) {
         if (readImage != null) {
             this.readImage = readImage;
@@ -215,7 +216,7 @@ public class ImageUtil implements Cloneable {
                     } else {
                         targetFile = path;
                     }
-                    return new SmartReadImage(context, targetFile).readImage(path, widthLimit);
+                    return new SmartReadImage(context, targetFile, isGif).readImage(path, widthLimit);
                 }
             };
         }
@@ -249,62 +250,64 @@ public class ImageUtil implements Cloneable {
                 }
 
                 @Override
-                public void onLoadCach(ImageView imageView, Bitmap bitmap) {
+                public void onLoadCach(final ImageView imageView, final ReadImageResult readImageResult) {
                     if (imageView != null) {
-                        imageView.setImageBitmap(bitmap);
-                        if (cachUseAnimation && loadAnimation != null) {
-                            imageView.startAnimation(loadAnimation);
+                        if (!isGif) {
+                            if (cachUseAnimation && loadAnimation != null) {
+                                imageView.startAnimation(loadAnimation);
+                            }
+                            imageView.setImageBitmap(readImageResult.getBitmap());
+                        } else {
+                            weakReference = new WeakReference<ImageView>(imageView);
+                            final Handler handler = ObjectPool.getInstance().getHandler();
+                            if (readImageResult.getCount() > 0) {
+                                loadGif(handler, readImageResult);
+                            } else {
+                                handler.post(new Runnable() {
+
+                                    @Override
+                                    public void run() {
+                                        if (loadAnimation != null) {
+                                            imageView.startAnimation(loadAnimation);
+                                        }
+                                        imageView.setImageBitmap(readImageResult.getBitmap());
+                                    }
+                                });
+                            }
                         }
                     }
                     if (onLoadListener != null) {
-                        onLoadListener.onLoadCach(imageView, bitmap);
+                        onLoadListener.onLoadCach(imageView, readImageResult);
                     }
                 }
 
-                private final void loadGif(final Handler handler, ReadImageResult readImageResult) {
-                    try {
-                        final GifDecoder decoder = new GifDecoder(new FileInputStream(new File(readImageResult.getPath())));
-                        decoder.setWidthLimit(widthLimit);
-                        decoder.decode();
-                        if (decoder.getStatus() == GifDecoder.STATUS_FINISH) {
-                            final int size = decoder.getFrameCount();
-                            final boolean calledAnimation[] = {false};
-                            Runnable runnable = new Runnable() {
+                private final void loadGif(final Handler handler, final ReadImageResult readImageResult) {
+                    final int size = readImageResult.getCount();
+                    final boolean calledAnimation[] = { false };
+                    Runnable runnable = new Runnable() {
 
-                                @Override
-                                public void run() {
-                                    ImageView imageView = weakReference.get();
-                                    if (imageView == null) {
-                                        return;
-                                    }
-                                    EfficientImageUtil.lock.lock();
-                                    boolean useful = tag.equals(imageView.getTag(tagKey));
-                                    EfficientImageUtil.lock.unlock();
-                                    if (useful) {
-                                        imageView.setImageBitmap(decoder.getFrame(index % size).image);
-                                        if (!calledAnimation[0] && index == 0 && loadAnimation != null) {
-                                            calledAnimation[0] = true;
-                                            imageView.startAnimation(loadAnimation);
-                                        }
-                                        long delay = decoder.getDelay(index % size);
-                                        handler.postDelayed(this, delay != 0 ? delay : 100);
-                                        index++;
-                                    }
+                        @Override
+                        public void run() {
+                            ImageView imageView = weakReference.get();
+                            if (imageView == null) {
+                                return;
+                            }
+                            EfficientImageUtil.lock.lock();
+                            boolean useful = tag.equals(imageView.getTag(tagKey));
+                            EfficientImageUtil.lock.unlock();
+                            if (useful) {
+                                imageView.setImageBitmap(readImageResult.getFrame(index % size).image);
+                                if (!calledAnimation[0] && index == 0 && loadAnimation != null) {
+                                    calledAnimation[0] = true;
+                                    imageView.startAnimation(loadAnimation);
                                 }
-                            };
-                            handler.post(runnable);
-                        } else {
-                            handler.post(new Runnable() {
-
-                                @Override
-                                public void run() {
-                                    onFailed(imageView, path);
-                                }
-                            });
+                                long delay = readImageResult.getFrame(index % size).delay;
+                                handler.postDelayed(this, delay != 0 ? delay : 100);
+                                index++;
+                            }
                         }
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
+                    };
+                    runnable.run();
                 }
 
                 @Override
@@ -317,38 +320,21 @@ public class ImageUtil implements Cloneable {
                             imageView.setImageBitmap(readImageResult.getBitmap());
                         } else {
                             weakReference = new WeakReference<ImageView>(imageView);
-                            server.execute(new Runnable() {
+                            final Handler handler = ObjectPool.getInstance().getHandler();
+                            if (readImageResult.getCount() > 0) {
+                                loadGif(handler, readImageResult);
+                            } else {
+                                handler.post(new Runnable() {
 
-                                @Override
-                                public void run() {
-                                    final Handler handler = ObjectPool.getInstance().getHandler();
-                                    if (readImageResult.getPath() != null) {
-                                        String type = BitmapUtil.getBitmapType(readImageResult.getPath());
-                                        if (type != null && type.contains("gif")) {
-                                            loadGif(handler, readImageResult);
-                                        } else {
-                                            handler.post(new Runnable() {
-
-                                                @Override
-                                                public void run() {
-                                                    if (loadAnimation != null) {
-                                                        imageView.startAnimation(loadAnimation);
-                                                    }
-                                                    imageView.setImageBitmap(readImageResult.getBitmap());
-                                                }
-                                            });
+                                    @Override
+                                    public void run() {
+                                        if (loadAnimation != null) {
+                                            imageView.startAnimation(loadAnimation);
                                         }
-                                    } else {
-                                        handler.post(new Runnable() {
-
-                                            @Override
-                                            public void run() {
-                                                onFailed(imageView, path);
-                                            }
-                                        });
+                                        imageView.setImageBitmap(readImageResult.getBitmap());
                                     }
-                                }
-                            });
+                                });
+                            }
                         }
                     }
                     if (onLoadListener != null) {
@@ -368,7 +354,7 @@ public class ImageUtil implements Cloneable {
             };
         }
 
-        EfficientImageUtil.loadImage(imageView, path, widthLimit, readImage, callback, null, removeOldTask, !isGif);
+        EfficientImageUtil.loadImage(imageView, path, widthLimit, readImage, callback, null, removeOldTask);
     }
 
     public static void releseTag(View view) {
@@ -379,14 +365,14 @@ public class ImageUtil implements Cloneable {
      * 获取已缓存图片
      */
     public static Bitmap getBitmapByPath(String path) {
-        return ImageCach.getFromCache(path + 200);
+        return ImageCach.getFromCache(path + 200).getBitmap();
     }
 
     /**
      * 获取已缓存图片
      */
     public static Bitmap getBitmapByPath(String path, int widthLimit) {
-        return ImageCach.getFromCache(path + widthLimit);
+        return ImageCach.getFromCache(path + widthLimit).getBitmap();
     }
 
     /**

@@ -43,7 +43,7 @@ public class GifDecoder {
 	private int lrx, lry, lrw, lrh;
 	private Bitmap image; // current frame
 	private Bitmap lastImage; // previous frame
-	private GifFrame currentFrame = null;
+	private Frame currentFrame = null;
 
 	private boolean isShow = false;
 
@@ -67,7 +67,7 @@ public class GifDecoder {
 	private byte[] pixelStack;
 	private byte[] pixels;
 
-	private GifFrame gifFrame; // frames read from current file
+	private Frame gifFrame; // frames read from current file
 	private int frameCount;
 
 	private byte[] gifData = null;
@@ -94,7 +94,7 @@ public class GifDecoder {
 	}
 
 	public void free() {
-		GifFrame fg = gifFrame;
+		Frame fg = gifFrame;
 		while (fg != null) {
 			fg.image = null;
 			fg = null;
@@ -122,8 +122,8 @@ public class GifDecoder {
 	public int getDelay(int n) {
 		delay = -1;
 		if ((n >= 0) && (n < frameCount)) {
-			// delay = ((GifFrame) frames.elementAt(n)).delay;
-			GifFrame f = getFrame(n);
+			// delay = ((Frame) frames.elementAt(n)).delay;
+			Frame f = getFrame(n);
 			if (f != null)
 				delay = f.delay;
 		}
@@ -131,7 +131,7 @@ public class GifDecoder {
 	}
 
 	public int[] getDelays() {
-		GifFrame f = gifFrame;
+		Frame f = gifFrame;
 		int[] d = new int[frameCount];
 		int i = 0;
 		while (f != null && i < frameCount) {
@@ -236,19 +236,19 @@ public class GifDecoder {
 	}
 
 	public Bitmap getFrameImage(int n) {
-		GifFrame frame = getFrame(n);
+		Frame frame = getFrame(n);
 		if (frame == null)
 			return null;
 		else
 			return frame.image;
 	}
 
-	public GifFrame getCurrentFrame() {
+	public Frame getCurrentFrame() {
 		return currentFrame;
 	}
 
-	public GifFrame getFrame(int n) {
-		GifFrame frame = gifFrame;
+	public Frame getFrame(int n) {
+		Frame frame = gifFrame;
 		int i = 0;
 		while (frame != null) {
 			if (i == n) {
@@ -265,7 +265,7 @@ public class GifDecoder {
 		currentFrame = gifFrame;
 	}
 
-	public GifFrame next() {
+	public Frame next() {
 		if (isShow == false) {
 			isShow = true;
 			return gifFrame;
@@ -608,16 +608,16 @@ public class GifDecoder {
 		// createImage(width, height);
 		setPixels(); // transfer pixel data to image
 		if (gifFrame == null) {
-			gifFrame = new GifFrame(image, delay, widthLimit);
+			gifFrame = new Frame(image, delay, widthLimit);
 			currentFrame = gifFrame;
 		} else {
-			GifFrame f = gifFrame;
+			Frame f = gifFrame;
 			while (f.nextFrame != null) {
 				f = f.nextFrame;
 			}
-			f.nextFrame = new GifFrame(image, delay, widthLimit);
+			f.nextFrame = new Frame(image, delay, widthLimit);
 		}
-		// frames.addElement(new GifFrame(image, delay)); // add image to frame
+		// frames.addElement(new Frame(image, delay)); // add image to frame
 		// list
 		if (transparency) {
 			act[transIndex] = save;

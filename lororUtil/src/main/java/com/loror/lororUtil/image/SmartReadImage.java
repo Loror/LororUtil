@@ -1,6 +1,7 @@
 package com.loror.lororUtil.image;
 
 import java.io.File;
+import java.io.FileInputStream;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -10,7 +11,7 @@ public class SmartReadImage implements ReadImage {
 	private String targetFilePath;
 	private Context context;
 
-	public SmartReadImage(Context context, String targetFilePath) {
+	public SmartReadImage(Context context, String targetFilePath, boolean mitiCach) {
 		this.context = context;
 		this.targetFilePath = targetFilePath;
 	}
@@ -24,6 +25,32 @@ public class SmartReadImage implements ReadImage {
 		} else {
 			f = new File(url);
 		}
+		String type = BitmapUtil.getBitmapType(f.getPath());
+		ReadImageResult result = new ReadImageResult();
+		if (type != null && type.contains("gif")) {
+			GifDecoder decoder;
+			try {
+				decoder = new GifDecoder(new FileInputStream(f));
+				decoder.setWidthLimit(widthLimit);
+				decoder.decode();
+				if (decoder.getStatus() == GifDecoder.STATUS_FINISH) {
+					for (int i = 0; i < decoder.getFrameCount(); i++) {
+						result.addFrame(decoder.getFrame(i));
+					}
+				} else {
+					result.addFrame(new Frame(getFirstFrame(f, url, widthLimit), 0, widthLimit));
+				}
+			} catch (Exception e) {
+				result.addFrame(new Frame(getFirstFrame(f, url, widthLimit), 0, widthLimit));
+			}
+		} else {
+			result.addFrame(new Frame(getFirstFrame(f, url, widthLimit), 0, widthLimit));
+		}
+		result.setPath(f.getAbsolutePath());
+		return result;
+	}
+
+	private Bitmap getFirstFrame(File f, String url, int widthLimit) {
 		Bitmap bitmap = null;
 		try {
 			bitmap = BitmapUtil.compessBitmap(f.getAbsolutePath(), widthLimit);
@@ -34,10 +61,7 @@ public class SmartReadImage implements ReadImage {
 			e.printStackTrace();
 			System.gc();
 		}
-		ReadImageResult result = new ReadImageResult();
-		result.setBitmap(bitmap);
-		result.setPath(f.getAbsolutePath());
-		return result;
+		return bitmap;
 	}
 
 }
