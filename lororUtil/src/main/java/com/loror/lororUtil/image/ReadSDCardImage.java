@@ -26,9 +26,8 @@ public class ReadSDCardImage implements ReadImage {
         String type = BitmapUtil.getBitmapType(path);
         ReadImageResult result = new ReadImageResult();
         if (type != null && type.contains("gif")) {
-            GifDecoder decoder;
             try {
-                decoder = new GifDecoder(new FileInputStream(new File(path)));
+                GifDecoder decoder = new GifDecoder(new FileInputStream(new File(path)));
                 decoder.setWidthLimit(widthLimit);
                 decoder.decode();
                 if (decoder.getStatus() == GifDecoder.STATUS_FINISH) {
@@ -38,7 +37,8 @@ public class ReadSDCardImage implements ReadImage {
                 } else {
                     result.addFrame(new Frame(getFirstFrame(path, widthLimit), 0, widthLimit));
                 }
-            } catch (Exception e) {
+            } catch (Throwable e) {
+                System.gc();
                 result.addFrame(new Frame(getFirstFrame(path, widthLimit), 0, widthLimit));
             }
         } else {

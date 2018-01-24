@@ -28,9 +28,8 @@ public class SmartReadImage implements ReadImage {
 		String type = BitmapUtil.getBitmapType(f.getPath());
 		ReadImageResult result = new ReadImageResult();
 		if (type != null && type.contains("gif")) {
-			GifDecoder decoder;
 			try {
-				decoder = new GifDecoder(new FileInputStream(f));
+				GifDecoder decoder = new GifDecoder(new FileInputStream(f));
 				decoder.setWidthLimit(widthLimit);
 				decoder.decode();
 				if (decoder.getStatus() == GifDecoder.STATUS_FINISH) {
@@ -40,7 +39,8 @@ public class SmartReadImage implements ReadImage {
 				} else {
 					result.addFrame(new Frame(getFirstFrame(f, url, widthLimit), 0, widthLimit));
 				}
-			} catch (Exception e) {
+			} catch (Throwable e) {
+				System.gc();
 				result.addFrame(new Frame(getFirstFrame(f, url, widthLimit), 0, widthLimit));
 			}
 		} else {
