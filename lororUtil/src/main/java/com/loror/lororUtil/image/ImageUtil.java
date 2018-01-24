@@ -216,7 +216,7 @@ public class ImageUtil implements Cloneable {
                     } else {
                         targetFile = path;
                     }
-                    return new SmartReadImage(context, targetFile, isGif).readImage(path, widthLimit);
+                    return SmartReadImage.getInstance(context, targetFile, isGif).readImage(path, widthLimit);
                 }
             };
         }

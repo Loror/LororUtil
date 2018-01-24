@@ -6,16 +6,31 @@ import java.io.FileInputStream;
 import android.content.Context;
 import android.graphics.Bitmap;
 
-public class SmartReadImage implements ReadImage {
+public class SmartReadImage implements ReadImage, Cloneable {
 
 	private String targetFilePath;
 	private Context context;
 	private boolean mitiCach;
 
-	public SmartReadImage(Context context, String targetFilePath, boolean mitiCach) {
-		this.context = context;
-		this.targetFilePath = targetFilePath;
-		this.mitiCach = mitiCach;
+	public static SmartReadImage getInstance(Context context, String targetFilePath, boolean mitiCach) {
+		SmartReadImage smartReadImage;
+		try {
+			smartReadImage = (SmartReadImage) SingletonFactory.instance.clone();
+		} catch (CloneNotSupportedException e) {
+			smartReadImage = new SmartReadImage();
+		}
+		smartReadImage.context = context;
+		smartReadImage.targetFilePath = targetFilePath;
+		smartReadImage.mitiCach = mitiCach;
+		return smartReadImage;
+	}
+
+	private SmartReadImage() {
+		// TODO Auto-generated constructor stub
+	}
+
+	private static class SingletonFactory {
+		private static SmartReadImage instance = new SmartReadImage();
 	}
 
 	@Override
