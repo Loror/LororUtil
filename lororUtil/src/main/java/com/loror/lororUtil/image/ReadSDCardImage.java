@@ -2,30 +2,60 @@ package com.loror.lororUtil.image;
 
 import android.graphics.Bitmap;
 
+import java.io.File;
+import java.io.FileInputStream;
+
 /**
  * 读取SD卡图片
  */
 public class ReadSDCardImage implements ReadImage {
-	private ReadSDCardImage() {
-		// TODO Auto-generated constructor stub
-	}
+    private ReadSDCardImage() {
+        // TODO Auto-generated constructor stub
+    }
 
-	private static class SingletonFactory {
-		private static ReadSDCardImage instance = new ReadSDCardImage();
-	}
+    private static class SingletonFactory {
+        private static ReadSDCardImage instance = new ReadSDCardImage();
+    }
 
-	public static ReadSDCardImage getInstance() {
-		return SingletonFactory.instance;
-	}
+    public static ReadSDCardImage getInstance() {
+        return SingletonFactory.instance;
+    }
 
-	@Override
-	public ReadImageResult readImage(String path, int widthLimit) {
-		Bitmap bitmap = BitmapUtil.compessBitmap(path, widthLimit);
-		bitmap = BitmapUtil.compessBitmap(bitmap, widthLimit, true);
-		ReadImageResult result = new ReadImageResult();
-		result.addFrame(new Frame(bitmap, 0, widthLimit));
-		result.setPath(path);
-		return result;
-	}
+    @Override
+    public ReadImageResult readImage(String path, int widthLimit) {
+        String type = BitmapUtil.getBitmapType(path);
+        ReadImageResult result = new ReadImageResult();
+        if (type != null && type.contains("gif")) {
+            GifDecoder decoder;
+            try {
+                decoder = new GifDecoder(new FileInputStream(new File(path)));
+                decoder.setWidthLimit(widthLimit);
+                decoder.decode();
+                if (decoder.getStatus() == GifDecoder.STATUS_FINISH) {
+                    for (int i = 0; i < decoder.getFrameCount(); i++) {
+                        result.addFrame(decoder.getFrame(i));
+                    }
+                } else {
+                    result.addFrame(new Frame(getFirstFrame(path, widthLimit), 0, widthLimit));
+                }
+            } catch (Exception e) {
+                result.addFrame(new Frame(getFirstFrame(path, widthLimit), 0, widthLimit));
+            }
+        } else {
+            result.addFrame(new Frame(getFirstFrame(path, widthLimit), 0, widthLimit));
+        }
+        result.setPath(path);
+        return result;
+    }
 
+    private Bitmap getFirstFrame(String path, int widthLimit) {
+        Bitmap bitmap = null;
+        try {
+            bitmap = BitmapUtil.compessBitmap(path, widthLimit);
+        } catch (OutOfMemoryError e) {
+            e.printStackTrace();
+            System.gc();
+        }
+        return bitmap;
+    }
 }
