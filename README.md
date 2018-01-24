@@ -46,7 +46,7 @@ ImageUtil回调接口
 * 接口ReadImageImageUtil
 后台读取图片接口
     * 抽象方法readImage(String path, int widthLimit) 子类重写读取图片方法
-    * 已实现的实现类ReadHttpImage，读取网络图片，ReadSDCardImage，读取sd卡图片，ReadSDCardVideo，读取sd卡视频缩略图。
+    * 已实现的实现类SmartReadImage，读取网络图片，ReadSDCardImage，读取sd卡图片，ReadSDCardVideo，读取sd卡视频缩略图。
 
 ## http包
 
