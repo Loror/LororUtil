@@ -8,7 +8,9 @@ import java.io.FileInputStream;
 /**
  * 读取SD卡图片
  */
-public class ReadSDCardImage implements ReadImage {
+public class ReadSDCardImage implements ReadImage, Cloneable {
+    private boolean mitiCach;
+
     private ReadSDCardImage() {
         // TODO Auto-generated constructor stub
     }
@@ -17,13 +19,20 @@ public class ReadSDCardImage implements ReadImage {
         private static ReadSDCardImage instance = new ReadSDCardImage();
     }
 
-    public static ReadSDCardImage getInstance() {
-        return SingletonFactory.instance;
+    public static ReadSDCardImage getInstance(boolean mitiCach) {
+        ReadSDCardImage readSDCardImage;
+        try {
+            readSDCardImage = (ReadSDCardImage) SingletonFactory.instance.clone();
+        } catch (CloneNotSupportedException e) {
+            readSDCardImage = new ReadSDCardImage();
+        }
+        readSDCardImage.mitiCach = mitiCach;
+        return readSDCardImage;
     }
 
     @Override
     public ReadImageResult readImage(String path, int widthLimit) {
-        String type = BitmapUtil.getBitmapType(path);
+        String type = mitiCach ? BitmapUtil.getBitmapType(path) : null;
         ReadImageResult result = new ReadImageResult();
         if (type != null && type.contains("gif")) {
             try {

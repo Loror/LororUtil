@@ -10,10 +10,12 @@ public class SmartReadImage implements ReadImage {
 
 	private String targetFilePath;
 	private Context context;
+	private boolean mitiCach;
 
 	public SmartReadImage(Context context, String targetFilePath, boolean mitiCach) {
 		this.context = context;
 		this.targetFilePath = targetFilePath;
+		this.mitiCach = mitiCach;
 	}
 
 	@Override
@@ -25,7 +27,7 @@ public class SmartReadImage implements ReadImage {
 		} else {
 			f = new File(url);
 		}
-		String type = BitmapUtil.getBitmapType(f.getPath());
+		String type = mitiCach ? BitmapUtil.getBitmapType(f.getAbsolutePath()) : null;
 		ReadImageResult result = new ReadImageResult();
 		if (type != null && type.contains("gif")) {
 			try {
