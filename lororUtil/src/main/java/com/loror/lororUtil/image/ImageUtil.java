@@ -296,6 +296,9 @@ public class ImageUtil implements Cloneable {
                             boolean useful = tag.equals(imageView.getTag(tagKey));
                             EfficientImageUtil.lock.unlock();
                             if (useful) {
+                                if (index != 0 && index % size == 0 && !readImageResult.isRepeate()) {
+                                    return;
+                                }
                                 imageView.setImageBitmap(readImageResult.getFrame(index % size).image);
                                 if (!calledAnimation[0] && index == 0 && loadAnimation != null) {
                                     calledAnimation[0] = true;

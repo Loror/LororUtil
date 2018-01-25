@@ -11,7 +11,7 @@ public class ReadImageResult {
 	private String path;
 	private int errorCode;
 	private Throwable throwable;
-	private boolean repeate;
+	private boolean repeate = true;
 
 	public Bitmap getBitmap() {
 		return frames.size() == 0 ? null : frames.get(0).image;
