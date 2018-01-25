@@ -343,12 +343,12 @@ public class ImageUtil implements Cloneable {
                 }
 
                 @Override
-                public void onFailed(ImageView imageView, String path) {
+                public void onFailed(ImageView imageView, ReadImageResult result) {
                     if (imageView != null && errorImage != 0) {
                         imageView.setImageResource(errorImage);
                     }
                     if (onLoadListener != null) {
-                        onLoadListener.onFailed(imageView, path);
+                        onLoadListener.onFailed(imageView, result);
                     }
                 }
             };

@@ -162,6 +162,7 @@ public class EfficientImageUtil {
                                 EfficientImageUtil.tasks.remove(tag);
                             }
                             final ReadImageResult readImageResult = readImage.readImage(path, widthLimit);
+                            readImageResult.setOriginPath(path);
                             if (readImageResult.getBitmap() == null) {
                                 EfficientImageUtil.lock.lock();
                                 boolean useful = !hasImageView
@@ -170,12 +171,14 @@ public class EfficientImageUtil {
                                 if (useful && callback != null) {
                                     EfficientImageUtil.handler.post(new Runnable() {
                                         public void run() {
-                                            callback.onFailed(imageView, path);
+                                            callback.onFailed(imageView, readImageResult);
                                         }
                                     });
                                 }
                             } else {
-                                ImageCach.pushToCach(cachKey, readImageResult);
+                                if (readImageResult.getErrorCode() == 0) {
+                                    ImageCach.pushToCach(cachKey, readImageResult);
+                                }
                                 handler.post(new Runnable() {
                                     public void run() {
                                         EfficientImageUtil.lock.lock();

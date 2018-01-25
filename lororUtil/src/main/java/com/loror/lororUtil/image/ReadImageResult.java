@@ -7,7 +7,10 @@ import android.graphics.Bitmap;
 
 public class ReadImageResult {
 	private List<Frame> frames = new ArrayList<>();
+	private String originPath;
 	private String path;
+	private int errorCode;
+	private Throwable throwable;
 	private boolean repeate;
 
 	public Bitmap getBitmap() {
@@ -24,6 +27,14 @@ public class ReadImageResult {
 		return frames.get(position);
 	}
 
+	public void setOriginPath(String originPath) {
+		this.originPath = originPath;
+	}
+
+	public String getOriginPath() {
+		return originPath;
+	}
+
 	public void setPath(String path) {
 		this.path = path;
 	}
@@ -32,12 +43,28 @@ public class ReadImageResult {
 		return path;
 	}
 
+	public void setErrorCode(int errorCode) {
+		this.errorCode = errorCode;
+	}
+
+	public int getErrorCode() {
+		return errorCode;
+	}
+
 	public void setRepeate(boolean repeate) {
 		this.repeate = repeate;
 	}
 
 	public boolean isRepeate() {
 		return repeate;
+	}
+
+	public void setThrowable(Throwable throwable) {
+		this.throwable = throwable;
+	}
+
+	public Throwable getThrowable() {
+		return throwable;
 	}
 
 	public int getCount() {
