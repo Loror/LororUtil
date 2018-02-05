@@ -12,6 +12,7 @@ public class ReadImageResult {
 	private int errorCode;
 	private Throwable throwable;
 	private boolean repeate = true;
+	private boolean pause;
 
 	public Bitmap getBitmap() {
 		return frames.size() == 0 ? null : frames.get(0).image;
@@ -57,6 +58,14 @@ public class ReadImageResult {
 
 	public boolean isRepeate() {
 		return repeate;
+	}
+
+	public void setPause(boolean pause) {
+		this.pause = pause;
+	}
+
+	public boolean isPause() {
+		return pause;
 	}
 
 	public void setThrowable(Throwable throwable) {

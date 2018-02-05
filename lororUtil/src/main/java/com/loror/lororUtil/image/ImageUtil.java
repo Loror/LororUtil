@@ -283,7 +283,7 @@ public class ImageUtil implements Cloneable {
 
                 private final void loadGif(final Handler handler, final ReadImageResult readImageResult) {
                     final int size = readImageResult.getCount();
-                    final boolean calledAnimation[] = { false };
+                    final boolean calledAnimation[] = {false};
                     Runnable runnable = new Runnable() {
 
                         @Override
@@ -296,17 +296,22 @@ public class ImageUtil implements Cloneable {
                             boolean useful = tag.equals(imageView.getTag(tagKey));
                             EfficientImageUtil.lock.unlock();
                             if (useful) {
-                                if (index != 0 && index % size == 0 && !readImageResult.isRepeate()) {
-                                    return;
+                                if (readImageResult.isPause()) {
+                                    long delay = readImageResult.getFrame(index % size).delay;
+                                    handler.postDelayed(this, delay != 0 ? delay : 100);
+                                } else {
+                                    if (index != 0 && index % size == 0 && !readImageResult.isRepeate()) {
+                                        return;
+                                    }
+                                    imageView.setImageBitmap(readImageResult.getFrame(index % size).image);
+                                    if (!calledAnimation[0] && index == 0 && loadAnimation != null) {
+                                        calledAnimation[0] = true;
+                                        imageView.startAnimation(loadAnimation);
+                                    }
+                                    long delay = readImageResult.getFrame(index % size).delay;
+                                    handler.postDelayed(this, delay != 0 ? delay : 100);
+                                    index++;
                                 }
-                                imageView.setImageBitmap(readImageResult.getFrame(index % size).image);
-                                if (!calledAnimation[0] && index == 0 && loadAnimation != null) {
-                                    calledAnimation[0] = true;
-                                    imageView.startAnimation(loadAnimation);
-                                }
-                                long delay = readImageResult.getFrame(index % size).delay;
-                                handler.postDelayed(this, delay != 0 ? delay : 100);
-                                index++;
                             }
                         }
                     };
