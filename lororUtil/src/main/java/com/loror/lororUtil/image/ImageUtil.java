@@ -47,7 +47,7 @@ public class ImageUtil implements Cloneable {
 
     private final void init(Context context) {
         if (targetDirPath == null) {
-            targetDirPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/" + context.getPackageName()
+            targetDirPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/Android/data/" + context.getPackageName()
                     + "/img";
         }
         if (targetName == null) {
