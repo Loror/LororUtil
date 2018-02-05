@@ -1,6 +1,6 @@
 package com.loror.lororUtil.http;
 
-import java.io.FileInputStream;
+import java.io.InputStream;
 import java.security.KeyStore;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
@@ -11,10 +11,10 @@ import javax.net.ssl.X509TrustManager;
 public class LororX509TrustManager implements X509TrustManager {
 	X509TrustManager sunJSSEX509TrustManager;
 
-	LororX509TrustManager(String keyPath, String password) throws Exception {
+	LororX509TrustManager(InputStream inputStream, String password) throws Exception {
         // create a "default" JSSE X509TrustManager.
         KeyStore ks = KeyStore.getInstance("JKS");
-        ks.load(new FileInputStream(keyPath), password.toCharArray());
+        ks.load(inputStream, password.toCharArray());
         TrustManagerFactory tmf = TrustManagerFactory.getInstance("SunX509", "SunJSSE");
         tmf.init(ks);
         TrustManager tms[] = tmf.getTrustManagers();
