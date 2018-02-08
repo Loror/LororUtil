@@ -145,7 +145,7 @@ HttpClient HttpsClient使用参数类
     * 主键，一个表只能指定一个主键，多主键会抛出异常。SQLiteUtil发现该注解会生成一个自增int型主键。
 
 * 类SQLiteUtil<T>   数据库辅助类
-* 注：一个类中只能指定一个主键，主键被内部取名id，因此其他各键名不应再已id命名，下列所有涉及到主键的方法若使用在未定义主键的表中，将抛出异常，请谨慎使用，建议为每张表建立主键。
+* 注：一个类中只能指定一个主键，主键被内部取名id，因此其他各键名不应再以id命名，下列所有涉及到主键的方法若使用在未定义主键的表中，将抛出异常，请谨慎使用，建议为每张表建立主键。
     * 构造方法SQLiteUtil(Context context, String dbName, Class<T> entityType, int version, OnChange onChange)  构造sqlite工具，泛型，操作对象类型，参数，1，上下文，2，数据库名，3，操作对象类型，5，版本号，6，回调，数据库创建、更新时回调，可为空。
     * 方法dropTable()  删除表
     * 方法createTableIfNotExists() 如果不存在表时创建表
@@ -162,7 +162,7 @@ HttpClient HttpsClient使用参数类
     * 方法getAll() 获取所有条目，返回对象数组
     * 方法getAllByOrder(String colume, int orderType)  获取所有条目并排序
     * 方法count() 获取总条目数
-    * countByCondition(ConditionBuilder conditionBuilder) 根据条件获取总条目数
+    * 方法countByCondition(ConditionBuilder conditionBuilder) 根据条件获取总条目数
     * 方法close() 关闭数据库
 
 * 类ConditionBuilder
