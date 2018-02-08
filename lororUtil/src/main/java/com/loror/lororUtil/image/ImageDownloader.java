@@ -8,6 +8,7 @@ import java.net.URL;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import com.loror.lororUtil.sql.ConditionBuilder;
 import com.loror.lororUtil.sql.SQLiteUtil;
 
 import android.content.Context;
@@ -26,7 +27,7 @@ public class ImageDownloader {
 		SQLiteUtil<Compare> sqLiteUtil = new SQLiteUtil<>(context, "image_compare", Compare.class, 1);
 		try {
 			File file = new File(path);
-			Compare compare = sqLiteUtil.getFirstByColume("url", urlStr);
+			Compare compare = sqLiteUtil.getFirstByCondition(ConditionBuilder.builder().addCondition("url", urlStr));
 			if (!checkNet && file.exists() && !cover && compare != null && compare.length == file.length()) {
 				return true;
 			}
@@ -37,7 +38,7 @@ public class ImageDownloader {
 			conn.setDoInput(true);
 			long length = conn.getContentLength();
 			lock.lock();
-			sqLiteUtil.deleteByColume("url", urlStr);
+			sqLiteUtil.deleteByCondition(ConditionBuilder.builder().addCondition("url", urlStr));
 			compare = new Compare();
 			compare.length = length;
 			compare.url = urlStr;
