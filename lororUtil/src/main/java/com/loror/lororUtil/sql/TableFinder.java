@@ -55,10 +55,12 @@ class TableFinder {
                     Object object = field.get(entity);
                     if (object == null) {
                         columns.add(1 + columnName);
-                    } else if (object instanceof Integer) {
+                    } else if (object instanceof Integer || object instanceof Long) {
                         columns.add(0 + columnName);
                     } else if (object instanceof String) {
                         columns.add(1 + columnName);
+                    } else if (object instanceof Float || object instanceof Double) {
+                        columns.add(3 + columnName);
                     } else {
                         columns.add(1 + columnName);
                     }
@@ -88,6 +90,8 @@ class TableFinder {
                 sql += o.substring(1) + " int,";
             } else if (o.startsWith("2")) {
                 sql += "id integer PRIMARY KEY AUTOINCREMENT,";
+            } else if (o.startsWith("3")) {
+                sql += o.substring(1) + " real,";
             }
         }
         sql = sql.substring(0, sql.length() - 1);
@@ -141,8 +145,9 @@ class TableFinder {
                 e.printStackTrace();
             }
         }
-        if (columns.size() == 0)
+        if (columns.size() == 0) {
             throw new IllegalStateException("this object does not contains any colume");
+        }
         String keys = "";
         for (String o : columns.keySet()) {
             keys += o + "='" + columns.get(o) + "',";
@@ -183,8 +188,9 @@ class TableFinder {
                 e.printStackTrace();
             }
         }
-        if (columns.size() == 0)
+        if (columns.size() == 0) {
             throw new IllegalStateException("this object does not contains any colume");
+        }
         String keys = "";
         String values = "";
         for (String o : columns.keySet()) {
