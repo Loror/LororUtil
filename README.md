@@ -131,3 +131,48 @@ HttpClient HttpsClient使用参数类
     * 构造方法ThreadPool(int threadNumber) 构造一个最多包含threadNumber个线程的线程池
     * 方法excute(Runnable task, int excuteType) 向线程池添加任务，参数excuteType，三个参数，EXCUTETYPE_RANDOM随机执行，EXCUTETYPE_ORDER先进先出，EXCUTETYPE_BACK先进后出。
     * 方法removeTask(Runnable task) 移除任务，只能移除尚未开始的任务
+
+## sql包
+
+
+* 注解@Table
+    * 数据库表名，指定表名。SQLiteUtil会抽取该注解中name值生成表名。
+    
+* 注解@Column
+    * 数据库条目，指定column。SQLiteUtil会抽取该注解中colume值生成键名。
+    
+* 注解@Id
+    * 主键，一个表只能指定一个主键，多主键会抛出异常。SQLiteUtil发现该注解会生成一个自增int型主键。
+
+* 类SQLiteUtil<T>   数据库辅助类
+* 注：一个类中只能指定一个主键，主键被内部取名id，因此其他各键名不应再已id命名，下列所有涉及到主键的方法若使用在未定义主键的表中，将抛出异常，请谨慎使用，建议为每张表建立主键。
+    * 构造方法SQLiteUtil(Context context, String dbName, Class<T> entityType, int version, OnChange onChange)  构造sqlite工具，泛型，操作对象类型，参数，1，上下文，2，数据库名，3，操作对象类型，5，版本号，6，回调，数据库创建、更新时回调，可为空。
+    * 方法dropTable()  删除表
+    * 方法createTableIfNotExists() 如果不存在表时创建表
+    * 方法insert(T entity)  插入对象到数据库
+    * 方法delete(T entity)  删除数据库条目，只删除与对象中所有参数相同的条目
+    * 方法deleteById(String id)  根据主键id删除数据
+    * 方法deleteByCondition(ConditionBuilder conditionBuilder) 通过条件删除条目
+    * 方法deleteAll() 清除表中所有数据
+    * 方法updateById(T entity) 更新数据，将根据主键id更新所有数据
+    * 方法getById(String id)  根据主键id获取数据
+    * 方法getByCondition(ConditionBuilder conditionBuilder)  通过条件获取数据
+    * 方法getFirst()  获取数据库首条数据
+    * 方法getFirstByCondition(ConditionBuilder conditionBuilder)  通过条件获取首条数据
+    * 方法getAll() 获取所有条目，返回对象数组
+    * 方法getAllByOrder(String colume, int orderType)  获取所有条目并排序
+    * 方法count() 获取总条目数
+    * countByCondition(ConditionBuilder conditionBuilder) 根据条件获取总条目数
+    * 方法close() 关闭数据库
+
+* 类ConditionBuilder
+    * 静态方法builder() 获取ConditionBuilder对象
+    * 方法getConditionList() 获取所有已设置条件
+    * 方法getOrder() 获取已设置排序条件
+    * 方法addCondition(String key, String operator, Object column) 添加条件
+    * 方法addCondition(String key, Object column) 添加条件，默认以=构造操作符
+    * 方法addIdCondition(String operator, Object column) 添加主键条件
+    * 方法addIdCondition(Object column) 添加主键条件，默认以=构造操作符
+    * 方法withOrder(String key, int orderType) 设置排序条件
+    
+* 注：上面类所用orderType可用两个参数Order.ORDER_DESC（反序）与Order.ORDER_ASC（正序）

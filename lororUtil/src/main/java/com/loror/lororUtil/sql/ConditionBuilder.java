@@ -31,6 +31,10 @@ public class ConditionBuilder {
         return conditions;
     }
 
+    public Order getOrder() {
+        return order;
+    }
+
     /**
      * 排序条件条件
      */
