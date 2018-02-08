@@ -269,7 +269,7 @@ public class SQLiteUtil<T> {
     public int countByCondition(ConditionBuilder conditionBuilder) {
         int count = 0;
         if (conditionBuilder.getConditionCount() > 0) {
-            Cursor cursor = database.rawQuery("select count(id) from " + TableFinder.getTableName(this.entityType)
+            Cursor cursor = database.rawQuery("select count(1) from " + TableFinder.getTableName(this.entityType)
                     + " where " + conditionBuilder.getNoColumnConditions(), conditionBuilder.getColumnArray());
             if (cursor.moveToNext()) {
                 try {
