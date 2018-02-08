@@ -176,3 +176,4 @@ HttpClient HttpsClient使用参数类
     * 方法withOrder(String key, int orderType) 设置排序条件
     
 * 注：上面类所用orderType可用两个参数Order.ORDER_DESC（反序）与Order.ORDER_ASC（正序）
+注：用于创建表的类权限需为public，并必须包含无参构造，若为内部类必须为静态内部类
