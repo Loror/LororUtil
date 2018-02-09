@@ -1,7 +1,6 @@
 package com.loror.lororUtil.sql;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import android.content.Context;
 import android.database.Cursor;
@@ -200,36 +199,14 @@ public class SQLiteUtil<T> {
      */
     public ArrayList<T> getByCondition(ConditionBuilder conditionBuilder) {
         ArrayList<T> entitys = new ArrayList<>();
-        if (conditionBuilder.getConditionCount() > 0) {
-            Cursor cursor = database.rawQuery(
-                    "select * from " + TableFinder.getTableName(this.entityType) + conditionBuilder.getNoColumnConditions(),
-                    conditionBuilder.getColumnArray());
-            while (cursor.moveToNext()) {
-                try {
-                    T entity = (T) this.entityType.newInstance();
-                    TableFinder.find(entity, cursor);
-                    entitys.add(entity);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-            cursor.close();
-            SQLiteDatabase.releaseMemory();
-        }
-        return entitys;
-    }
-
-    /**
-     * 获取所有数据
-     */
-    public ArrayList<T> getAll() {
-        ArrayList<T> entitys = new ArrayList<>();
-        Cursor cursor = database.rawQuery("select * from " + TableFinder.getTableName(this.entityType), null);
+        Cursor cursor = database.rawQuery(
+                "select * from " + TableFinder.getTableName(this.entityType) + conditionBuilder.getNoColumnConditions(),
+                conditionBuilder.getColumnArray());
         while (cursor.moveToNext()) {
             try {
                 T entity = (T) this.entityType.newInstance();
-                entitys.add(entity);
                 TableFinder.find(entity, cursor);
+                entitys.add(entity);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -242,18 +219,9 @@ public class SQLiteUtil<T> {
     /**
      * 获取所有数据
      */
-    public ArrayList<T> getAllByOrder(List<Order> orders) {
-        StringBuilder builder = new StringBuilder();
-        for (int i = 0; i < orders.size(); i++) {
-            if (i == 0) {
-                builder.append(orders.get(i).toString());
-            } else {
-                builder.append(orders.get(i).toString().replace("order by ", ","));
-            }
-        }
+    public ArrayList<T> getAll() {
         ArrayList<T> entitys = new ArrayList<>();
-        Cursor cursor = database.rawQuery("select * from " + TableFinder.getTableName(this.entityType) + " " +
-                builder.toString(), null);
+        Cursor cursor = database.rawQuery("select * from " + TableFinder.getTableName(this.entityType), null);
         while (cursor.moveToNext()) {
             try {
                 T entity = (T) this.entityType.newInstance();
@@ -291,19 +259,17 @@ public class SQLiteUtil<T> {
      */
     public int countByCondition(ConditionBuilder conditionBuilder) {
         int count = 0;
-        if (conditionBuilder.getConditionCount() > 0) {
-            Cursor cursor = database.rawQuery("select count(1) from " + TableFinder.getTableName(this.entityType)
-                    + conditionBuilder.getNoColumnConditions(), conditionBuilder.getColumnArray());
-            if (cursor.moveToNext()) {
-                try {
-                    count = cursor.getInt(0);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+        Cursor cursor = database.rawQuery("select count(1) from " + TableFinder.getTableName(this.entityType)
+                + conditionBuilder.getNoColumnConditions(), conditionBuilder.getColumnArray());
+        if (cursor.moveToNext()) {
+            try {
+                count = cursor.getInt(0);
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-            cursor.close();
-            SQLiteDatabase.releaseMemory();
         }
+        cursor.close();
+        SQLiteDatabase.releaseMemory();
         return count;
     }
 

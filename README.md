@@ -3,7 +3,7 @@
 
 dependencies {
 
-    compile 'com.github.Loror:LororUtil:1.1.3'
+    compile 'com.github.Loror:LororUtil:1.1.4'
  
 }
 
@@ -161,7 +161,6 @@ HttpClient HttpsClient使用参数类
     * 方法getFirst()  获取数据库首条数据
     * 方法getFirstByCondition(ConditionBuilder conditionBuilder)  通过条件获取首条数据
     * 方法getAll() 获取所有条目，返回对象数组
-    * 方法getAllByOrder(List<Order> orders)  获取所有条目并排序
     * 方法count() 获取总条目数
     * 方法countByCondition(ConditionBuilder conditionBuilder) 根据条件获取总条目数
     * 方法close() 关闭数据库
