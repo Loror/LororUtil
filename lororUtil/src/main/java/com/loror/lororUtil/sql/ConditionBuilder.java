@@ -10,7 +10,8 @@ import java.util.List;
 public class ConditionBuilder {
 
     private List<Condition> conditions = new ArrayList<>();
-    private Order order;
+    private List<Order> orders = new ArrayList<>();
+    private Page page;
 
     private ConditionBuilder() {
 
@@ -31,15 +32,23 @@ public class ConditionBuilder {
         return conditions;
     }
 
-    public Order getOrder() {
-        return order;
+    public List<Order> getOrderList() {
+        return orders;
+    }
+
+    /**
+     * 分页
+     */
+    public ConditionBuilder withPagination(int page, int number) {
+        this.page = new Page(page, number);
+        return this;
     }
 
     /**
      * 排序条件条件
      */
     public ConditionBuilder withOrder(String key, int orderType) {
-        order = new Order(key, orderType);
+        orders.add(new Order(key, orderType));
         return this;
     }
 
@@ -76,9 +85,31 @@ public class ConditionBuilder {
     }
 
     /**
+     * 获取排序语句
+     */
+    public String getOrders() {
+        StringBuilder builder = new StringBuilder();
+        for (int i = 0; i < orders.size(); i++) {
+            if (i == 0) {
+                builder.append(orders.get(i).toString());
+            } else {
+                builder.append(orders.get(i).toString().replace("order by", ","));
+            }
+        }
+        return builder.toString();
+    }
+
+    /**
      * 获取条件语句
      */
     public String getConditions() {
+        return getConditionsWithoutPage() + (page == null ? "" : " " + page.toString());
+    }
+
+    /**
+     * 获取条件语句
+     */
+    public String getConditionsWithoutPage() {
         StringBuilder builder = new StringBuilder();
         for (int i = 0; i < conditions.size(); i++) {
             if (i > 0) {
@@ -86,9 +117,10 @@ public class ConditionBuilder {
             }
             builder.append(conditions.get(i).toString());
         }
-        if (order != null) {
+        String order = getOrders();
+        if (order.length() > 0) {
             builder.append(" ");
-            builder.append(order.toString());
+            builder.append(order);
         }
         return builder.toString();
     }
@@ -97,6 +129,13 @@ public class ConditionBuilder {
      * 获取条件语句
      */
     public String getNoColumnConditions() {
+        return getNoColumnConditions() + (page == null ? "" : " " + page.toString());
+    }
+
+    /**
+     * 获取条件语句
+     */
+    public String getNoColumnConditionsWithoutPage() {
         StringBuilder builder = new StringBuilder();
         for (int i = 0; i < conditions.size(); i++) {
             if (i > 0) {
@@ -107,9 +146,10 @@ public class ConditionBuilder {
             builder.append(conditions.get(i).getOperator());
             builder.append(" ?");
         }
-        if (order != null) {
+        String order = getOrders();
+        if (order.length() > 0) {
             builder.append(" ");
-            builder.append(order.toString());
+            builder.append(order);
         }
         return builder.toString();
     }

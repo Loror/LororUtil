@@ -1,6 +1,7 @@
 package com.loror.lororUtil.sql;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import android.content.Context;
 import android.database.Cursor;
@@ -75,6 +76,20 @@ public class SQLiteUtil<T> {
     public void insert(T entity) {
         database.execSQL(TableFinder.getInsertSql(entity));
         SQLiteDatabase.releaseMemory();
+    }
+
+    /**
+     * 获取最后插入数据id
+     */
+    public long getLastId() {
+        Cursor cursor = database.rawQuery("select last_insert_rowid() from " + TableFinder.getTableName(entityType), null);
+        long id = -1;
+        if (cursor.moveToFirst()) {
+            id = cursor.getLong(0);
+        }
+        cursor.close();
+        SQLiteDatabase.releaseMemory();
+        return id;
     }
 
     /**
@@ -164,7 +179,7 @@ public class SQLiteUtil<T> {
     public T getFirstByCondition(ConditionBuilder conditionBuilder) {
         T entity = null;
         if (conditionBuilder.getConditionCount() > 0) {
-            Cursor cursor = database.rawQuery("select * from " + TableFinder.getTableName(this.entityType) + " where " + conditionBuilder.getNoColumnConditions() + " limit 0,2",
+            Cursor cursor = database.rawQuery("select * from " + TableFinder.getTableName(this.entityType) + " where " + conditionBuilder.getNoColumnConditionsWithoutPage() + " limit 0,2",
                     conditionBuilder.getColumnArray());
             if (cursor.moveToNext()) {
                 try {
@@ -227,10 +242,18 @@ public class SQLiteUtil<T> {
     /**
      * 获取所有数据
      */
-    public ArrayList<T> getAllByOrder(String key, int orderType) {
+    public ArrayList<T> getAllByOrder(List<Order> orders) {
+        StringBuilder builder = new StringBuilder();
+        for (int i = 0; i < orders.size(); i++) {
+            if (i == 0) {
+                builder.append(orders.get(i).toString());
+            } else {
+                builder.append(orders.get(i).toString().replace("order by", ","));
+            }
+        }
         ArrayList<T> entitys = new ArrayList<>();
-        Cursor cursor = database.rawQuery("select * from " + TableFinder.getTableName(this.entityType) + " order by "
-                + key + (orderType == Order.ORDER_DESC ? " desc" : " asc"), null);
+        Cursor cursor = database.rawQuery("select * from " + TableFinder.getTableName(this.entityType) + " " +
+                builder.toString(), null);
         while (cursor.moveToNext()) {
             try {
                 T entity = (T) this.entityType.newInstance();

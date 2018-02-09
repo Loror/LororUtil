@@ -150,6 +150,7 @@ HttpClient HttpsClient使用参数类
     * 方法dropTable()  删除表
     * 方法createTableIfNotExists() 如果不存在表时创建表
     * 方法insert(T entity)  插入对象到数据库
+    * 方法getLastId() 获取最后插入主键id
     * 方法delete(T entity)  删除数据库条目，只删除与对象中所有参数相同的条目
     * 方法deleteById(String id)  根据主键id删除数据
     * 方法deleteByCondition(ConditionBuilder conditionBuilder) 通过条件删除条目
@@ -160,7 +161,7 @@ HttpClient HttpsClient使用参数类
     * 方法getFirst()  获取数据库首条数据
     * 方法getFirstByCondition(ConditionBuilder conditionBuilder)  通过条件获取首条数据
     * 方法getAll() 获取所有条目，返回对象数组
-    * 方法getAllByOrder(String colume, int orderType)  获取所有条目并排序
+    * 方法getAllByOrder(List<Order> orders)  获取所有条目并排序
     * 方法count() 获取总条目数
     * 方法countByCondition(ConditionBuilder conditionBuilder) 根据条件获取总条目数
     * 方法close() 关闭数据库
@@ -174,6 +175,7 @@ HttpClient HttpsClient使用参数类
     * 方法addIdCondition(String operator, Object column) 添加主键条件
     * 方法addIdCondition(Object column) 添加主键条件，默认以=构造操作符
     * 方法withOrder(String key, int orderType) 设置排序条件
+    * withPagination(int page, int number) 设置分页，第page页，每页number个
     
 * 注：上面类所用orderType可用两个参数Order.ORDER_DESC（反序）与Order.ORDER_ASC（正序）
 注：用于创建表的类权限需为public，并必须包含无参构造，若为内部类必须为静态内部类
