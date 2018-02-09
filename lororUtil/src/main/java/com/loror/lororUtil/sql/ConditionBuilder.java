@@ -93,7 +93,7 @@ public class ConditionBuilder {
             if (i == 0) {
                 builder.append(orders.get(i).toString());
             } else {
-                builder.append(orders.get(i).toString().replace("order by", ","));
+                builder.append(orders.get(i).toString().replace("order by ", ","));
             }
         }
         return builder.toString();
