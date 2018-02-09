@@ -129,7 +129,7 @@ public class ConditionBuilder {
      * 获取条件语句
      */
     public String getNoColumnConditions() {
-        return getNoColumnConditions() + (page == null ? "" : " " + page.toString());
+        return getNoColumnConditionsWithoutPage() + (page == null ? "" : " " + page.toString());
     }
 
     /**
