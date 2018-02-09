@@ -175,7 +175,7 @@ HttpClient HttpsClient使用参数类
     * 方法addIdCondition(String operator, Object column) 添加主键条件
     * 方法addIdCondition(Object column) 添加主键条件，默认以=构造操作符
     * 方法withOrder(String key, int orderType) 设置排序条件
-    * withPagination(int page, int number) 设置分页，第page页，每页number个
+    * 方法withPagination(int page, int number) 设置分页，第page页，每页number个
     
 * 注：上面类所用orderType可用两个参数Order.ORDER_DESC（反序）与Order.ORDER_ASC（正序）
 注：用于创建表的类权限需为public，并必须包含无参构造，若为内部类必须为静态内部类
