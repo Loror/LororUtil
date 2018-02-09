@@ -114,6 +114,8 @@ public class ConditionBuilder {
         for (int i = 0; i < conditions.size(); i++) {
             if (i > 0) {
                 builder.append(" and ");
+            } else {
+                builder.append(" where ");
             }
             builder.append(conditions.get(i).toString());
         }
@@ -140,6 +142,8 @@ public class ConditionBuilder {
         for (int i = 0; i < conditions.size(); i++) {
             if (i > 0) {
                 builder.append(" and ");
+            } else {
+                builder.append(" where ");
             }
             builder.append(conditions.get(i).getKey());
             builder.append(" ");

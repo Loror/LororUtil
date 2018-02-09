@@ -113,7 +113,7 @@ public class SQLiteUtil<T> {
      */
     public void deleteByCondition(ConditionBuilder conditionBuilder) {
         if (conditionBuilder.getConditionCount() > 0) {
-            database.execSQL("delete from " + TableFinder.getTableName(entityType) + " where " + conditionBuilder.getConditions());
+            database.execSQL("delete from " + TableFinder.getTableName(entityType) + conditionBuilder.getConditions());
             SQLiteDatabase.releaseMemory();
         }
     }
@@ -179,7 +179,7 @@ public class SQLiteUtil<T> {
     public T getFirstByCondition(ConditionBuilder conditionBuilder) {
         T entity = null;
         if (conditionBuilder.getConditionCount() > 0) {
-            Cursor cursor = database.rawQuery("select * from " + TableFinder.getTableName(this.entityType) + " where " + conditionBuilder.getNoColumnConditionsWithoutPage() + " limit 0,2",
+            Cursor cursor = database.rawQuery("select * from " + TableFinder.getTableName(this.entityType) + conditionBuilder.getNoColumnConditionsWithoutPage() + " limit 0,2",
                     conditionBuilder.getColumnArray());
             if (cursor.moveToNext()) {
                 try {
@@ -202,7 +202,7 @@ public class SQLiteUtil<T> {
         ArrayList<T> entitys = new ArrayList<>();
         if (conditionBuilder.getConditionCount() > 0) {
             Cursor cursor = database.rawQuery(
-                    "select * from " + TableFinder.getTableName(this.entityType) + " where " + conditionBuilder.getNoColumnConditions(),
+                    "select * from " + TableFinder.getTableName(this.entityType) + conditionBuilder.getNoColumnConditions(),
                     conditionBuilder.getColumnArray());
             while (cursor.moveToNext()) {
                 try {
@@ -293,7 +293,7 @@ public class SQLiteUtil<T> {
         int count = 0;
         if (conditionBuilder.getConditionCount() > 0) {
             Cursor cursor = database.rawQuery("select count(1) from " + TableFinder.getTableName(this.entityType)
-                    + " where " + conditionBuilder.getNoColumnConditions(), conditionBuilder.getColumnArray());
+                    + conditionBuilder.getNoColumnConditions(), conditionBuilder.getColumnArray());
             if (cursor.moveToNext()) {
                 try {
                     count = cursor.getInt(0);
