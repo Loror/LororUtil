@@ -150,7 +150,7 @@ class TableFinder {
         }
         String keys = "";
         for (String o : columns.keySet()) {
-            keys += o + "='" + columns.get(o) + "',";
+            keys += o + "='" + (columns.get(o) == null ? null : columns.get(o).replace("'", "''")) + "',";
         }
         keys = keys.substring(0, keys.length() - 1);
         sql = "update " + tableName + " set " + keys + "where id = " + id_pry;
@@ -195,7 +195,7 @@ class TableFinder {
         String values = "";
         for (String o : columns.keySet()) {
             keys += o + ",";
-            values += "'" + columns.get(o) + "',";
+            values += "'" + (columns.get(o) == null ? null : columns.get(o).replace("'", "''")) + "',";
         }
         keys = "(" + keys.substring(0, keys.length() - 1) + ")";
         values = "(" + values.substring(0, values.length() - 1) + ")";
@@ -245,7 +245,7 @@ class TableFinder {
             throw new IllegalStateException("this object does not contains any colume");
         String keys = "";
         for (String o : columns.keySet()) {
-            keys += o + "='" + columns.get(o) + "' and ";
+            keys += o + "='" + (columns.get(o) == null ? null : columns.get(o).replace("'", "''")) + "' and ";
         }
         keys = keys.substring(0, keys.length() - 5);
         sql = "delete from " + tableName + " where " + keys;

@@ -47,8 +47,8 @@ public class ImageUtil implements Cloneable {
 
     private final void init(Context context) {
         if (targetDirPath == null) {
-            targetDirPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/Android/data/" + context.getPackageName()
-                    + "/img";
+            targetDirPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/Android/data/"
+                    + context.getPackageName() + "/img";
         }
         if (targetName == null) {
             targetName = MD5Util.MD5(path);
@@ -283,7 +283,7 @@ public class ImageUtil implements Cloneable {
 
                 private final void loadGif(final Handler handler, final ReadImageResult readImageResult) {
                     final int size = readImageResult.getCount();
-                    final boolean calledAnimation[] = {false};
+                    final boolean calledAnimation[] = { false };
                     Runnable runnable = new Runnable() {
 
                         @Override
@@ -366,21 +366,21 @@ public class ImageUtil implements Cloneable {
     }
 
     public static void releseTag(View view) {
-        view.setTag(tagKey, "");
+        EfficientImageUtil.releseTag(view);
     }
 
     /**
-     * 获取已缓存图片
+     * 获取缓存
      */
     public static Bitmap getBitmapByPath(String path) {
-        return ImageCach.getFromCache(path + 200).getBitmap();
+        return EfficientImageUtil.getBitmapByPath(path);
     }
 
     /**
-     * 获取已缓存图片
+     * 获取缓存
      */
     public static Bitmap getBitmapByPath(String path, int widthLimit) {
-        return ImageCach.getFromCache(path + widthLimit).getBitmap();
+        return EfficientImageUtil.getBitmapByPath(path, widthLimit);
     }
 
     /**

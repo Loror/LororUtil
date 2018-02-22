@@ -39,20 +39,23 @@ public class EfficientImageUtil {
      */
     public static void releseTag(View view) {
         view.setTag(tagKey, "");
+        view.setTag(cachTagKey, "");
     }
 
     /**
      * 获取缓存
      */
     public static Bitmap getBitmapByPath(String path) {
-        return ImageCach.getFromCache(path + 200).getBitmap();
+        ReadImageResult readImageResult = ImageCach.getFromCache(path + 200);
+        return readImageResult == null ? null : readImageResult.getBitmap();
     }
 
     /**
      * 获取缓存
      */
     public static Bitmap getBitmapByPath(String path, int widthLimit) {
-        return ImageCach.getFromCache(path + widthLimit).getBitmap();
+        ReadImageResult readImageResult = ImageCach.getFromCache(path + widthLimit);
+        return readImageResult == null ? null : readImageResult.getBitmap();
     }
 
     /**
