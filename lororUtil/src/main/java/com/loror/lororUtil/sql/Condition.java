@@ -8,6 +8,7 @@ public class Condition {
     private String key;
     private String operator;
     private String column;
+    private Condition orCondition;
 
     public Condition(String key, String operator, String column) {
         this.key = key;
@@ -37,6 +38,18 @@ public class Condition {
 
     public void setColumn(String column) {
         this.column = column;
+    }
+
+    public void addOrCondition(Condition orCondition) {
+        if (this.orCondition == null) {
+            this.orCondition = orCondition;
+        } else {
+            this.orCondition.addOrCondition(orCondition);
+        }
+    }
+
+    public Condition getOrCondition() {
+        return orCondition;
     }
 
     @Override

@@ -85,6 +85,28 @@ public class ConditionBuilder {
     }
 
     /**
+     * 增加条件
+     */
+    public ConditionBuilder withOrCondition(String key, Object column) {
+        if (conditions.size() > 0) {
+            Condition condition = conditions.get(conditions.size() - 1);
+            condition.addOrCondition(new Condition(key, "=", String.valueOf(column)));
+        }
+        return this;
+    }
+
+    /**
+     * 增加条件
+     */
+    public ConditionBuilder withOrCondition(String key, String operator, Object column) {
+        if (conditions.size() > 0) {
+            Condition condition = conditions.get(conditions.size() - 1);
+            condition.addOrCondition(new Condition(key, operator, String.valueOf(column)));
+        }
+        return this;
+    }
+
+    /**
      * 获取排序语句
      */
     public String getOrders() {
@@ -118,6 +140,11 @@ public class ConditionBuilder {
                 builder.append(" where ");
             }
             builder.append(conditions.get(i).toString());
+            Condition orCondition = conditions.get(i);
+            while ((orCondition = orCondition.getOrCondition()) != null) {
+                builder.append(" or ");
+                builder.append(orCondition.toString());
+            }
         }
         String order = getOrders();
         if (order.length() > 0) {
@@ -149,6 +176,14 @@ public class ConditionBuilder {
             builder.append(" ");
             builder.append(conditions.get(i).getOperator());
             builder.append(" ?");
+            Condition orCondition = conditions.get(i);
+            while ((orCondition = orCondition.getOrCondition()) != null) {
+                builder.append(" or ");
+                builder.append(orCondition.getKey());
+                builder.append(" ");
+                builder.append(orCondition.getOperator());
+                builder.append(" ?");
+            }
         }
         String order = getOrders();
         if (order.length() > 0) {
@@ -162,13 +197,16 @@ public class ConditionBuilder {
      * 获取条件值数组
      */
     public String[] getColumnArray() {
-        String[] array = null;
+        List<String> array = new ArrayList<>();
         if (conditions.size() > 0) {
-            array = new String[conditions.size()];
             for (int i = 0; i < conditions.size(); i++) {
-                array[i] = conditions.get(i).getColumn();
+                Condition condition = conditions.get(i);
+                array.add(condition.getColumn());
+                while ((condition = condition.getOrCondition()) != null) {
+                    array.add(condition.getColumn());
+                }
             }
         }
-        return array;
+        return array.toArray(new String[0]);
     }
 }
