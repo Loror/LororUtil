@@ -3,7 +3,7 @@
 
 dependencies {
 
-    compile 'com.github.Loror:LororUtil:1.1.4'
+    compile 'com.github.Loror:LororUtil:1.1.5'
  
 }
 
@@ -33,6 +33,7 @@ allprojects {
     * 方法setTargetDir(File targetDir) 设置缓存路径
     * 方法setLoadAnimation(Animation loadAnimation) 设置加载成功动画
     * 方法loadImage() 开始加载图片
+    * 方法releaseTag() 释放tag，若出现本地与网络混加载图片，请为本地图片加载时调用该方法释放网络tag，避免图片显示错乱
 
 
 * 接口ImageUtilCallBack
@@ -171,6 +172,8 @@ HttpClient HttpsClient使用参数类
     * 方法getOrder() 获取已设置排序条件
     * 方法addCondition(String key, String operator, Object column) 添加条件
     * 方法addCondition(String key, Object column) 添加条件，默认以=构造操作符
+    * 方法withOrCondition(String key, String operator, Object column) 添加or条件，将附属于前一个addCondition附属or条件，若前面未调用addCondition，则该方法调用无效，若连续调用都附属前一addCondition条件
+    * 方法withOrCondition(String key, Object column) 添加or条件，默认以=构造操作符
     * 方法addIdCondition(String operator, Object column) 添加主键条件
     * 方法addIdCondition(Object column) 添加主键条件，默认以=构造操作符
     * 方法withOrder(String key, int orderType) 设置排序条件
