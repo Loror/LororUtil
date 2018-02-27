@@ -54,6 +54,13 @@ public class SQLiteUtil<T> {
     }
 
     /**
+     * 获取数据库操作对象
+     */
+    public SQLiteDatabase getDatabase() {
+        return database;
+    }
+
+    /**
      * 删除表
      */
     public void dropTable() {
