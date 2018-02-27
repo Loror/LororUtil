@@ -175,9 +175,9 @@ HttpClient HttpsClient使用参数类
     * 方法addOrCondition(String key, String operator, Object column) 添加or条件
     * 方法addOrCondition(String key, Object column) 添加or条件，默认以=构造操作符
     * 方法withCondition(String key, String operator, Object column) 追加and条件，将附属于前一个addCondition或addOrCondition条件，若前面未调用addCondition或addOrCondition，则该方法调用无效，若连续调用都追加到前一addCondition或addOrCondition条件
-    * 方法withCondition(String key, Object column) 添加or条件，默认以=构造操作符
+    * 方法withCondition(String key, Object column) 追加and条件，默认以=构造操作符
     * 方法withOrCondition(String key, String operator, Object column) 追加or条件，将附属于前一个addCondition或addOrCondition条件，若前面未调用addCondition或addOrCondition，则该方法调用无效，若连续调用都追加到前一addCondition或addOrCondition条件
-    * 方法withOrCondition(String key, Object column) 添加or条件，默认以=构造操作符
+    * 方法withOrCondition(String key, Object column) 追加or条件，默认以=构造操作符
     * 方法addIdCondition(String operator, Object column) 添加主键条件
     * 方法addIdCondition(Object column) 添加主键条件，默认以=构造操作符
     * 方法withOrder(String key, int orderType) 设置排序条件
