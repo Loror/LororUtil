@@ -10,7 +10,7 @@ public class TableFinder {
     /**
      * 获得表名
      */
-    protected static String getTableName(Class<?> entityType) {
+    public static String getTableName(Class<?> entityType) {
         String tableName = "";
         Table table = (Table) entityType.getAnnotation(Table.class);
         if (table == null) {
@@ -26,7 +26,7 @@ public class TableFinder {
     /**
      * 获得创建语句
      */
-    protected static String getCreateSql(Class<?> entityType) {
+    public static String getCreateSql(Class<?> entityType) {
         String sql = "";
         String tableName = getTableName(entityType);
         ArrayList<String> columns = new ArrayList<>();
@@ -102,14 +102,14 @@ public class TableFinder {
     /**
      * 获得删表语句
      */
-    protected static String getDropTableSql(Class<?> entityType) {
+    public static String getDropTableSql(Class<?> entityType) {
         return "drop table if exists " + getTableName(entityType);
     }
 
     /**
      * 获得更新语句
      */
-    protected static String getUpdateSql(Object entity) {
+    public static String getUpdateSql(Object entity) {
         String sql = "";
         String tableName = getTableName(entity.getClass());
         HashMap<String, String> columns = new HashMap<>();
@@ -160,7 +160,7 @@ public class TableFinder {
     /**
      * 获得插入语句
      */
-    protected static String getInsertSql(Object entity) {
+    public static String getInsertSql(Object entity) {
         String sql = "";
         String tableName = getTableName(entity.getClass());
         HashMap<String, String> columns = new HashMap<>();
@@ -206,7 +206,7 @@ public class TableFinder {
     /**
      * 获得删除语句
      */
-    protected static String getdeleteSql(Object entity) {
+    public static String getdeleteSql(Object entity) {
         String sql = "";
         String tableName = getTableName(entity.getClass());
         HashMap<String, String> columns = new HashMap<>();
@@ -255,7 +255,7 @@ public class TableFinder {
     /**
      * 查询sql数据到对象中
      */
-    protected static void find(Object entity, Cursor cursor) {
+    public static void find(Object entity, Cursor cursor) {
         Class<?> handlerType = entity.getClass();
         Field[] fields = handlerType.getDeclaredFields();
         if (fields == null) {
