@@ -6,7 +6,7 @@ import java.util.HashMap;
 
 import android.database.Cursor;
 
-class TableFinder {
+public class TableFinder {
     /**
      * 获得表名
      */
