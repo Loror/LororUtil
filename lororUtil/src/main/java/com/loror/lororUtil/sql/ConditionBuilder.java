@@ -87,10 +87,48 @@ public class ConditionBuilder {
     /**
      * 增加条件
      */
+    public ConditionBuilder addOrCondition(String key, Object column) {
+        conditions.add(new Condition(key, "=", String.valueOf(column), 1));
+        return this;
+    }
+
+    /**
+     * 增加条件
+     */
+    public ConditionBuilder addOrCondition(String key, String operator, Object column) {
+        conditions.add(new Condition(key, operator, String.valueOf(column), 1));
+        return this;
+    }
+
+    /**
+     * 增加条件
+     */
+    public ConditionBuilder withCondition(String key, Object column) {
+        if (conditions.size() > 0) {
+            Condition condition = conditions.get(conditions.size() - 1);
+            condition.addCondition(new Condition(key, "=", String.valueOf(column)));
+        }
+        return this;
+    }
+
+    /**
+     * 增加条件
+     */
+    public ConditionBuilder withCondition(String key, String operator, Object column) {
+        if (conditions.size() > 0) {
+            Condition condition = conditions.get(conditions.size() - 1);
+            condition.addCondition(new Condition(key, operator, String.valueOf(column)));
+        }
+        return this;
+    }
+
+    /**
+     * 增加条件
+     */
     public ConditionBuilder withOrCondition(String key, Object column) {
         if (conditions.size() > 0) {
             Condition condition = conditions.get(conditions.size() - 1);
-            condition.addOrCondition(new Condition(key, "=", String.valueOf(column)));
+            condition.addCondition(new Condition(key, "=", String.valueOf(column), 1));
         }
         return this;
     }
@@ -101,7 +139,7 @@ public class ConditionBuilder {
     public ConditionBuilder withOrCondition(String key, String operator, Object column) {
         if (conditions.size() > 0) {
             Condition condition = conditions.get(conditions.size() - 1);
-            condition.addOrCondition(new Condition(key, operator, String.valueOf(column)));
+            condition.addCondition(new Condition(key, operator, String.valueOf(column), 1));
         }
         return this;
     }
@@ -135,16 +173,11 @@ public class ConditionBuilder {
         StringBuilder builder = new StringBuilder();
         for (int i = 0; i < conditions.size(); i++) {
             if (i > 0) {
-                builder.append(" and ");
+                builder.append(conditions.get(i).getType() == 0 ? " and " : " or ");
             } else {
                 builder.append(" where ");
             }
             builder.append(conditions.get(i).toString());
-            Condition orCondition = conditions.get(i);
-            while ((orCondition = orCondition.getOrCondition()) != null) {
-                builder.append(" or ");
-                builder.append(orCondition.toString());
-            }
         }
         String order = getOrders();
         if (order.length() > 0) {
@@ -168,21 +201,30 @@ public class ConditionBuilder {
         StringBuilder builder = new StringBuilder();
         for (int i = 0; i < conditions.size(); i++) {
             if (i > 0) {
-                builder.append(" and ");
+                builder.append(conditions.get(i).getType() == 0 ? " and " : " or ");
             } else {
                 builder.append(" where ");
             }
-            builder.append(conditions.get(i).getKey());
-            builder.append(" ");
-            builder.append(conditions.get(i).getOperator());
-            builder.append(" ?");
-            Condition orCondition = conditions.get(i);
-            while ((orCondition = orCondition.getOrCondition()) != null) {
-                builder.append(" or ");
-                builder.append(orCondition.getKey());
+            Condition that = conditions.get(i).getCondition();
+            if (that == null) {
+                builder.append(conditions.get(i).getKey());
                 builder.append(" ");
-                builder.append(orCondition.getOperator());
+                builder.append(conditions.get(i).getOperator());
                 builder.append(" ?");
+            } else {
+                builder.append("(");
+                builder.append(conditions.get(i).getKey());
+                builder.append(" ");
+                builder.append(conditions.get(i).getOperator());
+                builder.append(" ?");
+                do {
+                    builder.append(that.getType() == 0 ? " and " : " or ");
+                    builder.append(that.getKey());
+                    builder.append(" ");
+                    builder.append(that.getOperator());
+                    builder.append(" ?");
+                } while ((that = that.getCondition()) != null);
+                builder.append(")");
             }
         }
         String order = getOrders();
@@ -202,7 +244,7 @@ public class ConditionBuilder {
             for (int i = 0; i < conditions.size(); i++) {
                 Condition condition = conditions.get(i);
                 array.add(condition.getColumn());
-                while ((condition = condition.getOrCondition()) != null) {
+                while ((condition = condition.getCondition()) != null) {
                     array.add(condition.getColumn());
                 }
             }

@@ -8,12 +8,20 @@ public class Condition {
     private String key;
     private String operator;
     private String column;
-    private Condition orCondition;
+    private int type;//0,and.1,or
+    private Condition condition;
 
     public Condition(String key, String operator, String column) {
         this.key = key;
         this.operator = operator;
         this.column = column;
+    }
+
+    public Condition(String key, String operator, String column, int type) {
+        this.key = key;
+        this.operator = operator;
+        this.column = column;
+        this.type = type;
     }
 
     public String getKey() {
@@ -40,20 +48,56 @@ public class Condition {
         this.column = column;
     }
 
-    public void addOrCondition(Condition orCondition) {
-        if (this.orCondition == null) {
-            this.orCondition = orCondition;
+    public void setType(int type) {
+        this.type = type;
+    }
+
+    public int getType() {
+        return type;
+    }
+
+    public void addCondition(Condition condition) {
+        if (this.condition == null) {
+            this.condition = condition;
         } else {
-            this.orCondition.addOrCondition(orCondition);
+            this.condition.addCondition(condition);
         }
     }
 
-    public Condition getOrCondition() {
-        return orCondition;
+    public Condition getCondition() {
+        return condition;
     }
 
     @Override
     public String toString() {
-        return key + " " + operator + " '" + column + "'";
+        StringBuilder builder = new StringBuilder();
+        Condition that = condition;
+        if (that == null) {
+            builder.append(key);
+            builder.append(" ");
+            builder.append(operator);
+            builder.append(" '");
+            builder.append(column);
+            builder.append("'");
+        } else {
+            builder.append("(");
+            builder.append(key);
+            builder.append(" ");
+            builder.append(operator);
+            builder.append(" '");
+            builder.append(column);
+            builder.append("'");
+            do {
+                builder.append(that.getType() == 0 ? " and " : " or ");
+                builder.append(that.getKey());
+                builder.append(" ");
+                builder.append(that.getOperator());
+                builder.append(" '");
+                builder.append(that.getColumn());
+                builder.append("'");
+            } while ((that = that.getCondition()) != null);
+            builder.append(")");
+        }
+        return builder.toString();
     }
 }

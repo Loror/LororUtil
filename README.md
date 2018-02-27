@@ -3,7 +3,7 @@
 
 dependencies {
 
-    compile 'com.github.Loror:LororUtil:1.1.5'
+    compile 'com.github.Loror:LororUtil:1.1.6'
  
 }
 
@@ -170,9 +170,13 @@ HttpClient HttpsClient使用参数类
     * 静态方法builder() 获取ConditionBuilder对象
     * 方法getConditionList() 获取所有已设置条件
     * 方法getOrder() 获取已设置排序条件
-    * 方法addCondition(String key, String operator, Object column) 添加条件
-    * 方法addCondition(String key, Object column) 添加条件，默认以=构造操作符
-    * 方法withOrCondition(String key, String operator, Object column) 添加or条件，将附属于前一个addCondition附属or条件，若前面未调用addCondition，则该方法调用无效，若连续调用都附属前一addCondition条件
+    * 方法addCondition(String key, String operator, Object column) 添加and条件
+    * 方法addCondition(String key, Object column) 添加and条件，默认以=构造操作符
+    * 方法addOrCondition(String key, String operator, Object column) 添加or条件
+    * 方法addOrCondition(String key, Object column) 添加or条件，默认以=构造操作符
+    * 方法withCondition(String key, String operator, Object column) 追加and条件，将附属于前一个addCondition或addOrCondition条件，若前面未调用addCondition或addOrCondition，则该方法调用无效，若连续调用都追加到前一addCondition或addOrCondition条件
+    * 方法withCondition(String key, Object column) 添加or条件，默认以=构造操作符
+    * 方法withOrCondition(String key, String operator, Object column) 追加or条件，将附属于前一个addCondition或addOrCondition条件，若前面未调用addCondition或addOrCondition，则该方法调用无效，若连续调用都追加到前一addCondition或addOrCondition条件
     * 方法withOrCondition(String key, Object column) 添加or条件，默认以=构造操作符
     * 方法addIdCondition(String operator, Object column) 添加主键条件
     * 方法addIdCondition(Object column) 添加主键条件，默认以=构造操作符
