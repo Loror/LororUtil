@@ -3,7 +3,7 @@
 
 dependencies {
 
-    compile 'com.github.Loror:LororUtil:1.1.6'
+    compile 'com.github.Loror:LororUtil:1.1.7'
  
 }
 
@@ -145,25 +145,25 @@ HttpClient HttpsClient使用参数类
 * 注解@Id
     * 主键，一个表只能指定一个主键，多主键会抛出异常。SQLiteUtil发现该注解会生成一个自增int型主键。
 
-* 类SQLiteUtil<T>   数据库辅助类
+* 类SQLiteUtil   数据库辅助类
 * 注：一个类中只能指定一个主键，主键被内部取名id，因此其他各键名不应再以id命名，下列所有涉及到主键的方法若使用在未定义主键的表中，将抛出异常，请谨慎使用，建议为每张表建立主键。
-    * 构造方法SQLiteUtil(Context context, String dbName, Class<T> entityType, int version, OnChange onChange)  构造sqlite工具，泛型，操作对象类型，参数，1，上下文，2，数据库名，3，操作对象类型，5，版本号，6，回调，数据库创建、更新时回调，可为空。
-    * 方法dropTable()  删除表
-    * 方法createTableIfNotExists() 如果不存在表时创建表
-    * 方法insert(T entity)  插入对象到数据库
-    * 方法getLastId() 获取最后插入主键id
-    * 方法delete(T entity)  删除数据库条目，只删除与对象中所有参数相同的条目
-    * 方法deleteById(String id)  根据主键id删除数据
-    * 方法deleteByCondition(ConditionBuilder conditionBuilder) 通过条件删除条目
-    * 方法deleteAll() 清除表中所有数据
-    * 方法updateById(T entity) 更新数据，将根据主键id更新所有数据
-    * 方法getById(String id)  根据主键id获取数据
-    * 方法getByCondition(ConditionBuilder conditionBuilder)  通过条件获取数据
-    * 方法getFirst()  获取数据库首条数据
-    * 方法getFirstByCondition(ConditionBuilder conditionBuilder)  通过条件获取首条数据
-    * 方法getAll() 获取所有条目，返回对象数组
-    * 方法count() 获取总条目数
-    * 方法countByCondition(ConditionBuilder conditionBuilder) 根据条件获取总条目数
+    * 构造方法SQLiteUtil(Context context, String dbName, Class<?> table, int version, OnChange onChange)  构造sqlite工具，泛型，操作对象类型，参数，1，上下文，2，数据库名，3，操作对象类型，5，版本号，6，回调，数据库创建、更新时回调，可为空。table被传入时创建数据库时将同时创建该表。
+    * 方法dropTable(Class<?> table)  删除表
+    * 方法createTableIfNotExists(Class<?> table) 如果不存在表时创建表
+    * 方法insert(Object entity)  插入对象到数据库
+    * 方法getLastId(Class<?> table) 获取最后插入主键id
+    * 方法delete(Object entity)  删除数据库条目，只删除与对象中所有参数相同的条目
+    * 方法deleteById(String id, Class<?> table)  根据主键id删除数据
+    * 方法deleteByCondition(ConditionBuilder conditionBuilder, Class<?> table) 通过条件删除条目
+    * 方法deleteAll(Class<?> table) 清除表中所有数据
+    * 方法updateById(Object entity) 更新数据，将根据主键id更新所有数据
+    * 方法<T> getById(String id, Class<T> table)  根据主键id获取数据
+    * 方法<T> getByCondition(ConditionBuilder conditionBuilder, Class<T> table)  通过条件获取数据
+    * 方法<T> getFirst(Class<T> table)  获取数据库首条数据
+    * 方法<T> getFirstByCondition(ConditionBuilder conditionBuilder, Class<T> table)  通过条件获取首条数据
+    * 方法<T> getAll(Class<T> table) 获取所有条目，返回对象数组
+    * 方法count(Class<?> table) 获取总条目数
+    * 方法countByCondition(ConditionBuilder conditionBuilder, Class<?> table) 根据条件获取总条目数
     * 方法close() 关闭数据库
 
 * 类ConditionBuilder
