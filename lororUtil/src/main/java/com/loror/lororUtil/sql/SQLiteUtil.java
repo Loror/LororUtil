@@ -211,22 +211,20 @@ public class SQLiteUtil {
      */
     public <T> T getFirstByCondition(ConditionBuilder conditionBuilder, Class<T> table) {
         T entity = null;
-        if (conditionBuilder.getConditionCount() > 0) {
-            Cursor cursor = database.rawQuery(
-                    "select * from " + TableFinder.getTableName(table)
-                            + conditionBuilder.getNoColumnConditionsWithoutPage() + " limit 0,2",
-                    conditionBuilder.getColumnArray());
-            if (cursor.moveToNext()) {
-                try {
-                    entity = (T) table.newInstance();
-                    TableFinder.find(entity, cursor);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+        Cursor cursor = database.rawQuery(
+                "select * from " + TableFinder.getTableName(table)
+                        + conditionBuilder.getNoColumnConditionsWithoutPage() + " limit 0,2",
+                conditionBuilder.getColumnArray());
+        if (cursor.moveToNext()) {
+            try {
+                entity = (T) table.newInstance();
+                TableFinder.find(entity, cursor);
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-            cursor.close();
-            SQLiteDatabase.releaseMemory();
         }
+        cursor.close();
+        SQLiteDatabase.releaseMemory();
         return entity;
     }
 
