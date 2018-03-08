@@ -1,6 +1,7 @@
 package com.loror.lororUtil.sql;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import android.content.Context;
 import android.database.Cursor;
@@ -232,8 +233,8 @@ public class SQLiteUtil {
     /**
      * 获取数据
      */
-    public <T> ArrayList<T> getByCondition(ConditionBuilder conditionBuilder, Class<T> table) {
-        ArrayList<T> entitys = new ArrayList<>();
+    public <T> List<T> getByCondition(ConditionBuilder conditionBuilder, Class<T> table) {
+        List<T> entitys = new ArrayList<>();
         Cursor cursor = database.rawQuery(
                 "select * from " + TableFinder.getTableName(table) + conditionBuilder.getNoColumnConditions(),
                 conditionBuilder.getColumnArray());
@@ -254,8 +255,8 @@ public class SQLiteUtil {
     /**
      * 获取所有数据
      */
-    public <T> ArrayList<T> getAll(Class<T> table) {
-        ArrayList<T> entitys = new ArrayList<>();
+    public <T> List<T> getAll(Class<T> table) {
+        List<T> entitys = new ArrayList<>();
         Cursor cursor = database.rawQuery("select * from " + TableFinder.getTableName(table), null);
         while (cursor.moveToNext()) {
             try {
@@ -315,6 +316,15 @@ public class SQLiteUtil {
         if (this.database != null) {
             this.database.close();
             this.database = null;
+        }
+    }
+
+    /**
+     * 打开
+     */
+    public void reOpen() {
+        if (this.database == null || !this.database.isOpen()) {
+            this.database = this.helper.getWritableDatabase();
         }
     }
 }
