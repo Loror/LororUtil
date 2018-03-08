@@ -32,41 +32,41 @@ public class SQLiteUtil {
         this(context, dbName, null, version, null);
     }
 
-    public SQLiteUtil(Context context, String dbName, Class<?> entityType, int version) {
-        this(context, dbName, entityType, version, null);
+    public SQLiteUtil(Context context, String dbName, Class<?> table, int version) {
+        this(context, dbName, table, version, null);
     }
 
     public SQLiteUtil(Context context, String dbName, int version, OnChange onChange) {
         this(context, dbName, null, version, onChange);
     }
 
-    public SQLiteUtil(Context context, String dbName, Class<?> entityType, int version, OnChange onChange) {
+    public SQLiteUtil(Context context, String dbName, Class<?> table, int version, OnChange onChange) {
         this.context = context;
         this.dbName = dbName;
         this.onChange = onChange;
         this.version = version;
-        init(entityType);
+        init(table);
     }
 
     /**
      * 初始化
      */
-    protected void init(final Class<?> entityType) {
+    protected void init(final Class<?> table) {
         close();
         this.helper = new DataBaseHelper(context, dbName, version, onChange != null ? onChange : new OnChange() {
 
             @Override
             public void onUpdate(SQLiteUtil sqLiteUtil) {
-                if (entityType != null) {
-                    sqLiteUtil.dropTable(entityType);
-                    sqLiteUtil.createTableIfNotExists(entityType);
+                if (table != null) {
+                    sqLiteUtil.dropTable(table);
+                    sqLiteUtil.createTableIfNotExists(table);
                 }
             }
 
             @Override
             public void onCreate(SQLiteUtil sqLiteUtil) {
-                if (entityType != null) {
-                    sqLiteUtil.createTableIfNotExists(entityType);
+                if (table != null) {
+                    sqLiteUtil.createTableIfNotExists(table);
                 }
             }
         }, new Link() {
@@ -89,16 +89,16 @@ public class SQLiteUtil {
     /**
      * 删除表
      */
-    public void dropTable(Class<?> entityType) {
-        database.execSQL(TableFinder.getDropTableSql(entityType));
+    public void dropTable(Class<?> table) {
+        database.execSQL(TableFinder.getDropTableSql(table));
         SQLiteDatabase.releaseMemory();
     }
 
     /**
      * 创建表
      */
-    public void createTableIfNotExists(Class<?> entityType) {
-        database.execSQL(TableFinder.getCreateSql(entityType));
+    public void createTableIfNotExists(Class<?> table) {
+        database.execSQL(TableFinder.getCreateSql(table));
         SQLiteDatabase.releaseMemory();
     }
 
@@ -113,8 +113,8 @@ public class SQLiteUtil {
     /**
      * 获取最后插入数据id
      */
-    public long getLastId(Class<?> entityType) {
-        Cursor cursor = database.rawQuery("select last_insert_rowid() from " + TableFinder.getTableName(entityType),
+    public long getLastId(Class<?> table) {
+        Cursor cursor = database.rawQuery("select last_insert_rowid() from " + TableFinder.getTableName(table),
                 null);
         long id = -1;
         if (cursor.moveToFirst()) {
@@ -136,17 +136,17 @@ public class SQLiteUtil {
     /**
      * 删除数据
      */
-    public void deleteById(String id, Class<?> entityType) {
-        database.execSQL("delete from " + TableFinder.getTableName(entityType) + " where id = '" + id + "'");
+    public void deleteById(String id, Class<?> table) {
+        database.execSQL("delete from " + TableFinder.getTableName(table) + " where id = '" + id + "'");
         SQLiteDatabase.releaseMemory();
     }
 
     /**
      * 删除数据
      */
-    public void deleteByCondition(ConditionBuilder conditionBuilder, Class<?> entityType) {
+    public void deleteByCondition(ConditionBuilder conditionBuilder, Class<?> table) {
         if (conditionBuilder.getConditionCount() > 0) {
-            database.execSQL("delete from " + TableFinder.getTableName(entityType) + conditionBuilder.getConditions());
+            database.execSQL("delete from " + TableFinder.getTableName(table) + conditionBuilder.getConditions());
             SQLiteDatabase.releaseMemory();
         }
     }
@@ -154,8 +154,8 @@ public class SQLiteUtil {
     /**
      * 删除所有数据
      */
-    public void deleteAll(Class<?> entityType) {
-        database.execSQL("delete from " + TableFinder.getTableName(entityType));
+    public void deleteAll(Class<?> table) {
+        database.execSQL("delete from " + TableFinder.getTableName(table));
         SQLiteDatabase.releaseMemory();
     }
 
@@ -169,13 +169,13 @@ public class SQLiteUtil {
     /**
      * 根据id(主键)获取数据
      */
-    public <T> T getById(String id, Class<T> entityType) {
+    public <T> T getById(String id, Class<T> table) {
         T entity = null;
-        Cursor cursor = database.rawQuery("select * from " + TableFinder.getTableName(entityType) + " where id = ?",
-                new String[] { id });
+        Cursor cursor = database.rawQuery("select * from " + TableFinder.getTableName(table) + " where id = ?",
+                new String[]{id});
         if (cursor.moveToNext()) {
             try {
-                entity = (T) entityType.newInstance();
+                entity = (T) table.newInstance();
                 TableFinder.find(entity, cursor);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -189,12 +189,12 @@ public class SQLiteUtil {
     /**
      * 获取首条数据
      */
-    public <T> T getFirst(Class<T> entityType) {
+    public <T> T getFirst(Class<T> table) {
         T entity = null;
-        Cursor cursor = database.rawQuery("select * from " + TableFinder.getTableName(entityType) + " limit 0,2", null);
+        Cursor cursor = database.rawQuery("select * from " + TableFinder.getTableName(table) + " limit 0,2", null);
         if (cursor.moveToNext()) {
             try {
-                entity = (T) entityType.newInstance();
+                entity = (T) table.newInstance();
                 TableFinder.find(entity, cursor);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -208,16 +208,16 @@ public class SQLiteUtil {
     /**
      * 获取首条数据
      */
-    public <T> T getFirstByCondition(ConditionBuilder conditionBuilder, Class<T> entityType) {
+    public <T> T getFirstByCondition(ConditionBuilder conditionBuilder, Class<T> table) {
         T entity = null;
         if (conditionBuilder.getConditionCount() > 0) {
             Cursor cursor = database.rawQuery(
-                    "select * from " + TableFinder.getTableName(entityType)
+                    "select * from " + TableFinder.getTableName(table)
                             + conditionBuilder.getNoColumnConditionsWithoutPage() + " limit 0,2",
                     conditionBuilder.getColumnArray());
             if (cursor.moveToNext()) {
                 try {
-                    entity = (T) entityType.newInstance();
+                    entity = (T) table.newInstance();
                     TableFinder.find(entity, cursor);
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -232,14 +232,14 @@ public class SQLiteUtil {
     /**
      * 获取数据
      */
-    public <T> ArrayList<T> getByCondition(ConditionBuilder conditionBuilder, Class<T> entityType) {
+    public <T> ArrayList<T> getByCondition(ConditionBuilder conditionBuilder, Class<T> table) {
         ArrayList<T> entitys = new ArrayList<>();
         Cursor cursor = database.rawQuery(
-                "select * from " + TableFinder.getTableName(entityType) + conditionBuilder.getNoColumnConditions(),
+                "select * from " + TableFinder.getTableName(table) + conditionBuilder.getNoColumnConditions(),
                 conditionBuilder.getColumnArray());
         while (cursor.moveToNext()) {
             try {
-                T entity = (T) entityType.newInstance();
+                T entity = (T) table.newInstance();
                 TableFinder.find(entity, cursor);
                 entitys.add(entity);
             } catch (Exception e) {
@@ -254,12 +254,12 @@ public class SQLiteUtil {
     /**
      * 获取所有数据
      */
-    public <T> ArrayList<T> getAll(Class<T> entityType) {
+    public <T> ArrayList<T> getAll(Class<T> table) {
         ArrayList<T> entitys = new ArrayList<>();
-        Cursor cursor = database.rawQuery("select * from " + TableFinder.getTableName(entityType), null);
+        Cursor cursor = database.rawQuery("select * from " + TableFinder.getTableName(table), null);
         while (cursor.moveToNext()) {
             try {
-                T entity = (T) entityType.newInstance();
+                T entity = (T) table.newInstance();
                 entitys.add(entity);
                 TableFinder.find(entity, cursor);
             } catch (Exception e) {
@@ -274,9 +274,9 @@ public class SQLiteUtil {
     /**
      * 获取条目
      */
-    public int count(Class<?> entityType) {
+    public int count(Class<?> table) {
         int count = 0;
-        Cursor cursor = database.rawQuery("select count(1) from " + TableFinder.getTableName(entityType), null);
+        Cursor cursor = database.rawQuery("select count(1) from " + TableFinder.getTableName(table), null);
         if (cursor.moveToNext()) {
             try {
                 count = cursor.getInt(0);
@@ -292,9 +292,9 @@ public class SQLiteUtil {
     /**
      * 获取条目
      */
-    public int countByCondition(ConditionBuilder conditionBuilder, Class<?> entityType) {
+    public int countByCondition(ConditionBuilder conditionBuilder, Class<?> table) {
         int count = 0;
-        Cursor cursor = database.rawQuery("select count(1) from " + TableFinder.getTableName(entityType)
+        Cursor cursor = database.rawQuery("select count(1) from " + TableFinder.getTableName(table)
                 + conditionBuilder.getNoColumnConditions(), conditionBuilder.getColumnArray());
         if (cursor.moveToNext()) {
             try {
