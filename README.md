@@ -157,11 +157,11 @@ HttpClient HttpsClient使用参数类
     * 方法deleteByCondition(ConditionBuilder conditionBuilder, Class<?> table) 通过条件删除条目
     * 方法deleteAll(Class<?> table) 清除表中所有数据
     * 方法updateById(Object entity) 更新数据，将根据主键id更新所有数据
-    * 方法<T> getById(String id, Class<T> table)  根据主键id获取数据
-    * 方法<T> getByCondition(ConditionBuilder conditionBuilder, Class<T> table)  通过条件获取数据
-    * 方法<T> getFirst(Class<T> table)  获取数据库首条数据
-    * 方法<T> getFirstByCondition(ConditionBuilder conditionBuilder, Class<T> table)  通过条件获取首条数据
-    * 方法<T> getAll(Class<T> table) 获取所有条目，返回对象数组
+    * 方法getById(String id, Class<T> table)  根据主键id获取数据
+    * 方法getByCondition(ConditionBuilder conditionBuilder, Class<T> table)  通过条件获取数据
+    * 方法getFirst(Class<T> table)  获取数据库首条数据
+    * 方法getFirstByCondition(ConditionBuilder conditionBuilder, Class<T> table)  通过条件获取首条数据
+    * 方法getAll(Class<T> table) 获取所有条目，返回对象数组
     * 方法count(Class<?> table) 获取总条目数
     * 方法countByCondition(ConditionBuilder conditionBuilder, Class<?> table) 根据条件获取总条目数
     * 方法close() 关闭数据库
