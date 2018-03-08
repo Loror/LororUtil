@@ -24,10 +24,11 @@ public class ImageDownloader {
 		if (!Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
 			return false;
 		}
-		SQLiteUtil<Compare> sqLiteUtil = new SQLiteUtil<>(context, "image_compare", Compare.class, 1);
+		SQLiteUtil sqLiteUtil = new SQLiteUtil(context, "image_compare", Compare.class, 1);
 		try {
 			File file = new File(path);
-			Compare compare = sqLiteUtil.getFirstByCondition(ConditionBuilder.builder().addCondition("url", urlStr));
+			Compare compare = sqLiteUtil.getFirstByCondition(ConditionBuilder.builder().addCondition("url", urlStr),
+					Compare.class);
 			if (!checkNet && file.exists() && !cover && compare != null && compare.length == file.length()) {
 				return true;
 			}
@@ -38,7 +39,7 @@ public class ImageDownloader {
 			conn.setDoInput(true);
 			long length = conn.getContentLength();
 			lock.lock();
-			sqLiteUtil.deleteByCondition(ConditionBuilder.builder().addCondition("url", urlStr));
+			sqLiteUtil.deleteByCondition(ConditionBuilder.builder().addCondition("url", urlStr), Compare.class);
 			compare = new Compare();
 			compare.length = length;
 			compare.url = urlStr;

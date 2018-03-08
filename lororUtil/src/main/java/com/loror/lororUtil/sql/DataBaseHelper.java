@@ -10,11 +10,11 @@ import android.database.sqlite.SQLiteOpenHelper;
 class DataBaseHelper extends SQLiteOpenHelper {
 
 	private OnChange onChange;
-	private SQLiteUtil<?> sqLiteUtil;
+	private SQLiteUtil sqLiteUtil;
 	private Link link;
 
-	public DataBaseHelper(Context context, String dbName, OnChange onChange, SQLiteUtil<?> sqLiteUtil, int version,
-			Link link) {
+	public DataBaseHelper(Context context, String dbName, int version, OnChange onChange, Link link,
+						  SQLiteUtil sqLiteUtil) {
 		super(context, dbName, null, version);
 		this.onChange = onChange;
 		this.sqLiteUtil = sqLiteUtil;
@@ -23,22 +23,17 @@ class DataBaseHelper extends SQLiteOpenHelper {
 
 	@Override
 	public void onCreate(SQLiteDatabase db) {
+		link.link(db);
 		if (onChange != null) {
-			onChange.create(sqLiteUtil);
-		} else {
-			link.link(db);
-			sqLiteUtil.createTableIfNotExists();
+			onChange.onCreate(sqLiteUtil);
 		}
 	}
 
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+		link.link(db);
 		if (onChange != null) {
-			onChange.update(sqLiteUtil);
-		} else {
-			link.link(db);
-			sqLiteUtil.dropTable();
-			sqLiteUtil.createTableIfNotExists();
+			onChange.onUpdate(sqLiteUtil);
 		}
 	}
 
