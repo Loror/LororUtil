@@ -58,7 +58,7 @@ public class ImageDownloader {
      * 删除所有sql缓存
      */
     public static void tryClearAllSqlCach(Context context) {
-        SQLiteUtil sqLiteUtil = new SQLiteUtil(context, "image_compare", 2);
+        SQLiteUtil sqLiteUtil = new SQLiteUtil(context, "imageCompare");
         sqLiteUtil.deleteAll(Compare.class);
         sqLiteUtil.close();
     }
@@ -70,7 +70,7 @@ public class ImageDownloader {
         if (!Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
             return false;
         }
-        SQLiteUtil sqLiteUtil = new SQLiteUtil(context, "image_compare", 2);
+        SQLiteUtil sqLiteUtil = new SQLiteUtil(context, "imageCompare");
         sqLiteUtil.createTableIfNotExists(Compare.class);
         try {
             File file = new File(path);
