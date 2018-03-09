@@ -24,6 +24,7 @@ public class ImageDownloader {
             return;
         }
         SQLiteUtil sqLiteUtil = new SQLiteUtil(context, "image_compare", 2);
+        sqLiteUtil.createTableIfNotExists(Compare.class);
         try {
             List<String> paths = new ArrayList<>();
             for (int i = 0; i < files.length; i++) {
@@ -59,6 +60,7 @@ public class ImageDownloader {
      */
     public static void tryClearAllSqlCach(Context context) {
         SQLiteUtil sqLiteUtil = new SQLiteUtil(context, "imageCompare");
+        sqLiteUtil.createTableIfNotExists(Compare.class);
         sqLiteUtil.deleteAll(Compare.class);
         sqLiteUtil.close();
     }
