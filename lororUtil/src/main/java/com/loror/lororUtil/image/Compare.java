@@ -6,10 +6,12 @@ import com.loror.lororUtil.sql.Table;
 
 @Table(name = "image_compare")
 public class Compare {
-	@Id
-	int id;
-	@Column(column = "url")
-	String url;
-	@Column(column = "length")
-	long length;
+    @Id
+    int id;
+    @Column
+    String url;
+    @Column
+    String path;
+    @Column
+    long length;
 }

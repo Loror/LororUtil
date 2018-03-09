@@ -10,20 +10,6 @@ public class SmartReadImage implements ReadImage, Cloneable {
 
 	private String targetFilePath;
 	private Context context;
-	private boolean mitiCach;
-
-	public static SmartReadImage getInstance(Context context, String targetFilePath, boolean mitiCach) {
-		SmartReadImage smartReadImage;
-		try {
-			smartReadImage = (SmartReadImage) SingletonFactory.instance.clone();
-		} catch (CloneNotSupportedException e) {
-			smartReadImage = new SmartReadImage();
-		}
-		smartReadImage.context = context;
-		smartReadImage.targetFilePath = targetFilePath;
-		smartReadImage.mitiCach = mitiCach;
-		return smartReadImage;
-	}
 
 	private SmartReadImage() {
 		// TODO Auto-generated constructor stub
@@ -33,8 +19,20 @@ public class SmartReadImage implements ReadImage, Cloneable {
 		private static SmartReadImage instance = new SmartReadImage();
 	}
 
+	public static SmartReadImage getInstance(Context context, String targetFilePath) {
+		try {
+			SmartReadImage smartReadImage = (SmartReadImage) SingletonFactory.instance.clone();
+			smartReadImage.context = context;
+			smartReadImage.targetFilePath = targetFilePath;
+			return smartReadImage;
+		} catch (CloneNotSupportedException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
 	@Override
-	public ReadImageResult readImage(String url, int widthLimit) {
+	public ReadImageResult readImage(String url, int widthLimit, boolean mitiCach) {
 		File f;
 		if (url.startsWith("http")) {
 			f = new File(targetFilePath);

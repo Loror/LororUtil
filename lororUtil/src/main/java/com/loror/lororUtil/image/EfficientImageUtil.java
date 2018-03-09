@@ -70,21 +70,21 @@ public class EfficientImageUtil {
      * 重载
      */
     public static void loadImage(ImageView imageView, String path, ReadImage readImage) {
-        loadImage(imageView, path, 200, readImage, null, null, true);
+        loadImage(imageView, path, 200, readImage, null, null, true, false);
     }
 
     /**
      * 重载
      */
     public static void loadImage(ImageView imageView, String path, int widthLimit, ReadImage readImage) {
-        loadImage(imageView, path, widthLimit, readImage, null, null, true);
+        loadImage(imageView, path, widthLimit, readImage, null, null, true, false);
     }
 
     /**
      * 重载
      */
     public static void loadImage(ImageView imageView, String path, ReadImage readImage, ImageUtilCallBack callback) {
-        loadImage(imageView, path, 200, readImage, callback, null, true);
+        loadImage(imageView, path, 200, readImage, callback, null, true, false);
     }
 
     /**
@@ -100,15 +100,24 @@ public class EfficientImageUtil {
      */
     public static void loadImage(ImageView imageView, String path, int widthLimit, ReadImage readImage,
                                  ImageUtilCallBack callback, Bitmap defaultImage) {
-        loadImage(imageView, path, widthLimit, readImage, callback, defaultImage, true);
+        loadImage(imageView, path, widthLimit, readImage, callback, defaultImage, true, false);
     }
 
     /**
-     * 加载，参数，1，imageView，2，地址，3，宽度限制，4，读取图片接口，5，回掉，6，是否移除滑出的任务
+     * 重载
      */
     public static void loadImage(final ImageView imageView, final String path, final int widthLimit,
                                  final ReadImage readImage, final ImageUtilCallBack callback, Bitmap defaultImage,
                                  final boolean removeOldTask) {
+        loadImage(imageView, path, widthLimit, readImage, callback, defaultImage, true, false);
+    }
+
+    /**
+     * 加载，参数，1，imageView，2，地址，3，宽度限制，4，读取图片接口，5，回掉，6，是否移除滑出的任务，7，是否支持多帧模式
+     */
+    public static void loadImage(final ImageView imageView, final String path, final int widthLimit,
+                                 final ReadImage readImage, final ImageUtilCallBack callback, Bitmap defaultImage,
+                                 final boolean removeOldTask, final boolean mutiCache) {
         if (!TextUtil.isEmpty(path)) {
             final String tag = String.valueOf(EfficientImageUtil.tag++);
             final String cachKey = path + widthLimit;
@@ -164,7 +173,7 @@ public class EfficientImageUtil {
                             if (removeOldTask) {
                                 EfficientImageUtil.tasks.remove(tag);
                             }
-                            final ReadImageResult readImageResult = readImage.readImage(path, widthLimit);
+                            final ReadImageResult readImageResult = readImage.readImage(path, widthLimit, mutiCache);
                             readImageResult.setOriginPath(path);
                             if (readImageResult.getBitmap() == null) {
                                 EfficientImageUtil.lock.lock();

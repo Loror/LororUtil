@@ -177,6 +177,16 @@ public class ImageUtil implements Cloneable {
         return this;
     }
 
+    public String getTargetDirPath() {
+        init(this.context);
+        return this.targetDirPath;
+    }
+
+    public String getTargetFile() {
+        init(this.context);
+        return (this.targetDirPath.endsWith("/") ? this.targetDirPath : (this.targetDirPath + "/")) + this.targetName;
+    }
+
     public ImageUtil setLoadAnimation(Animation loadAnimation) {
         this.loadAnimation = loadAnimation;
         return this;
@@ -204,7 +214,7 @@ public class ImageUtil implements Cloneable {
             readImage = new ReadImage() {
 
                 @Override
-                public ReadImageResult readImage(String path, int widthLimit) {
+                public ReadImageResult readImage(String path, int widthLimit, boolean mutiCache) {
                     String targetFile;
                     if (path.startsWith("http")) {
                         File targetDir = new File(targetDirPath);
@@ -216,7 +226,7 @@ public class ImageUtil implements Cloneable {
                     } else {
                         targetFile = path;
                     }
-                    return SmartReadImage.getInstance(context, targetFile, isGif).readImage(path, widthLimit);
+                    return SmartReadImage.getInstance(context, targetFile).readImage(path, widthLimit, isGif);
                 }
             };
         }
@@ -362,7 +372,7 @@ public class ImageUtil implements Cloneable {
             };
         }
 
-        EfficientImageUtil.loadImage(imageView, path, widthLimit, readImage, callback, null, removeOldTask);
+        EfficientImageUtil.loadImage(imageView, path, widthLimit, readImage, callback, null, removeOldTask, isGif);
     }
 
     public static void releseTag(View view) {

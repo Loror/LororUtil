@@ -20,7 +20,7 @@ public class Condition {
     public Condition(String key, String operator, String column, int type) {
         this.key = key;
         this.operator = operator;
-        this.column = column;
+        this.column = column == null ? null : column.replace("'", "''");
         this.type = type;
     }
 
@@ -45,7 +45,7 @@ public class Condition {
     }
 
     public void setColumn(String column) {
-        this.column = column;
+        this.column = column == null ? null : column.replace("'", "''");
     }
 
     public void setType(int type) {
