@@ -23,7 +23,7 @@ public class ImageDownloader {
         if (files == null || files.length == 0) {
             return;
         }
-        SQLiteUtil sqLiteUtil = new SQLiteUtil(context, "image_compare", 2);
+        SQLiteUtil sqLiteUtil = new SQLiteUtil(context, "imageCompare");
         sqLiteUtil.createTableIfNotExists(Compare.class);
         try {
             List<String> paths = new ArrayList<>();
