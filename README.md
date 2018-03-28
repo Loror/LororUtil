@@ -3,7 +3,7 @@
 
 dependencies {
 
-    compile 'com.github.Loror:LororUtil:1.2.0'
+    compile 'com.github.Loror:LororUtil:1.2.1'
  
 }
 
