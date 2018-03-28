@@ -53,12 +53,9 @@ public class ViewUtil {
             Find find = (Find) field.getAnnotation(Find.class);
             if (find != null) {
                 try {
-                    View annotations = null;
-                    if (suiteHump) {
+                    View annotations = finder.findViewById(find.value() == -1 ? getResourceId(name, globalIdClass) : find.value());
+                    if (suiteHump && annotations == null) {
                         annotations = finder.findViewById(find.value() == -1 ? getResourceId(TextUtil.humpToUnderlineLowercase(name), globalIdClass) : find.value());
-                    }
-                    if (annotations == null) {
-                        annotations = finder.findViewById(find.value() == -1 ? getResourceId(name, globalIdClass) : find.value());
                     }
                     if (annotations != null) {
                         field.setAccessible(true);
