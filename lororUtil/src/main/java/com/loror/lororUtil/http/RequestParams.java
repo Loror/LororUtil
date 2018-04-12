@@ -176,7 +176,7 @@ public class RequestParams {
         }
         if (sb.length() > 0) {
             if (!"POST_FILE".equals(method)) {
-                str = sb.substring(0, sb.length() - 1);
+                str = sb.deleteCharAt(sb.length() - 1).toString();
             } else {
                 str = sb.toString();
             }
