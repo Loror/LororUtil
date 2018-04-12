@@ -1,5 +1,6 @@
 package com.loror.lororUtil.http;
 
+import java.io.File;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -48,7 +49,15 @@ public class RequestParams {
             try {
                 String key = field.getName();
                 Object value = field.get(object);
-                addParams(key, String.valueOf(value));
+                Class<?> type = field.getDeclaringClass();
+                if (type == File.class) {
+                    addParams(key, value == null ? new FileBody(null, key) : new FileBody(((File) object).getAbsolutePath(), ((File) object).getName()));
+                } else if (type == FileBody.class) {
+                    addParams(key, value == null ? new FileBody(null, key) : (FileBody) value);
+                } else {
+                    addParams(key, value == null ? "" : String.valueOf(value));
+                }
+
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
             }
@@ -60,10 +69,11 @@ public class RequestParams {
      * 添加参数
      */
     public RequestParams addParams(String key, Object[] value) {
-        StringBuffer stringBuffer = new StringBuffer();
+        StringBuilder stringBuffer = new StringBuilder();
         stringBuffer.append("array{");
         for (int i = 0; i < value.length; i++) {
-            stringBuffer.append(String.valueOf(value[i]) + ",");
+            stringBuffer.append(String.valueOf(value[i]))
+                    .append(",");
         }
         stringBuffer.append("}");
         return addParams(key, stringBuffer.toString());
@@ -155,7 +165,7 @@ public class RequestParams {
             if (value != null && value.startsWith("array{")) {
                 value = value.substring(6, value.length() - 1);
                 String[] values = value.split(",");
-                if (values != null) {
+                if (values.length > 0) {
                     for (int i = 0; i < values.length; i++) {
                         append(method, sb, o, values[i]);
                     }
@@ -177,10 +187,16 @@ public class RequestParams {
     private final void append(String method, StringBuilder sb, String key, String value) {
         switch (method) {
             case "GET":
-                sb.append(key + "=" + (getConverter == null ? value : getConverter.convert(key, value)) + "&");
+                sb.append(key)
+                        .append("=")
+                        .append(getConverter == null ? value : getConverter.convert(key, value))
+                        .append("&");
                 break;
             case "POST":
-                sb.append(key + "=" + (postConverter == null ? value : postConverter.convert(key, value)) + "&");
+                sb.append(key)
+                        .append("=")
+                        .append(postConverter == null ? value : postConverter.convert(key, value))
+                        .append("&");
                 break;
             case "POST_FILE":
                 sb.append(Config.PREFIX);
@@ -198,13 +214,19 @@ public class RequestParams {
 
     @Override
     public String toString() {
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
         buffer.append("[");
         for (String o : parmas.keySet()) {
-            buffer.append(o + "=" + parmas.get(o) + ",");
+            buffer.append(o)
+                    .append("=")
+                    .append(parmas.get(o))
+                    .append(",");
         }
         for (FileBody fileBody : files) {
-            buffer.append(fileBody.getKey() + "=" + fileBody.getName() + ",");
+            buffer.append(fileBody.getKey())
+                    .append("=")
+                    .append(fileBody.getName())
+                    .append(",");
         }
         if (buffer.length() > 1) {
             buffer.deleteCharAt(buffer.length() - 1);

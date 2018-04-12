@@ -55,10 +55,10 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
             responce.cookielist = new ArrayList<>();
         }
         for (String cookielist : responce.cookielist) {
-            String[] cookies = cookielist.split(";");
-            if (cookies == null) {
+            if (cookielist == null) {
                 continue;
             }
+            String[] cookies = cookielist.split(";");
             for (int i = 0; i < cookies.length; i++) {
                 String cookie = cookies[i];
                 if (cookie == null) {
