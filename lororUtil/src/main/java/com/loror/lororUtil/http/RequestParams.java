@@ -10,17 +10,31 @@ import java.util.List;
  * post提交参数类
  */
 public class RequestParams {
-    protected HashMap<String, String> parmas = new HashMap<String, String>();
-    protected List<FileBody> files = new ArrayList<>();
-    protected String[] head = new String[2];
-    protected RequestConverter getConverter, postConverter, bodyConverter;
+
+    private HashMap<String, String> parmas = new HashMap<String, String>();
+    private List<FileBody> files = new ArrayList<FileBody>();
+    private RequestConverter getConverter, postConverter, bodyConverter;
+
+    protected HashMap<String, String> head = new HashMap<String, String>();
+
+    public List<FileBody> getFiles() {
+        return files;
+    }
 
     /**
-     * 设置请求头
+     * 添加请求头
      */
-    public void setHeader(String name, String value) {
-        head[0] = name;
-        head[1] = value;
+    public RequestParams addHeader(String name, String value) {
+        head.put(name, value);
+        return this;
+    }
+
+    /**
+     * 添加参数
+     */
+    public void asJson(String json) {
+        parmas.clear();
+        parmas.put("RequestParamsAsJson", json);
     }
 
     /**
@@ -158,6 +172,9 @@ public class RequestParams {
      * 打包参数
      */
     protected String packetOutParams(String method) {
+        if ("POST".equals(method) && parmas.get("RequestParamsAsJson") != null) {
+            return parmas.get("RequestParamsAsJson");
+        }
         String str = "";
         StringBuilder sb = new StringBuilder();
         for (String o : parmas.keySet()) {

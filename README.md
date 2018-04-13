@@ -3,7 +3,7 @@
 
 dependencies {
 
-    compile 'com.github.Loror:LororUtil:1.2.2'
+    compile 'com.github.Loror:LororUtil:1.2.3'
  
 }
 
@@ -79,13 +79,14 @@ HttpsClient监听器
 
 * 类RequestParmas HttpClient 
 HttpsClient使用参数类
+    * 方法asJson(String json) 已json形式上传参数，仅对post请求生效
     * 方法fromObject(Object object) 添加参数
     * 方法fromKeyValue(String params) 添加参数
     * 方法addParmas(String key, String value) 添加参数
     * 方法addParmas(String key, FileBody value) 添加参数
     * 方法getParmas() 获取参数类中所有参数
     * 方法getParma(String key) 通过键获取参数类中参数
-    * 方法setHead(String name, String value) 设置请求头
+    * 方法addHead(String name, String value) 添加请求头
     * 方法packetOutParmas() 打包参数，HttpClient类调用
 
 

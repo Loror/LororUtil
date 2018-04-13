@@ -134,10 +134,10 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
 
     @Override
     public synchronized Responce post(String urlStr, RequestParams parmas) {
-        if (parmas == null || parmas.files.size() == 0) {
+        if (parmas == null || parmas.getFiles().size() == 0) {
             return postFrom(urlStr, parmas);
         } else {
-            return postFile(urlStr, parmas, parmas.files);
+            return postFile(urlStr, parmas, parmas.getFiles());
         }
     }
 
@@ -249,23 +249,6 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
             }
         }
         return responce;
-    }
-
-    /**
-     * 提交一个表单参数
-     */
-    protected void upLoadParma(String key, String value, RequestParams params, OutputStream out) throws Throwable {
-        StringBuilder sb = new StringBuilder();
-        sb.append(Config.PREFIX);
-        sb.append(Config.BOUNDARY);
-        sb.append(Config.LINEND);
-        sb.append("Content-Disposition: form-data; name=\"" + key + "\"" + Config.LINEND);
-        sb.append("Content-Type: text/plain; charset=UTF-8" + Config.LINEND);
-        sb.append("Content-Transfer-Encoding: 8bit" + Config.LINEND);
-        sb.append(Config.LINEND);
-        sb.append(params.postConverter == null ? value : params.postConverter.convert(key, value));
-        sb.append(Config.LINEND);
-        out.write(sb.toString().getBytes());
     }
 
     /**
