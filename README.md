@@ -3,7 +3,7 @@
 
 dependencies {
 
-    compile 'com.github.Loror:LororUtil:1.2.3'
+    compile 'com.github.Loror:LororUtil:1.2.4'
  
 }
 
@@ -142,6 +142,7 @@ HttpClient HttpsClient使用参数类
     
 * 注解@Column
     * 数据库条目，指定column。SQLiteUtil会抽取该注解中colume值生成键名。
+    * encryption() 可指定加密解密方式，需要参数Class<? extends Encryption>，需继承Encryption实现加密解密方法。
     
 * 注解@Id
     * 主键，一个表只能指定一个主键，多主键会抛出异常。SQLiteUtil发现该注解会生成一个自增int型主键。
