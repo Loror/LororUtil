@@ -315,7 +315,12 @@ public class TableFinder {
                 if (id != null) {
                     String result = cursor.getString(cursor.getColumnIndex("id"));
                     Object type = field.get(entity);
-                    field.set(entity, type instanceof Integer ? Integer.parseInt(result) : Long.parseLong(result));
+                    if (type instanceof Integer) {
+                        field.set(entity, Integer.parseInt(result));
+                    } else {
+                        field.set(entity, Long.parseLong(result));
+                    }
+
                 }
             } catch (Exception e) {
                 e.printStackTrace();
