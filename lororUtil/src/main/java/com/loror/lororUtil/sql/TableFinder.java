@@ -66,8 +66,9 @@ public class TableFinder {
                 Id id = (Id) field.getAnnotation(Id.class);
                 if (id != null) {
                     Object object = field.get(entity);
-                    if (!(object instanceof Integer) && !(object instanceof Long))
+                    if (!(object instanceof Integer) && !(object instanceof Long)) {
                         throw new IllegalStateException("PRIMARY KEY must be Integer or Long");
+                    }
                     columns.add(2 + "id");
                     mainCount++;
                 }
