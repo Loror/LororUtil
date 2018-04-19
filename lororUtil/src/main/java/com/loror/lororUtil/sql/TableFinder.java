@@ -314,7 +314,8 @@ public class TableFinder {
                 Id id = (Id) field.getAnnotation(Id.class);
                 if (id != null) {
                     String result = cursor.getString(cursor.getColumnIndex("id"));
-                    field.set(entity, field.getDeclaringClass() == Integer.class ? Integer.parseInt(result) : Long.parseLong(result));
+                    Object type = field.get(entity);
+                    field.set(entity, type instanceof Integer ? Integer.parseInt(result) : Long.parseLong(result));
                 }
             } catch (Exception e) {
                 e.printStackTrace();
