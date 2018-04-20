@@ -141,10 +141,10 @@ public class TableFinder {
                         }
                         columns.put(columnName, value);
                     } else {
-                        if (column.notNull()) {
+                        if (column.notNull() && "".equals(column.defaultValue())) {
                             throw new NullPointerException("column " + columnName + " can not be null");
                         }
-                        columns.put(columnName, null);
+                        columns.put(columnName, "".equals(column.defaultValue()) ? null : column.defaultValue());
                     }
                 } else {
                     Id id = (Id) field.getAnnotation(Id.class);
@@ -208,8 +208,15 @@ public class TableFinder {
                             value = getEncryption(column.encryption()).encrypt(value);
                         }
                         columns.put(columnName, value);
-                    } else if (column.notNull()) {
-                        throw new NullPointerException("column " + columnName + " can not be null");
+                    } else {
+                        if (column.notNull()) {
+                            if ("".equals(column.defaultValue())) {
+                                throw new NullPointerException("column " + columnName + " can not be null");
+                            } else {
+                                columns.put(columnName, column.defaultValue());
+                            }
+                        }
+
                     }
                 } else {
                     Id id = (Id) field.getAnnotation(Id.class);
