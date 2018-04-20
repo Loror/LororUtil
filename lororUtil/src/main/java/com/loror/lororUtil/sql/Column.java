@@ -8,9 +8,11 @@ import java.lang.annotation.Target;
 @Target({ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Column {
-    String column() default "";
+    String name() default "";
 
     String defaultValue() default "";
 
     Class<? extends Encryption> encryption() default Encryption.class;
+
+    boolean notNull() default false;
 }

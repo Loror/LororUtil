@@ -3,6 +3,7 @@ package com.loror.lororUtil.sql;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import android.database.Cursor;
 
@@ -46,7 +47,7 @@ public class TableFinder {
             try {
                 Column column = (Column) field.getAnnotation(Column.class);
                 if (column != null) {
-                    String columnName = column.column();
+                    String columnName = column.name();
                     if ("".equals(columnName)) {
                         columnName = field.getName();
                     }
@@ -62,15 +63,16 @@ public class TableFinder {
                     } else {
                         columns.add(1 + columnName);
                     }
-                }
-                Id id = (Id) field.getAnnotation(Id.class);
-                if (id != null) {
-                    Object object = field.get(entity);
-                    if (!(object instanceof Integer) && !(object instanceof Long)) {
-                        throw new IllegalStateException("PRIMARY KEY must be Integer or Long");
+                } else {
+                    Id id = (Id) field.getAnnotation(Id.class);
+                    if (id != null) {
+                        Object object = field.get(entity);
+                        if (!(object instanceof Integer) && !(object instanceof Long)) {
+                            throw new IllegalStateException("PRIMARY KEY must be Integer or Long");
+                        }
+                        columns.add(2 + "id");
+                        mainCount++;
                     }
-                    columns.add(2 + "id");
-                    mainCount++;
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -127,7 +129,7 @@ public class TableFinder {
             try {
                 Column column = (Column) field.getAnnotation(Column.class);
                 if (column != null) {
-                    String columnName = column.column();
+                    String columnName = column.name();
                     if ("".equals(columnName)) {
                         columnName = field.getName();
                     }
@@ -135,19 +137,26 @@ public class TableFinder {
                     if (object != null) {
                         String value = String.valueOf(object);
                         if (column.encryption() != Encryption.class) {
-                            value = column.encryption().newInstance().encrypt(value);
+                            value = getEncryption(column.encryption()).encrypt(value);
                         }
                         columns.put(columnName, value);
                     } else {
+                        if (column.notNull()) {
+                            throw new NullPointerException("column " + columnName + " can not be null");
+                        }
                         columns.put(columnName, null);
                     }
-                }
-                Id id = (Id) field.getAnnotation(Id.class);
-                if (id != null) {
-                    Object object = field.get(entity);
-                    id_pry = object.toString();
+                } else {
+                    Id id = (Id) field.getAnnotation(Id.class);
+                    if (id != null) {
+                        Object object = field.get(entity);
+                        id_pry = object.toString();
+                    }
                 }
             } catch (Exception e) {
+                if (e instanceof NullPointerException) {
+                    throw ((NullPointerException) e);
+                }
                 e.printStackTrace();
             }
         }
@@ -188,7 +197,7 @@ public class TableFinder {
             try {
                 Column column = (Column) field.getAnnotation(Column.class);
                 if (column != null) {
-                    String columnName = column.column();
+                    String columnName = column.name();
                     if ("".equals(columnName)) {
                         columnName = field.getName();
                     }
@@ -196,12 +205,28 @@ public class TableFinder {
                     if (object != null) {
                         String value = String.valueOf(object);
                         if (column.encryption() != Encryption.class) {
-                            value = column.encryption().newInstance().encrypt(value);
+                            value = getEncryption(column.encryption()).encrypt(value);
                         }
                         columns.put(columnName, value);
+                    } else if (column.notNull()) {
+                        throw new NullPointerException("column " + columnName + " can not be null");
+                    }
+                } else {
+                    Id id = (Id) field.getAnnotation(Id.class);
+                    if (id != null) {
+                        Object object = field.get(entity);
+                        if (object != null) {
+                            long idValue = Long.parseLong(object.toString());
+                            if (idValue > 0) {
+                                columns.put("id", object.toString());
+                            }
+                        }
                     }
                 }
             } catch (Exception e) {
+                if (e instanceof NullPointerException) {
+                    throw ((NullPointerException) e);
+                }
                 e.printStackTrace();
             }
         }
@@ -240,7 +265,7 @@ public class TableFinder {
             try {
                 Column column = (Column) field.getAnnotation(Column.class);
                 if (column != null) {
-                    String columnName = column.column();
+                    String columnName = column.name();
                     if ("".equals(columnName)) {
                         columnName = field.getName();
                     }
@@ -248,15 +273,16 @@ public class TableFinder {
                     if (object != null) {
                         String value = String.valueOf(object);
                         if (column.encryption() != Encryption.class) {
-                            value = column.encryption().newInstance().encrypt(value);
+                            value = getEncryption(column.encryption()).encrypt(value);
                         }
                         columns.put(columnName, value);
                     }
-                }
-                Id id = (Id) field.getAnnotation(Id.class);
-                if (id != null) {
-                    Object object = field.get(entity);
-                    columns.put("id", object.toString());
+                } else {
+                    Id id = (Id) field.getAnnotation(Id.class);
+                    if (id != null) {
+                        Object object = field.get(entity);
+                        columns.put("id", object.toString());
+                    }
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -291,14 +317,14 @@ public class TableFinder {
             try {
                 Column column = (Column) field.getAnnotation(Column.class);
                 if (column != null) {
-                    String columnName = column.column();
+                    String columnName = column.name();
                     if ("".equals(columnName)) {
                         columnName = field.getName();
                     }
                     Object type = field.get(entity);
                     String result = cursor.getString(cursor.getColumnIndex(columnName));
                     if (result != null && column.encryption() != Encryption.class) {
-                        result = column.encryption().newInstance().decrypt(result);
+                        result = getEncryption(column.encryption()).decrypt(result);
                     }
                     if (type instanceof Integer) {
                         field.set(entity, Integer.parseInt(result));
@@ -311,21 +337,42 @@ public class TableFinder {
                     } else {
                         field.set(entity, result);
                     }
-                }
-                Id id = (Id) field.getAnnotation(Id.class);
-                if (id != null) {
-                    String result = cursor.getString(cursor.getColumnIndex("id"));
-                    Object type = field.get(entity);
-                    if (type instanceof Integer) {
-                        field.set(entity, Integer.parseInt(result));
-                    } else {
-                        field.set(entity, Long.parseLong(result));
-                    }
+                } else {
+                    Id id = (Id) field.getAnnotation(Id.class);
+                    if (id != null) {
+                        String result = cursor.getString(cursor.getColumnIndex("id"));
+                        Object type = field.get(entity);
+                        if (type instanceof Integer) {
+                            field.set(entity, Integer.parseInt(result));
+                        } else {
+                            field.set(entity, Long.parseLong(result));
+                        }
 
+                    }
                 }
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
+    }
+
+    private static List<Encryption> encryptions = new ArrayList<>();
+
+    private static Encryption getEncryption(Class<? extends Encryption> encryptionType) throws Exception {
+        Encryption encryption = null;
+        for (int i = 0; i < encryptions.size(); i++) {
+            if (encryptions.get(i).getClass() == encryptionType) {
+                encryption = encryptions.get(i);
+                break;
+            }
+        }
+        if (encryption == null) {
+            encryption = encryptionType.newInstance();
+        }
+        if (encryptions.size() > 10) {
+            encryptions.remove(0);
+        }
+        encryptions.add(encryption);
+        return encryption;
     }
 }

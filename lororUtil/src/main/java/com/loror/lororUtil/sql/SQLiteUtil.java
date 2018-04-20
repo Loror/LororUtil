@@ -1,6 +1,8 @@
 package com.loror.lororUtil.sql;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import android.content.Context;
@@ -104,6 +106,77 @@ public class SQLiteUtil {
     }
 
     /**
+     * 表字段增加
+     */
+    public void changeTableIfColumnAdd(Class<?> table) {
+        Cursor cursor = database.rawQuery("select * from " + TableFinder.getTableName(table) + " where 0", null);
+        String[] columnNames = cursor.getColumnNames();
+        cursor.close();
+        List<String> newColumnNames = new ArrayList<>();
+        HashMap<String, Object> objectHashMap = new HashMap<>();
+        boolean hasId = false;
+        Field[] fields = table.getDeclaredFields();
+        Object entity = null;
+        int i;
+        try {
+            entity = table.newInstance();
+        } catch (Exception e1) {
+            e1.printStackTrace();
+        }
+        for (i = 0; i < fields.length; i++) {
+            Field field = fields[i];
+            field.setAccessible(true);
+            Column column = field.getAnnotation(Column.class);
+            if (column != null) {
+                String columnName = column.name();
+                if ("".equals(columnName)) {
+                    columnName = field.getName();
+                }
+                newColumnNames.add(columnName);
+                try {
+                    objectHashMap.put(columnName, field.get(entity));
+                } catch (Exception e1) {
+                    e1.printStackTrace();
+                }
+            } else {
+                Id id = (Id) field.getAnnotation(Id.class);
+                if (id != null) {
+                    hasId = true;
+                }
+            }
+        }
+        List<String> different = new ArrayList<>();
+        for (i = 0; i < columnNames.length; i++) {
+            String columnName = columnNames[i];
+            if (hasId && "id".equals(columnName)) {
+                continue;
+            }
+            boolean remove = newColumnNames.remove(columnName);
+            if (!remove) {
+                different.add(columnName);
+            }
+        }
+        if (different.size() > 0) {
+            throw new IllegalStateException("cannot reduce column at this function");
+        }
+        database.beginTransaction();
+        for (i = 0; i < newColumnNames.size(); i++) {
+            String type = "text";
+            Object object = objectHashMap.get(newColumnNames.get(i));
+            if (object instanceof Integer || object instanceof Long) {
+                type = "int";
+            } else if (object instanceof Float || object instanceof Double) {
+                type = "real";
+            }
+            database.execSQL("ALTER TABLE '" + TableFinder.getTableName(table) + "' ADD COLUMN '"
+                    + newColumnNames.get(i) + "' " + type);
+        }
+        database.setTransactionSuccessful();
+        database.endTransaction();
+        SQLiteDatabase.releaseMemory();
+    }
+
+    /**
      * 插入数据
      */
     public void insert(Object entity) {
@@ -115,8 +188,7 @@ public class SQLiteUtil {
      * 获取最后插入数据id
      */
     public long getLastId(Class<?> table) {
-        Cursor cursor = database.rawQuery("select last_insert_rowid() from " + TableFinder.getTableName(table),
-                null);
+        Cursor cursor = database.rawQuery("select last_insert_rowid() from " + TableFinder.getTableName(table), null);
         long id = -1;
         if (cursor.moveToFirst()) {
             id = cursor.getLong(0);
@@ -211,10 +283,11 @@ public class SQLiteUtil {
      */
     public <T> T getFirstByCondition(ConditionBuilder conditionBuilder, Class<T> table) {
         T entity = null;
-        Cursor cursor = database.rawQuery(
-                "select * from " + TableFinder.getTableName(table)
-                        + conditionBuilder.getNoColumnConditionsWithoutPage() + " limit 0,2",
-                conditionBuilder.getColumnArray());
+        Cursor cursor = database
+                .rawQuery(
+                        "select * from " + TableFinder.getTableName(table)
+                                + conditionBuilder.getNoColumnConditionsWithoutPage() + " limit 0,2",
+                        conditionBuilder.getColumnArray());
         if (cursor.moveToNext()) {
             try {
                 entity = (T) table.newInstance();
@@ -293,8 +366,9 @@ public class SQLiteUtil {
      */
     public int countByCondition(ConditionBuilder conditionBuilder, Class<?> table) {
         int count = 0;
-        Cursor cursor = database.rawQuery("select count(1) from " + TableFinder.getTableName(table)
-                + conditionBuilder.getNoColumnConditions(), conditionBuilder.getColumnArray());
+        Cursor cursor = database.rawQuery(
+                "select count(1) from " + TableFinder.getTableName(table) + conditionBuilder.getNoColumnConditions(),
+                conditionBuilder.getColumnArray());
         if (cursor.moveToNext()) {
             try {
                 count = cursor.getInt(0);

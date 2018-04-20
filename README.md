@@ -3,7 +3,7 @@
 
 dependencies {
 
-    compile 'com.github.Loror:LororUtil:1.2.7'
+    compile 'com.github.Loror:LororUtil:1.2.8'
  
 }
 
@@ -152,6 +152,7 @@ HttpClient HttpsClient使用参数类
     * 构造方法SQLiteUtil(Context context, String dbName, Class<?> table, int version, OnChange onChange)  构造sqlite工具，泛型，操作对象类型，参数，1，上下文，2，数据库名，3，操作对象类型，5，版本号，6，回调，数据库创建、更新时回调，可为空。table被传入时创建数据库时将同时创建该表。
     * 方法dropTable(Class<?> table)  删除表
     * 方法createTableIfNotExists(Class<?> table) 如果不存在表时创建表
+    * 方法changeTableIfColumnAdd(Class<?> table) 如果表字段增加时插入字段
     * 方法insert(Object entity)  插入对象到数据库
     * 方法getLastId(Class<?> table) 获取最后插入主键id
     * 方法delete(Object entity)  删除数据库条目，只删除与对象中所有参数相同的条目
