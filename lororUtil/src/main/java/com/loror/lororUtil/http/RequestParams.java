@@ -86,8 +86,10 @@ public class RequestParams {
         StringBuilder stringBuffer = new StringBuilder();
         stringBuffer.append("array{");
         for (int i = 0; i < value.length; i++) {
-            stringBuffer.append(String.valueOf(value[i]))
-                    .append(",");
+            stringBuffer.append(String.valueOf(value[i]));
+            if (i != value.length - 1) {
+                stringBuffer.append(",");
+            }
         }
         stringBuffer.append("}");
         return addParams(key, stringBuffer.toString());
