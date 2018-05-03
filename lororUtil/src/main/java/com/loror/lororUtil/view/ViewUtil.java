@@ -28,21 +28,35 @@ public class ViewUtil {
     /**
      * 抽取控件
      */
+    public static void find(Activity activity, Class<?> idClass) {
+        injectObject(activity, new ViewFinder(activity), idClass != null ? idClass : globalIdClass);
+    }
+
+    /**
+     * 抽取控件
+     */
     public static void find(Activity activity) {
-        injectObject(activity, new ViewFinder(activity));
+        injectObject(activity, new ViewFinder(activity), null);
+    }
+
+    /**
+     * 抽取控件
+     */
+    public static void find(Object holder, View view, Class<?> idClass) {
+        injectObject(holder, new ViewFinder(view), idClass != null ? idClass : globalIdClass);
     }
 
     /**
      * 抽取控件
      */
     public static void find(Object holder, View view) {
-        injectObject(holder, new ViewFinder(view));
+        injectObject(holder, new ViewFinder(view), null);
     }
 
     /**
      * 通过反射取出所有ViewInject注解，循环执行赋值
      */
-    private static void injectObject(Object handler, ViewFinder finder) {
+    private static void injectObject(Object handler, ViewFinder finder, Class<?> globalIdClass) {
         Class<?> handlerType = handler.getClass();
         Field[] fields = handlerType.getDeclaredFields();
         if (fields == null)
