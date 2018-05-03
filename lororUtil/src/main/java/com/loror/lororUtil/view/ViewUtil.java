@@ -36,7 +36,7 @@ public class ViewUtil {
      * 抽取控件
      */
     public static void find(Activity activity) {
-        injectObject(activity, new ViewFinder(activity), null);
+        find(activity, new ViewFinder(activity), null);
     }
 
     /**
@@ -50,7 +50,7 @@ public class ViewUtil {
      * 抽取控件
      */
     public static void find(Object holder, View view) {
-        injectObject(holder, new ViewFinder(view), null);
+        find(holder, new ViewFinder(view), null);
     }
 
     /**
