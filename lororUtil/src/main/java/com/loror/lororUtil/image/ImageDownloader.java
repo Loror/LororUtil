@@ -113,7 +113,7 @@ public class ImageDownloader {
             }
             is.close();
             fos.close();
-            return true;
+            return length == file.length();
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
