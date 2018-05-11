@@ -37,10 +37,17 @@ public class SmartReadImage implements ReadImage, Cloneable {
         ReadImageResult result = new ReadImageResult();
         if (url.startsWith("http")) {
             f = new File(targetFilePath);
-            if (!ImageDownloader.download(context, url, f.getAbsolutePath(), false, false)) {
-                result.setErrorCode(1);
-                result.setPath(f.getAbsolutePath());
-                return result;
+            LockMap.SingleLock lock = LockMap.getLock(url);
+            synchronized (lock) {
+                if (lock.mark == 0) {
+                    if (ImageDownloader.download(context, url, f.getAbsolutePath(), false, false)) {
+                        lock.mark = 1;
+                    } else {
+                        result.setErrorCode(1);
+                        result.setPath(f.getAbsolutePath());
+                        return result;
+                    }
+                }
             }
         } else {
             f = new File(url);
@@ -56,7 +63,12 @@ public class SmartReadImage implements ReadImage, Cloneable {
                         result.addFrame(decoder.getFrame(i));
                     }
                 } else {
-                    result.addFrame(new Frame(getFirstFrame(f, url, widthLimit), 0, widthLimit));
+                    Bitmap firstFrame = getFirstFrame(f, url, widthLimit);
+                    if (firstFrame != null) {
+                        result.addFrame(new Frame(firstFrame, 0, widthLimit));
+                    } else {
+                        result.setErrorCode(1);
+                    }
                 }
             } catch (Throwable e) {
                 System.gc();
@@ -65,7 +77,12 @@ public class SmartReadImage implements ReadImage, Cloneable {
                 result.addFrame(new Frame(getFirstFrame(f, url, widthLimit), 0, widthLimit));
             }
         } else {
-            result.addFrame(new Frame(getFirstFrame(f, url, widthLimit), 0, widthLimit));
+            Bitmap firstFrame = getFirstFrame(f, url, widthLimit);
+            if (firstFrame != null) {
+                result.addFrame(new Frame(firstFrame, 0, widthLimit));
+            } else {
+                result.setErrorCode(1);
+            }
         }
         result.setPath(f.getAbsolutePath());
         return result;

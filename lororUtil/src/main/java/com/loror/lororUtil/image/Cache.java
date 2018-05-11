@@ -24,6 +24,7 @@ public abstract class Cache<T> {
 
         @Override
         protected void entryRemoved(boolean evicted, String key, T oldValue, T newValue) {
+            moveToWeak(key, oldValue);
             if (oldValue != null) {
                 // 当硬引用缓存容量已满时，会使用LRU算法将最近没有被使用的图片转入软引用缓存
                 softCach.put(key, new SoftReference<T>(oldValue));
@@ -32,6 +33,10 @@ public abstract class Cache<T> {
     };
 
     protected abstract int sizeOf(T t);
+
+    protected void moveToWeak(String key, T value) {
+
+    }
 
     /**
      * 获取缓存

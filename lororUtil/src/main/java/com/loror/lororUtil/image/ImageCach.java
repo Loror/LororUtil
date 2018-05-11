@@ -14,6 +14,11 @@ public class ImageCach {
             }
             return size / 1024;
         }
+
+        @Override
+        protected void moveToWeak(String key, ReadImageResult value) {
+            LockMap.removeLock(key);
+        }
     };
 
     /**
