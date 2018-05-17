@@ -1,19 +1,21 @@
+# Android辅助开发Library-LororUtil
+
+[![License](https://img.shields.io/badge/License%20-Apache%202-337ab7.svg)](https://www.apache.org/licenses/LICENSE-2.0)
+
 ## Studio中引入项目
 
-
+```
 dependencies {
-
     compile 'com.github.Loror:LororUtil:1.3.4'
- 
 }
 
 allprojects {
-
 	repositories {
 		...
 		maven { url 'https://jitpack.io' }
 	}
 }
+```
 
 
 ## image包
@@ -188,3 +190,20 @@ HttpClient HttpsClient使用参数类
     
 * 注：上面类所用orderType可用两个参数Order.ORDER_DESC（反序）与Order.ORDER_ASC（正序）
 注：用于创建表的类权限需为public，并必须包含无参构造，若为内部类必须为静态内部类
+
+License
+-------
+
+    Copyright 2018 Loror
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
