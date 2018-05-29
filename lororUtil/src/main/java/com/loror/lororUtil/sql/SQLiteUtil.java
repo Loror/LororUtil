@@ -245,7 +245,7 @@ public class SQLiteUtil {
     public <T> T getById(String id, Class<T> table) {
         T entity = null;
         Cursor cursor = database.rawQuery("select * from " + TableFinder.getTableName(table) + " where id = ?",
-                new String[]{id});
+                new String[] { id });
         if (cursor.moveToNext()) {
             try {
                 entity = (T) table.newInstance();
@@ -398,5 +398,12 @@ public class SQLiteUtil {
         if (this.database == null || !this.database.isOpen()) {
             this.database = this.helper.getWritableDatabase();
         }
+    }
+
+    /**
+     * 是否关闭
+     */
+    public boolean isClosed() {
+        return this.database == null;
     }
 }
