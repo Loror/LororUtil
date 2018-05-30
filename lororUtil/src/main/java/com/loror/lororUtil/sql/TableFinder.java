@@ -34,12 +34,6 @@ public class TableFinder {
         if (fields == null) {
             throw new IllegalStateException("this object does not contains any colume");
         }
-        Object entity = null;
-        try {
-            entity = entityType.newInstance();
-        } catch (Exception e1) {
-            e1.printStackTrace();
-        }
         int mainCount = 0;
         for (int i = 0; i < fields.length; i++) {
             Field field = fields[i];
@@ -51,23 +45,19 @@ public class TableFinder {
                     if ("".equals(columnName)) {
                         columnName = field.getName();
                     }
-                    Object object = field.get(entity);
-                    if (object == null) {
-                        columns.add(1 + columnName);
-                    } else if (object instanceof Integer || object instanceof Long) {
+                    Class<?> type = field.getType();
+                    if (type == Integer.class || type == Long.class) {
                         columns.add(0 + columnName);
-                    } else if (object instanceof String) {
-                        columns.add(1 + columnName);
-                    } else if (object instanceof Float || object instanceof Double) {
+                    } else if (type == Float.class || type == Double.class) {
                         columns.add(3 + columnName);
-                    } else {
+                    } else if (type == String.class) {
                         columns.add(1 + columnName);
                     }
                 } else {
                     Id id = (Id) field.getAnnotation(Id.class);
                     if (id != null) {
-                        Object object = field.get(entity);
-                        if (!(object instanceof Integer) && !(object instanceof Long)) {
+                        Class<?> type = field.getType();
+                        if (type != Integer.class && type != Long.class) {
                             throw new IllegalStateException("PRIMARY KEY must be Integer or Long");
                         }
                         columns.add(2 + "id");
@@ -328,20 +318,20 @@ public class TableFinder {
                     if ("".equals(columnName)) {
                         columnName = field.getName();
                     }
-                    Object type = field.get(entity);
+                    Class<?> type = field.getType();
                     String result = cursor.getString(cursor.getColumnIndex(columnName));
                     if (result != null && column.encryption() != Encryption.class) {
                         result = getEncryption(column.encryption()).decrypt(result);
                     }
-                    if (type instanceof Integer) {
+                    if (type == Integer.class) {
                         field.set(entity, Integer.parseInt(result));
-                    } else if (type instanceof Long) {
+                    } else if (type == Long.class) {
                         field.set(entity, Long.parseLong(result));
-                    } else if (type instanceof Float) {
+                    } else if (type == Float.class) {
                         field.set(entity, Float.parseFloat(result));
-                    } else if (type instanceof Double) {
+                    } else if (type == Double.class) {
                         field.set(entity, Double.parseDouble(result));
-                    } else {
+                    } else if (type == String.class) {
                         field.set(entity, result);
                     }
                 } else {
