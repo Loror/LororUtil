@@ -46,9 +46,9 @@ public class TableFinder {
                         columnName = field.getName();
                     }
                     Class<?> type = field.getType();
-                    if (type == Integer.class || type == Long.class) {
+                    if (type == int.class || type == long.class || type == Integer.class || type == Long.class) {
                         columns.add(0 + columnName);
-                    } else if (type == Float.class || type == Double.class) {
+                    } else if (type == float.class || type == double.class || type == Float.class || type == Double.class) {
                         columns.add(3 + columnName);
                     } else if (type == String.class) {
                         columns.add(1 + columnName);
@@ -57,7 +57,7 @@ public class TableFinder {
                     Id id = (Id) field.getAnnotation(Id.class);
                     if (id != null) {
                         Class<?> type = field.getType();
-                        if (type != Integer.class && type != Long.class) {
+                        if (type == int.class || type == long.class || type != Integer.class && type != Long.class) {
                             throw new IllegalStateException("PRIMARY KEY must be Integer or Long");
                         }
                         columns.add(2 + "id");
@@ -323,13 +323,13 @@ public class TableFinder {
                     if (result != null && column.encryption() != Encryption.class) {
                         result = getEncryption(column.encryption()).decrypt(result);
                     }
-                    if (type == Integer.class) {
+                    if (type == int.class || type == Integer.class) {
                         field.set(entity, Integer.parseInt(result));
-                    } else if (type == Long.class) {
+                    } else if (type == long.class || type == Long.class) {
                         field.set(entity, Long.parseLong(result));
-                    } else if (type == Float.class) {
+                    } else if (type == float.class || type == Float.class) {
                         field.set(entity, Float.parseFloat(result));
-                    } else if (type == Double.class) {
+                    } else if (type == double.class || type == Double.class) {
                         field.set(entity, Double.parseDouble(result));
                     } else if (type == String.class) {
                         field.set(entity, result);
@@ -338,8 +338,8 @@ public class TableFinder {
                     Id id = (Id) field.getAnnotation(Id.class);
                     if (id != null) {
                         String result = cursor.getString(cursor.getColumnIndex("id"));
-                        Object type = field.get(entity);
-                        if (type instanceof Integer) {
+                        Class<?> type = field.getType();
+                        if (type == int.class || type == Integer.class) {
                             field.set(entity, Integer.parseInt(result));
                         } else {
                             field.set(entity, Long.parseLong(result));
