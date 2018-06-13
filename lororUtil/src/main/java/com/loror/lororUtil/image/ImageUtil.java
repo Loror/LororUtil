@@ -302,9 +302,7 @@ public class ImageUtil implements Cloneable {
                             if (imageView == null) {
                                 return;
                             }
-                            EfficientImageUtil.lock.lock();
                             boolean useful = tag.equals(imageView.getTag(tagKey));
-                            EfficientImageUtil.lock.unlock();
                             if (useful) {
                                 if (readImageResult.isPause()) {
                                     long delay = readImageResult.getFrame(index % size).delay;
