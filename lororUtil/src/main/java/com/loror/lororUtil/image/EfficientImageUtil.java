@@ -1,8 +1,6 @@
 package com.loror.lororUtil.image;
 
 import java.util.Hashtable;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 import com.loror.lororUtil.asynctask.RemoveableThreadPool;
 import com.loror.lororUtil.flyweight.ObjectPool;
