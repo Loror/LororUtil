@@ -14,7 +14,6 @@ import android.view.View;
 import android.widget.ImageView;
 
 public class EfficientImageUtil {
-    protected static Lock lock = new ReentrantLock();
     private static final int tagKey = 3 << 24;
     private static final int cachTagKey = 3 << 24 + 1;
     private static int tag = 1;
@@ -132,12 +131,10 @@ public class EfficientImageUtil {
                     defaultImage = ObjectPool.getInstance().getDefaultImage();
                 }
 
-                lock.lock();
                 if (hasImageView) {
                     imageView.setTag(tagKey, tag);
                     imageView.setTag(cachTagKey, cachKey);
                 }
-                lock.unlock();
                 if (old != null && removeOldTask) {
                     Runnable runnable = tasks.remove(old);
                     if (runnable != null) {
@@ -154,9 +151,7 @@ public class EfficientImageUtil {
 
                 ReadImageResult result = ImageCach.getFromCache(cachKey);
                 if (result != null) {
-                    lock.lock();
                     boolean useful = !hasImageView || tag.equals(imageView.getTag(tagKey));
-                    lock.unlock();
                     if (useful) {
                         if (callback != null) {
                             callback.onLoadCach(imageView, result);
@@ -176,14 +171,14 @@ public class EfficientImageUtil {
                             final ReadImageResult readImageResult = readImage.readImage(path, widthLimit, mutiCache);
                             readImageResult.setOriginPath(path);
                             if (readImageResult.getBitmap() == null) {
-                                EfficientImageUtil.lock.lock();
-                                boolean useful = !hasImageView
-                                        || tag.equals(imageView.getTag(EfficientImageUtil.tagKey));
-                                EfficientImageUtil.lock.unlock();
-                                if (useful && callback != null) {
+                                if (callback != null) {
                                     EfficientImageUtil.handler.post(new Runnable() {
                                         public void run() {
-                                            callback.onFailed(imageView, readImageResult);
+                                            boolean useful = !hasImageView
+                                                    || tag.equals(imageView.getTag(EfficientImageUtil.tagKey));
+                                            if (useful) {
+                                                callback.onFailed(imageView, readImageResult);
+                                            }
                                         }
                                     });
                                 }
@@ -193,10 +188,8 @@ public class EfficientImageUtil {
                                 }
                                 handler.post(new Runnable() {
                                     public void run() {
-                                        EfficientImageUtil.lock.lock();
                                         boolean useful = !hasImageView
                                                 || tag.equals(imageView.getTag(EfficientImageUtil.tagKey));
-                                        EfficientImageUtil.lock.unlock();
                                         if (useful) {
                                             if (callback != null) {
                                                 callback.onFinish(imageView, readImageResult);
