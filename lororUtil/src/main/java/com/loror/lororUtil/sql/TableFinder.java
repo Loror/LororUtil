@@ -102,7 +102,8 @@ public class TableFinder {
     public static String getUpdateSql(Object entity) {
         String tableName = getTableName(entity.getClass());
         HashMap<String, String> columns = new HashMap<>();
-        String id_pry = "0";
+        String idName = "id";
+        String idVolume = "0";
         Class<?> handlerType = entity.getClass();
         Field[] fields = handlerType.getDeclaredFields();
         if (fields == null) {
@@ -115,7 +116,7 @@ public class TableFinder {
                 Column column = (Column) field.getAnnotation(Column.class);
                 if (column != null) {
                     String columnName = column.name();
-                    if ("".equals(columnName)) {
+                    if (columnName.length() == 0) {
                         columnName = field.getName();
                     }
                     Object object = field.get(entity);
@@ -135,7 +136,11 @@ public class TableFinder {
                     Id id = (Id) field.getAnnotation(Id.class);
                     if (id != null) {
                         Object object = field.get(entity);
-                        id_pry = object.toString();
+                        String name = id.name();
+                        if (name.length() > 0) {
+                            idName = name;
+                        }
+                        idVolume = object.toString();
                     }
                 }
             } catch (Exception e) {
@@ -164,8 +169,10 @@ public class TableFinder {
             }
         }
         builder.deleteCharAt(builder.length() - 1);
-        builder.append("where id = ")
-                .append(id_pry);
+        builder.append("where ")
+                .append(idName)
+                .append(" = ")
+                .append(idVolume);
         return builder.toString();
     }
 
@@ -187,7 +194,7 @@ public class TableFinder {
                 Column column = (Column) field.getAnnotation(Column.class);
                 if (column != null) {
                     String columnName = column.name();
-                    if ("".equals(columnName)) {
+                    if (columnName.length() == 0) {
                         columnName = field.getName();
                     }
                     Object object = field.get(entity);
@@ -214,7 +221,8 @@ public class TableFinder {
                         if (object != null) {
                             long idValue = Long.parseLong(object.toString());
                             if (idValue > 0) {
-                                columns.put("id", object.toString());
+                                String name = id.name();
+                                columns.put(name.length() == 0 ? "id" : name, object.toString());
                             }
                         }
                     }
@@ -261,7 +269,7 @@ public class TableFinder {
                 Column column = (Column) field.getAnnotation(Column.class);
                 if (column != null) {
                     String columnName = column.name();
-                    if ("".equals(columnName)) {
+                    if (columnName.length() == 0) {
                         columnName = field.getName();
                     }
                     Object object = field.get(entity);
@@ -276,7 +284,8 @@ public class TableFinder {
                     Id id = (Id) field.getAnnotation(Id.class);
                     if (id != null) {
                         Object object = field.get(entity);
-                        columns.put("id", object.toString());
+                        String name = id.name();
+                        columns.put(name.length() == 0 ? "id" : name, String.valueOf(object));
                     }
                 }
             } catch (Exception e) {
@@ -315,7 +324,7 @@ public class TableFinder {
                 Column column = (Column) field.getAnnotation(Column.class);
                 if (column != null) {
                     String columnName = column.name();
-                    if ("".equals(columnName)) {
+                    if (columnName.length() == 0) {
                         columnName = field.getName();
                     }
                     Class<?> type = field.getType();
@@ -337,7 +346,11 @@ public class TableFinder {
                 } else {
                     Id id = (Id) field.getAnnotation(Id.class);
                     if (id != null) {
-                        String result = cursor.getString(cursor.getColumnIndex("id"));
+                        String name = id.name();
+                        if (name.length() == 0) {
+                            name = "id";
+                        }
+                        String result = cursor.getString(cursor.getColumnIndex(name));
                         Class<?> type = field.getType();
                         if (type == int.class || type == Integer.class) {
                             field.set(entity, Integer.parseInt(result));
