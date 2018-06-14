@@ -206,7 +206,7 @@ public class TableFinder {
                         columns.put(columnName, value);
                     } else {
                         if (column.notNull()) {
-                            if ("".equals(column.defaultValue())) {
+                            if (column.defaultValue().length() == 0) {
                                 throw new NullPointerException("column " + columnName + " can not be null");
                             } else {
                                 columns.put(columnName, column.defaultValue());
