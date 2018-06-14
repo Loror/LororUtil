@@ -12,13 +12,13 @@ public class TableFinder {
      * 获得表名
      */
     public static String getTableName(Class<?> entityType) {
-        String tableName = "";
+        String tableName = null;
         Table table = (Table) entityType.getAnnotation(Table.class);
         if (table == null) {
             throw new IllegalStateException("this object does not define table");
         }
         tableName = table.name();
-        if ("".equals(tableName)) {
+        if (tableName.length() == 0) {
             tableName = entityType.getSimpleName();
         }
         return tableName;
@@ -29,12 +29,16 @@ public class TableFinder {
      */
     public static String getCreateSql(Class<?> entityType) {
         String tableName = getTableName(entityType);
-        ArrayList<String> columns = new ArrayList<>();
         Field[] fields = entityType.getDeclaredFields();
         if (fields == null) {
-            throw new IllegalStateException("this object does not contains any colume");
+            throw new IllegalStateException("this object does not contains any field");
         }
         int mainCount = 0;
+        int columnCount = 0;
+        StringBuilder builder = new StringBuilder();
+        builder.append("create table if not exists ")
+                .append(tableName)
+                .append("(");
         for (int i = 0; i < fields.length; i++) {
             Field field = fields[i];
             field.setAccessible(true);
@@ -42,25 +46,31 @@ public class TableFinder {
                 Column column = (Column) field.getAnnotation(Column.class);
                 if (column != null) {
                     String columnName = column.name();
-                    if ("".equals(columnName)) {
+                    if (columnName.length() == 0) {
                         columnName = field.getName();
                     }
                     Class<?> type = field.getType();
                     if (type == int.class || type == long.class || type == Integer.class || type == Long.class) {
-                        columns.add(0 + columnName);
+                        builder.append(columnName)
+                                .append(" int,");
                     } else if (type == float.class || type == double.class || type == Float.class || type == Double.class) {
-                        columns.add(3 + columnName);
+                        builder.append(columnName)
+                                .append(" real,");
                     } else if (type == String.class) {
-                        columns.add(1 + columnName);
+                        builder.append(columnName)
+                                .append(" text,");
                     }
+                    columnCount++;
                 } else {
                     Id id = (Id) field.getAnnotation(Id.class);
                     if (id != null) {
                         Class<?> type = field.getType();
                         if (type == int.class || type == long.class || type != Integer.class && type != Long.class) {
-                            throw new IllegalStateException("PRIMARY KEY must be Integer or Long");
+                            throw new IllegalStateException("primary key must be Integer or Long");
                         }
-                        columns.add(2 + "id");
+                        String idName = id.name();
+                        builder.append(idName.length() == 0 ? "id" : idName)
+                                .append(" integer PRIMARY KEY AUTOINCREMENT,");
                         mainCount++;
                     }
                 }
@@ -68,29 +78,15 @@ public class TableFinder {
                 e.printStackTrace();
             }
         }
-        if (columns.size() == 0) {
+        if (columnCount == 0) {
             throw new IllegalStateException("this object does not contains any colume");
         }
         if (mainCount > 1) {
             throw new IllegalStateException("cannot contain more than 1 primary key");
         }
-        StringBuilder builder = new StringBuilder();
-        for (String o : columns) {
-            if (o.startsWith("1")) {
-                builder.append(o.substring(1))
-                        .append(" text,");
-            } else if (o.startsWith("0")) {
-                builder.append(o.substring(1))
-                        .append(" int,");
-            } else if (o.startsWith("2")) {
-                builder.append("id integer PRIMARY KEY AUTOINCREMENT,");
-            } else if (o.startsWith("3")) {
-                builder.append(o.substring(1))
-                        .append(" real,");
-            }
-        }
         builder.deleteCharAt(builder.length() - 1);
-        return "create table if not exists " + tableName + "(" + builder.toString() + ")";
+        builder.append(")");
+        return builder.toString();
     }
 
     /**
@@ -104,14 +100,13 @@ public class TableFinder {
      * 获得更新语句
      */
     public static String getUpdateSql(Object entity) {
-        String sql = "";
         String tableName = getTableName(entity.getClass());
         HashMap<String, String> columns = new HashMap<>();
         String id_pry = "0";
         Class<?> handlerType = entity.getClass();
         Field[] fields = handlerType.getDeclaredFields();
         if (fields == null) {
-            throw new IllegalStateException("this object does not contains any colume");
+            throw new IllegalStateException("this object does not contains any field");
         }
         for (int i = 0; i < fields.length; i++) {
             Field field = fields[i];
@@ -153,21 +148,25 @@ public class TableFinder {
         if (columns.size() == 0) {
             throw new IllegalStateException("this object does not contains any colume");
         }
-        StringBuilder keys = new StringBuilder();
+        StringBuilder builder = new StringBuilder();
+        builder.append("update ")
+                .append(tableName)
+                .append(" set ");
         for (String o : columns.keySet()) {
             if (columns.get(o) == null) {
-                keys.append(o)
+                builder.append(o)
                         .append("= null ,");
             } else {
-                keys.append(o)
+                builder.append(o)
                         .append("='")
                         .append(columns.get(o).replace("'", "''"))
                         .append("',");
             }
         }
-        keys.deleteCharAt(keys.length() - 1);
-        sql = "update " + tableName + " set " + keys.toString() + "where id = " + id_pry;
-        return sql;
+        builder.deleteCharAt(builder.length() - 1);
+        builder.append("where id = ")
+                .append(id_pry);
+        return builder.toString();
     }
 
     /**
@@ -248,7 +247,6 @@ public class TableFinder {
      * 获得删除语句
      */
     public static String getdeleteSql(Object entity) {
-        String sql = "";
         String tableName = getTableName(entity.getClass());
         HashMap<String, String> columns = new HashMap<>();
         Class<?> handlerType = entity.getClass();
@@ -288,15 +286,17 @@ public class TableFinder {
         if (columns.size() == 0) {
             throw new IllegalStateException("this object does not contains any colume");
         }
-        StringBuilder keys = new StringBuilder();
+        StringBuilder builder = new StringBuilder();
+        builder.append("delete from ")
+                .append(tableName)
+                .append(" where ");
         for (String o : columns.keySet()) {
-            keys.append(o)
+            builder.append(o)
                     .append("='")
                     .append(columns.get(o).replace("'", "''"))
                     .append("' and ");
         }
-        sql = "delete from " + tableName + " where " + keys.toString().substring(0, keys.toString().length() - 5);
-        return sql;
+        return builder.toString().substring(0, builder.toString().length() - 5);
     }
 
     /**
