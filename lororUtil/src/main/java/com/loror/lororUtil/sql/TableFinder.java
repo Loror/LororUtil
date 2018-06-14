@@ -169,7 +169,7 @@ public class TableFinder {
             }
         }
         builder.deleteCharAt(builder.length() - 1);
-        builder.append("where ")
+        builder.append(" where ")
                 .append(idName)
                 .append(" = ")
                 .append(idVolume);
