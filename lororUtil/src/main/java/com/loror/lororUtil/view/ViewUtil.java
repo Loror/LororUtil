@@ -32,17 +32,22 @@ public class ViewUtil {
      * 抽取控件
      */
     public static void find(Activity activity, Class<?> idClass) {
+        boolean thisCheck = false;
         if (!notClassAnotation) {
             try {
                 injectOfClassAnotation(activity, null, activity);
                 return;
             } catch (Exception e) {
-                Log.e("TAG_", "cannot find compiled class");
+                Log.e("TAG_", "进入反射模式");
                 e.printStackTrace();
                 notClassAnotation = true;
+                thisCheck = true;
             }
         }
-        injectObject(activity, new ViewFinder(activity), idClass);
+        if (!injectObject(activity, new ViewFinder(activity), idClass) && thisCheck) {
+            Log.e("TAG_", "退出反射模式");
+            notClassAnotation = false;
+        }
     }
 
     /**
@@ -56,17 +61,22 @@ public class ViewUtil {
      * 抽取控件
      */
     public static void find(Object holder, View view, Class<?> idClass) {
+        boolean thisCheck = false;
         if (!notClassAnotation) {
             try {
                 injectOfClassAnotation(null, view, holder);
                 return;
             } catch (Exception e) {
-                Log.e("TAG_", "cannot find compiled class");
+                Log.e("TAG_", "进入反射模式");
                 e.printStackTrace();
                 notClassAnotation = true;
+                thisCheck = true;
             }
         }
-        injectObject(holder, new ViewFinder(view), idClass);
+        if (!injectObject(holder, new ViewFinder(view), idClass) && thisCheck) {
+            Log.e("TAG_", "退出反射模式");
+            notClassAnotation = false;
+        }
     }
 
     /**
@@ -89,7 +99,7 @@ public class ViewUtil {
     /**
      * 通过反射取出所有ViewInject注解，循环执行赋值
      */
-    private static void injectObject(Object handler, ViewFinder finder, Class<?> idClass) {
+    private static boolean injectObject(Object handler, ViewFinder finder, Class<?> idClass) {
         if (idClass == null) {
             if (globalIdClass == null) {
                 try {
@@ -104,7 +114,8 @@ public class ViewUtil {
         Class<?> handlerType = handler.getClass();
         Field[] fields = handlerType.getDeclaredFields();
         if (fields == null)
-            return;
+            return false;
+        boolean injected = false;
         for (int i = 0; i < fields.length; i++) {
             Field field = fields[i];
             String name = field.getName();
@@ -119,11 +130,13 @@ public class ViewUtil {
                         field.setAccessible(true);
                         field.set(handler, annotations);
                     }
+                    injected = true;
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
         }
+        return injected;
     }
 
     /**
