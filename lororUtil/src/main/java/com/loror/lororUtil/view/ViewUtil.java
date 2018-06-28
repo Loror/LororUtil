@@ -87,7 +87,7 @@ public class ViewUtil {
     }
 
     private static void injectOfClassAnotation(Activity activity, View parent, Object holder) throws Exception {
-        Class<?> type = Class.forName(holder.getClass().getCanonicalName() + "$$Finder");
+        Class<?> type = Class.forName(holder.getClass().getName() + "$$Finder");
         ClassAnotationFinder finder = (ClassAnotationFinder) type.newInstance();
         if (activity != null) {
             finder.find(holder, activity);
