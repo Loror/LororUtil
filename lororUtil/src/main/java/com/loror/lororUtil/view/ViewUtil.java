@@ -39,6 +39,7 @@ public class ViewUtil {
      */
     private static void find(Object object, Class<?> idClass) {
         boolean thisCheck = false;
+        boolean result = false;
         if (!notClassAnotation) {
             try {
                 injectOfClassAnotation(object, null, object);
@@ -47,9 +48,10 @@ public class ViewUtil {
                 e.printStackTrace();
                 notClassAnotation = true;
                 thisCheck = true;
+                result = injectFind(object, new ViewFinder(object), idClass);
             }
         }
-        if (thisCheck && !injectFind(object, new ViewFinder(object), idClass)) {
+        if (thisCheck && !result) {
             Log.e("TAG_", "退出反射模式");
             notClassAnotation = false;
         }
@@ -117,6 +119,7 @@ public class ViewUtil {
      */
     public static void find(Object holder, View view, Class<?> idClass) {
         boolean thisCheck = false;
+        boolean result = false;
         if (!notClassAnotation) {
             try {
                 injectOfClassAnotation(null, view, holder);
@@ -125,9 +128,10 @@ public class ViewUtil {
                 e.printStackTrace();
                 notClassAnotation = true;
                 thisCheck = true;
+                result = injectFind(holder, new ViewFinder(view), idClass);
             }
         }
-        if (thisCheck && !injectFind(holder, new ViewFinder(view), idClass)) {
+        if (thisCheck && !result) {
             Log.e("TAG_", "退出反射模式");
             notClassAnotation = false;
         }

@@ -65,7 +65,7 @@ public class TableFinder {
                     Id id = (Id) field.getAnnotation(Id.class);
                     if (id != null) {
                         Class<?> type = field.getType();
-                        if (type != int.class || type != long.class || type != Integer.class && type != Long.class) {
+                        if (type != int.class && type != long.class && type != Integer.class && type != Long.class) {
                             throw new IllegalStateException("primary key must be Integer or Long");
                         }
                         String idName = id.name();
