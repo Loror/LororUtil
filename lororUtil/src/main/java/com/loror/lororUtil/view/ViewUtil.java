@@ -352,25 +352,25 @@ public class ViewUtil {
                                     }
                                 }
                             });
-                        }
-                    } else if (view instanceof ItemClickAble) {
-                        ((ItemClickAble) view).setOnItemClickListener(new OnItemClickListener() {
-                            long clickTime;
+                        } else if (view instanceof ItemClickAble) {
+                            ((ItemClickAble) view).setOnItemClickListener(new OnItemClickListener() {
+                                long clickTime;
 
-                            @Override
-                            public void onItemClick(View view, int position) {
-                                if (System.currentTimeMillis() - clickTime > clickSpace) {
-                                    clickTime = System.currentTimeMillis();
-                                    try {
-                                        method.invoke(holder, view, position);
-                                    } catch (IllegalAccessException e) {
-                                        e.printStackTrace();
-                                    } catch (InvocationTargetException e) {
-                                        e.printStackTrace();
+                                @Override
+                                public void onItemClick(View view, int position) {
+                                    if (System.currentTimeMillis() - clickTime > clickSpace) {
+                                        clickTime = System.currentTimeMillis();
+                                        try {
+                                            method.invoke(holder, view, position);
+                                        } catch (IllegalAccessException e) {
+                                            e.printStackTrace();
+                                        } catch (InvocationTargetException e) {
+                                            e.printStackTrace();
+                                        }
                                     }
                                 }
-                            }
-                        });
+                            });
+                        }
                     }
                 } else if (finder.getSource() instanceof View) {
                     ((View) finder.getSource()).setOnClickListener(new View.OnClickListener() {
