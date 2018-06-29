@@ -1,13 +1,19 @@
 package com.loror.lororUtil.view;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 import com.loror.lororUtil.text.TextUtil;
 
 import android.app.Activity;
+import android.app.Dialog;
+import android.app.Fragment;
 import android.content.Context;
 import android.util.Log;
 import android.view.View;
+import android.widget.AbsListView;
+import android.widget.AdapterView;
 
 public class ViewUtil {
     private static Class<?> globalIdClass;
@@ -31,11 +37,25 @@ public class ViewUtil {
     /**
      * 抽取控件
      */
-    public static void find(Activity activity, Class<?> idClass) {
+    private static void find(Object Object, Class<?> idClass) {
         boolean thisCheck = false;
         if (!notClassAnotation) {
             try {
-                injectOfClassAnotation(activity, null, activity);
+                injectOfClassAnotation(Object, null, Object);
+            } catch (Exception e) {
+                Log.e("TAG_", "进入反射模式");
+                e.printStackTrace();
+                notClassAnotation = true;
+                thisCheck = true;
+            }
+        }
+        if (thisCheck && !injectFind(Object, new ViewFinder(Object), idClass)) {
+            Log.e("TAG_", "退出反射模式");
+            notClassAnotation = false;
+        }
+        if (!notClassAnotation) {
+            try {
+                injectClickOfClassAnotation(Object, null, Object);
                 return;
             } catch (Exception e) {
                 Log.e("TAG_", "进入反射模式");
@@ -44,7 +64,7 @@ public class ViewUtil {
                 thisCheck = true;
             }
         }
-        if (!injectObject(activity, new ViewFinder(activity), idClass) && thisCheck) {
+        if (!injectClick(Object, new ViewFinder(Object)) && thisCheck) {
             Log.e("TAG_", "退出反射模式");
             notClassAnotation = false;
         }
@@ -53,8 +73,57 @@ public class ViewUtil {
     /**
      * 抽取控件
      */
+    public static void find(Activity activity, Class<?> idClass) {
+        find((Object) activity, idClass);
+    }
+
+    /**
+     * 抽取控件
+     */
     public static void find(Activity activity) {
-        find(activity, (Class<?>) null);
+        find((Object) activity, (Class<?>) null);
+    }
+
+    /**
+     * 抽取控件
+     */
+    public static void find(Fragment fragment, Class<?> idClass) {
+        find((Object) fragment, idClass);
+    }
+
+    /**
+     * 抽取控件
+     */
+    public static void find(Fragment fragment) {
+        find((Object) fragment, (Class<?>) null);
+    }
+
+    /**
+     * 抽取控件
+     */
+    public static void find(android.support.v4.app.Fragment fragment, Class<?> idClass) {
+        find((Object) fragment, idClass);
+    }
+
+    /**
+     * 抽取控件
+     */
+    public static void find(android.support.v4.app.Fragment fragment) {
+        find((Object) fragment, (Class<?>) null);
+    }
+
+    /**
+     * 抽取控件
+     */
+    public static void find(Dialog dialog, Class<?> idClass) {
+        find((Object) dialog, idClass);
+    }
+
+    /**
+     * 抽取控件
+     */
+    public static void find(Dialog dialog) {
+        find((Object) dialog, (Class<?>) null);
     }
 
     /**
@@ -65,6 +134,20 @@ public class ViewUtil {
         if (!notClassAnotation) {
             try {
                 injectOfClassAnotation(null, view, holder);
+            } catch (Exception e) {
+                Log.e("TAG_", "进入反射模式");
+                e.printStackTrace();
+                notClassAnotation = true;
+                thisCheck = true;
+            }
+        }
+        if (thisCheck && !injectFind(holder, new ViewFinder(view), idClass)) {
+            Log.e("TAG_", "退出反射模式");
+            notClassAnotation = false;
+        }
+        if (!notClassAnotation) {
+            try {
+                injectClickOfClassAnotation(null, view, holder);
                 return;
             } catch (Exception e) {
                 Log.e("TAG_", "进入反射模式");
@@ -73,7 +156,7 @@ public class ViewUtil {
                 thisCheck = true;
             }
         }
-        if (!injectObject(holder, new ViewFinder(view), idClass) && thisCheck) {
+        if (!injectClick(holder, new ViewFinder(view)) && thisCheck) {
             Log.e("TAG_", "退出反射模式");
             notClassAnotation = false;
         }
@@ -86,20 +169,20 @@ public class ViewUtil {
         find(holder, view, null);
     }
 
-    private static void injectOfClassAnotation(Activity activity, View parent, Object holder) throws Exception {
+    private static void injectOfClassAnotation(Object source, View parent, Object holder) throws Exception {
         Class<?> type = Class.forName(holder.getClass().getName() + "$$Finder");
         ClassAnotationFinder finder = (ClassAnotationFinder) type.newInstance();
-        if (activity != null) {
-            finder.find(holder, activity);
-        } else {
+        if (parent != null) {
             finder.find(holder, parent);
+        } else {
+            finder.find(holder, source);
         }
     }
 
     /**
-     * 通过反射取出所有ViewInject注解，循环执行赋值
+     * 通过反射取出所有Find注解，循环执行赋值
      */
-    private static boolean injectObject(Object handler, ViewFinder finder, Class<?> idClass) {
+    private static boolean injectFind(Object handler, ViewFinder finder, Class<?> idClass) {
         if (idClass == null) {
             if (globalIdClass == null) {
                 try {
@@ -150,5 +233,123 @@ public class ViewUtil {
             e.printStackTrace();
             return -1;
         }
+    }
+
+    private static void injectClickOfClassAnotation(Object source, View parent, Object holder) throws Exception {
+        Class<?> type = Class.forName(holder.getClass().getName() + "$$Finder");
+        ClassAnotationFinder finder = (ClassAnotationFinder) type.newInstance();
+        if (parent != null) {
+            finder.click(holder, parent);
+        } else {
+            finder.click(holder, source);
+        }
+    }
+
+    /**
+     * 通过反射取出所有Click,ItemClick注解，循环执行赋值
+     */
+    private static boolean injectClick(final Object holder, ViewFinder finder) {
+        Method[] methods = holder.getClass().getDeclaredMethods();
+        if (methods == null)
+            return false;
+        boolean injected = false;
+        for (int i = 0; i < methods.length; i++) {
+            final Method method = methods[i];
+            Click click = (Click) method.getAnnotation(Click.class);
+            ItemClick itemClick = (ItemClick) method.getAnnotation(ItemClick.class);
+            if (click != null) {
+                int id = click.id();
+                View view = finder.findViewById(id);
+                if (view != null) {
+                    method.setAccessible(true);
+                    final long clickSpace = click.clickSpace();
+                    view.setOnClickListener(new View.OnClickListener() {
+                        long clickTime;
+
+                        @Override
+                        public void onClick(View v) {
+                            if (System.currentTimeMillis() - clickTime > clickSpace) {
+                                clickTime = System.currentTimeMillis();
+                                try {
+                                    method.invoke(holder, v);
+                                } catch (IllegalAccessException e) {
+                                    e.printStackTrace();
+                                } catch (InvocationTargetException e) {
+                                    e.printStackTrace();
+                                }
+
+                            }
+                        }
+                    });
+                }
+                injected = true;
+            } else if (itemClick != null) {
+                int id = itemClick.id();
+                final long clickSpace = itemClick.clickSpace();
+                if (id != 0) {
+                    View view = finder.findViewById(id);
+                    if (view != null) {
+                        method.setAccessible(true);
+                        if (view instanceof AbsListView) {
+                            ((AbsListView) view).setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                                long clickTime;
+
+                                @Override
+                                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                                    if (System.currentTimeMillis() - clickTime > clickSpace) {
+                                        clickTime = System.currentTimeMillis();
+                                        try {
+                                            method.invoke(holder, view, position);
+                                        } catch (IllegalAccessException e) {
+                                            e.printStackTrace();
+                                        } catch (InvocationTargetException e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
+                                }
+                            });
+                        }
+                    } else if (view instanceof ItemClickAble) {
+                        ((ItemClickAble) view).setOnItemClickListener(new OnItemClickListener() {
+                            long clickTime;
+
+                            @Override
+                            public void onItemClick(View view, int position) {
+                                if (System.currentTimeMillis() - clickTime > clickSpace) {
+                                    clickTime = System.currentTimeMillis();
+                                    try {
+                                        method.invoke(holder, view, position);
+                                    } catch (IllegalAccessException e) {
+                                        e.printStackTrace();
+                                    } catch (InvocationTargetException e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                            }
+                        });
+                    }
+                } else if (finder.getSource() instanceof View) {
+                    ((View) finder.getSource()).setOnClickListener(new View.OnClickListener() {
+                        long clickTime;
+
+                        @Override
+                        public void onClick(View v) {
+                            if (System.currentTimeMillis() - clickTime > clickSpace) {
+                                clickTime = System.currentTimeMillis();
+                                try {
+                                    method.invoke(holder, v);
+                                } catch (IllegalAccessException e) {
+                                    e.printStackTrace();
+                                } catch (InvocationTargetException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        }
+                    });
+                }
+                injected = true;
+            }
+        }
+        return injected;
     }
 }
