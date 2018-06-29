@@ -112,6 +112,14 @@ HttpClient HttpsClient使用参数类
 * 注解Find
 需配合工具类ViewUtil使用
     * @Find(R.id.xx) 用于查找控件注解
+    
+* 注解Click
+需配合工具类ViewUtil使用
+    * @Click(id = R.id.xx) 用于绑定控件点击事件
+    
+* 注解ItemClick
+需配合工具类ViewUtil使用
+    * @ItemClick(id = R.id.xx) 用于绑定控件点击事件
 
 
 * 类ViewUtil
