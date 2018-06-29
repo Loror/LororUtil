@@ -333,7 +333,6 @@ public class ViewUtil {
                 if (id != 0) {
                     View view = finder.findViewById(id);
                     if (view != null) {
-                        Log.e("TAG_", view.getClass().getCanonicalName() + "");
                         method.setAccessible(true);
                         if (view instanceof AbsListView) {
                             ((AbsListView) view).setOnItemClickListener(new AdapterView.OnItemClickListener() {
