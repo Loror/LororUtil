@@ -37,11 +37,11 @@ public class ViewUtil {
     /**
      * 抽取控件
      */
-    private static void find(Object Object, Class<?> idClass) {
+    private static void find(Object object, Class<?> idClass) {
         boolean thisCheck = false;
         if (!notClassAnotation) {
             try {
-                injectOfClassAnotation(Object, null, Object);
+                injectOfClassAnotation(object, null, object);
             } catch (Exception e) {
                 Log.e("TAG_", "进入反射模式");
                 e.printStackTrace();
@@ -49,25 +49,11 @@ public class ViewUtil {
                 thisCheck = true;
             }
         }
-        if (thisCheck && !injectFind(Object, new ViewFinder(Object), idClass)) {
+        if (thisCheck && !injectFind(object, new ViewFinder(object), idClass)) {
             Log.e("TAG_", "退出反射模式");
             notClassAnotation = false;
         }
-        if (!notClassAnotation) {
-            try {
-                injectClickOfClassAnotation(Object, null, Object);
-                return;
-            } catch (Exception e) {
-                Log.e("TAG_", "进入反射模式");
-                e.printStackTrace();
-                notClassAnotation = true;
-                thisCheck = true;
-            }
-        }
-        if (!injectClick(Object, new ViewFinder(Object)) && thisCheck) {
-            Log.e("TAG_", "退出反射模式");
-            notClassAnotation = false;
-        }
+        click(object);
     }
 
     /**
@@ -145,21 +131,7 @@ public class ViewUtil {
             Log.e("TAG_", "退出反射模式");
             notClassAnotation = false;
         }
-        if (!notClassAnotation) {
-            try {
-                injectClickOfClassAnotation(null, view, holder);
-                return;
-            } catch (Exception e) {
-                Log.e("TAG_", "进入反射模式");
-                e.printStackTrace();
-                notClassAnotation = true;
-                thisCheck = true;
-            }
-        }
-        if (!injectClick(holder, new ViewFinder(view)) && thisCheck) {
-            Log.e("TAG_", "退出反射模式");
-            notClassAnotation = false;
-        }
+        click(holder, view);
     }
 
     /**
@@ -232,6 +204,78 @@ public class ViewUtil {
         } catch (Exception e) {
             e.printStackTrace();
             return -1;
+        }
+    }
+
+    /**
+     * 抽取控件
+     */
+    private static void click(Object Object) {
+        boolean thisCheck = false;
+        if (!notClassAnotation) {
+            try {
+                injectClickOfClassAnotation(Object, null, Object);
+                return;
+            } catch (Exception e) {
+                Log.e("TAG_", "进入反射模式");
+                e.printStackTrace();
+                notClassAnotation = true;
+                thisCheck = true;
+            }
+        }
+        if (!injectClick(Object, new ViewFinder(Object)) && thisCheck) {
+            Log.e("TAG_", "退出反射模式");
+            notClassAnotation = false;
+        }
+    }
+
+    /**
+     * 抽取控件
+     */
+    public static void click(Activity activity) {
+        click((Object) activity);
+    }
+
+    /**
+     * 抽取控件
+     */
+    public static void click(Fragment fragment) {
+        click((Object) fragment);
+    }
+
+    /**
+     * 抽取控件
+     */
+    public static void click(android.support.v4.app.Fragment fragment) {
+        click((Object) fragment);
+    }
+
+    /**
+     * 抽取控件
+     */
+    public static void click(Dialog dialog) {
+        click((Object) dialog);
+    }
+
+    /**
+     * 抽取控件
+     */
+    public static void click(Object holder, View view) {
+        boolean thisCheck = false;
+        if (!notClassAnotation) {
+            try {
+                injectClickOfClassAnotation(null, view, holder);
+                return;
+            } catch (Exception e) {
+                Log.e("TAG_", "进入反射模式");
+                e.printStackTrace();
+                notClassAnotation = true;
+                thisCheck = true;
+            }
+        }
+        if (!injectClick(holder, new ViewFinder(view)) && thisCheck) {
+            Log.e("TAG_", "退出反射模式");
+            notClassAnotation = false;
         }
     }
 
