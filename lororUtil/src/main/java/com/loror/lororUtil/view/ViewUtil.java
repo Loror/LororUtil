@@ -50,6 +50,8 @@ public class ViewUtil {
                 thisCheck = true;
                 result = injectFind(object, new ViewFinder(object), idClass);
             }
+        } else {
+            result = injectFind(object, new ViewFinder(object), idClass);
         }
         if (thisCheck && !result) {
             Log.e("TAG_", "退出反射模式");
@@ -130,6 +132,8 @@ public class ViewUtil {
                 thisCheck = true;
                 result = injectFind(holder, new ViewFinder(view), idClass);
             }
+        } else {
+            result = injectFind(holder, new ViewFinder(view), idClass);
         }
         if (thisCheck && !result) {
             Log.e("TAG_", "退出反射模式");
