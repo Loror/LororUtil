@@ -49,7 +49,7 @@ public class ViewUtil {
                 thisCheck = true;
             }
         }
-        if (thisCheck && !injectFind(object, new ViewFinder(object), idClass)) {
+        if (!injectFind(object, new ViewFinder(object), idClass) && thisCheck) {
             Log.e("TAG_", "退出反射模式");
             notClassAnotation = false;
         }

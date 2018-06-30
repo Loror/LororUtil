@@ -6,7 +6,7 @@
 
 ```
 dependencies {
-    compile 'com.github.Loror:LororUtil:1.4.5'
+    compile 'com.github.Loror:LororUtil:1.4.6'
 }
 
 allprojects {
@@ -108,24 +108,25 @@ HttpClient HttpsClient使用参数类
 
 
 ## view包
+##### 以下注解需配合工具类ViewUtil使用
 
 * 注解Find
-需配合工具类ViewUtil使用
     * @Find(R.id.xx) 用于查找控件注解
     
 * 注解Click
-需配合工具类ViewUtil使用
     * @Click(id = R.id.xx) 用于绑定控件点击事件
     
 * 注解ItemClick
-需配合工具类ViewUtil使用
     * @ItemClick(id = R.id.xx) 用于绑定控件点击事件
 
 
 * 类ViewUtil
-    * 静态方法find(Activity activity) 查找activity中find注解并为控件初始化
+    * 静态方法find(Object holder) 查找holder中find注解并为控件初始化
     * 静态方法find(Object holder, View view) 查找holder中注解并为控件初始化，需传入父控件view
-
+    * 静态方法click(Object holder) 查找holder中click注解并绑定监听
+    * 静态方法click(Object holder, View view) 查找holder中注解绑定监听，需传入父控件view
+    
+##### 配合LororUtilCompiler可使libary在编译器生成代码实现绑定提高效率，若未使用LororUtilCompiler将已反射方式处理注解
 
 ## asynctask包
 
