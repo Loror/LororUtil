@@ -126,7 +126,7 @@ HttpClient HttpsClient使用参数类
     * 静态方法click(Object holder) 查找holder中click注解并绑定监听
     * 静态方法click(Object holder, View view) 查找holder中click注解并绑定监听，需传入父控件view
     
-##### 配合LororUtilCompiler可使libary在编译期生成代码实现绑定提高效率，若未使用LororUtilCompiler将已反射方式处理注解
+##### 配合LororUtilCompiler可使libary在编译期生成代码实现绑定提高效率，若未使用LororUtilCompiler将以反射方式处理注解
 
 ## asynctask包
 
