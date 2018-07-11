@@ -86,7 +86,7 @@ public class ImageDownloader {
             conn.setRequestMethod("GET");
             conn.setConnectTimeout(10000);
             conn.setDoInput(true);
-//            conn.setRequestProperty("Accept-Encoding", "identity");
+            conn.setRequestProperty("Accept-Encoding", "identity");
             long length = conn.getContentLength();
             if (compare == null) {
                 compare = new Compare();
