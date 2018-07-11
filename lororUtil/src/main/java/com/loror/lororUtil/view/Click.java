@@ -8,7 +8,7 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Click {
-    int id();//控件id
+    int[] id();//控件id
 
     long clickSpace() default 0;//点击允许间隔
 }

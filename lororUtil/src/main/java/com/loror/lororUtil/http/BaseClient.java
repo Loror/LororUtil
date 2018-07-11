@@ -88,7 +88,7 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
      */
     protected byte[] getResponce(T conn) throws Exception {
         InputStream inputStream = conn.getInputStream();
-        ArrayList<Byte> list = new ArrayList<>();
+        List<Byte> list = new ArrayList<>();
         byte[] bytes = new byte[1024];
         int total = 0;
         while ((total = inputStream.read(bytes)) != -1) {

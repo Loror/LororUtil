@@ -16,6 +16,7 @@ public class SQLiteUtil {
     private String dbName;
     private OnChange onChange;
     private int version;
+    private boolean mitiProgress = true;
 
     public interface OnChange {
         void onCreate(SQLiteUtil sqLiteUtil);
@@ -82,6 +83,10 @@ public class SQLiteUtil {
         this.database = this.helper.getWritableDatabase();
     }
 
+    public void setMitiProgress(boolean mitiProgress) {
+        this.mitiProgress = mitiProgress;
+    }
+
     /**
      * 获取数据库操作对象
      */
@@ -94,7 +99,9 @@ public class SQLiteUtil {
      */
     public void dropTable(Class<?> table) {
         database.execSQL(TableFinder.getDropTableSql(table));
-        SQLiteDatabase.releaseMemory();
+        if (mitiProgress) {
+            SQLiteDatabase.releaseMemory();
+        }
     }
 
     /**
@@ -102,7 +109,9 @@ public class SQLiteUtil {
      */
     public void createTableIfNotExists(Class<?> table) {
         database.execSQL(TableFinder.getCreateSql(table));
-        SQLiteDatabase.releaseMemory();
+        if (mitiProgress) {
+            SQLiteDatabase.releaseMemory();
+        }
     }
 
     /**
@@ -173,7 +182,9 @@ public class SQLiteUtil {
         }
         database.setTransactionSuccessful();
         database.endTransaction();
-        SQLiteDatabase.releaseMemory();
+        if (mitiProgress) {
+            SQLiteDatabase.releaseMemory();
+        }
     }
 
     /**
@@ -181,7 +192,9 @@ public class SQLiteUtil {
      */
     public void insert(Object entity) {
         database.execSQL(TableFinder.getInsertSql(entity));
-        SQLiteDatabase.releaseMemory();
+        if (mitiProgress) {
+            SQLiteDatabase.releaseMemory();
+        }
     }
 
     /**
@@ -194,7 +207,9 @@ public class SQLiteUtil {
             id = cursor.getLong(0);
         }
         cursor.close();
-        SQLiteDatabase.releaseMemory();
+        if (mitiProgress) {
+            SQLiteDatabase.releaseMemory();
+        }
         return id;
     }
 
@@ -203,7 +218,9 @@ public class SQLiteUtil {
      */
     public void delete(Object entity) {
         database.execSQL(TableFinder.getdeleteSql(entity));
-        SQLiteDatabase.releaseMemory();
+        if (mitiProgress) {
+            SQLiteDatabase.releaseMemory();
+        }
     }
 
     /**
@@ -211,7 +228,9 @@ public class SQLiteUtil {
      */
     public void deleteById(String id, Class<?> table) {
         database.execSQL("delete from " + TableFinder.getTableName(table) + " where id = '" + id + "'");
-        SQLiteDatabase.releaseMemory();
+        if (mitiProgress) {
+            SQLiteDatabase.releaseMemory();
+        }
     }
 
     /**
@@ -220,7 +239,9 @@ public class SQLiteUtil {
     public void deleteByCondition(ConditionBuilder conditionBuilder, Class<?> table) {
         if (conditionBuilder.getConditionCount() > 0) {
             database.execSQL("delete from " + TableFinder.getTableName(table) + conditionBuilder.getConditions());
-            SQLiteDatabase.releaseMemory();
+            if (mitiProgress) {
+                SQLiteDatabase.releaseMemory();
+            }
         }
     }
 
@@ -229,7 +250,9 @@ public class SQLiteUtil {
      */
     public void deleteAll(Class<?> table) {
         database.execSQL("delete from " + TableFinder.getTableName(table));
-        SQLiteDatabase.releaseMemory();
+        if (mitiProgress) {
+            SQLiteDatabase.releaseMemory();
+        }
     }
 
     /**
@@ -237,6 +260,9 @@ public class SQLiteUtil {
      */
     public void updateById(Object entity) {
         database.execSQL(TableFinder.getUpdateSql(entity));
+        if (mitiProgress) {
+            SQLiteDatabase.releaseMemory();
+        }
     }
 
     /**
@@ -245,7 +271,7 @@ public class SQLiteUtil {
     public <T> T getById(String id, Class<T> table) {
         T entity = null;
         Cursor cursor = database.rawQuery("select * from " + TableFinder.getTableName(table) + " where id = ?",
-                new String[] { id });
+                new String[]{id});
         if (cursor.moveToNext()) {
             try {
                 entity = (T) table.newInstance();
@@ -255,7 +281,9 @@ public class SQLiteUtil {
             }
         }
         cursor.close();
-        SQLiteDatabase.releaseMemory();
+        if (mitiProgress) {
+            SQLiteDatabase.releaseMemory();
+        }
         return entity;
     }
 
@@ -274,7 +302,9 @@ public class SQLiteUtil {
             }
         }
         cursor.close();
-        SQLiteDatabase.releaseMemory();
+        if (mitiProgress) {
+            SQLiteDatabase.releaseMemory();
+        }
         return entity;
     }
 
@@ -297,7 +327,9 @@ public class SQLiteUtil {
             }
         }
         cursor.close();
-        SQLiteDatabase.releaseMemory();
+        if (mitiProgress) {
+            SQLiteDatabase.releaseMemory();
+        }
         return entity;
     }
 
@@ -319,7 +351,9 @@ public class SQLiteUtil {
             }
         }
         cursor.close();
-        SQLiteDatabase.releaseMemory();
+        if (mitiProgress) {
+            SQLiteDatabase.releaseMemory();
+        }
         return entitys;
     }
 
@@ -339,7 +373,9 @@ public class SQLiteUtil {
             }
         }
         cursor.close();
-        SQLiteDatabase.releaseMemory();
+        if (mitiProgress) {
+            SQLiteDatabase.releaseMemory();
+        }
         return entitys;
     }
 
@@ -357,7 +393,9 @@ public class SQLiteUtil {
             }
         }
         cursor.close();
-        SQLiteDatabase.releaseMemory();
+        if (mitiProgress) {
+            SQLiteDatabase.releaseMemory();
+        }
         return count;
     }
 
@@ -377,7 +415,9 @@ public class SQLiteUtil {
             }
         }
         cursor.close();
-        SQLiteDatabase.releaseMemory();
+        if (mitiProgress) {
+            SQLiteDatabase.releaseMemory();
+        }
         return count;
     }
 

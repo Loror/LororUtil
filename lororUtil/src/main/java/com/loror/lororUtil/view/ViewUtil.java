@@ -300,29 +300,31 @@ public class ViewUtil {
             Click click = (Click) method.getAnnotation(Click.class);
             ItemClick itemClick = (ItemClick) method.getAnnotation(ItemClick.class);
             if (click != null) {
-                int id = click.id();
-                View view = finder.findViewById(id);
-                if (view != null) {
-                    method.setAccessible(true);
-                    final long clickSpace = click.clickSpace();
-                    view.setOnClickListener(new View.OnClickListener() {
-                        long clickTime;
+                int[] id = click.id();
+                for (int j = 0; j < id.length; j++) {
+                    View view = finder.findViewById(id[j]);
+                    if (view != null) {
+                        method.setAccessible(true);
+                        final long clickSpace = click.clickSpace();
+                        view.setOnClickListener(new View.OnClickListener() {
+                            long clickTime;
 
-                        @Override
-                        public void onClick(View v) {
-                            if (System.currentTimeMillis() - clickTime > clickSpace) {
-                                clickTime = System.currentTimeMillis();
-                                try {
-                                    method.invoke(holder, v);
-                                } catch (IllegalAccessException e) {
-                                    e.printStackTrace();
-                                } catch (InvocationTargetException e) {
-                                    e.printStackTrace();
+                            @Override
+                            public void onClick(View v) {
+                                if (System.currentTimeMillis() - clickTime > clickSpace) {
+                                    clickTime = System.currentTimeMillis();
+                                    try {
+                                        method.invoke(holder, v);
+                                    } catch (IllegalAccessException e) {
+                                        e.printStackTrace();
+                                    } catch (InvocationTargetException e) {
+                                        e.printStackTrace();
+                                    }
+
                                 }
-
                             }
-                        }
-                    });
+                        });
+                    }
                 }
                 injected = true;
             } else if (itemClick != null) {
