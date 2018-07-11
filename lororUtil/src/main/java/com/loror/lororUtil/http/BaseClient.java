@@ -1,5 +1,7 @@
 package com.loror.lororUtil.http;
 
+import android.annotation.SuppressLint;
+
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -378,6 +380,7 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
     /**
      * 下载文件
      */
+    @SuppressLint("NewApi")
     public synchronized Responce download(String urlStr, String path, boolean cover) {
         final Responce responce = new Responce();
         try {
@@ -387,7 +390,13 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
             URL url = new URL(urlStr);
             conn = (T) url.openConnection();
             prepareGet(conn, timeOut, readTimeOut, null);
-            long length = conn.getContentLength();
+            conn.setRequestProperty("Accept-Encoding", "identity");
+            long length = 0;
+            try {
+                length = conn.getContentLengthLong();
+            } catch (Throwable e) {
+                length = conn.getContentLength();
+            }
             File file = getFile(conn, path, urlStr);
             responce.url = conn.getURL();
             responce.code = conn.getResponseCode();
@@ -432,6 +441,7 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
     /**
      * 断点续传下载
      */
+    @SuppressLint("NewApi")
     public synchronized Responce downloadInPeice(String urlStr, String path, long start, long end) {
         final Responce responce = new Responce();
         try {
@@ -443,11 +453,18 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
             conn.setConnectTimeout(timeOut);
             conn.setRequestMethod("GET");
             conn.setRequestProperty("Range", "bytes=" + start + "-" + end);
+            conn.setRequestProperty("Accept-Encoding", "identity");
             conn.setDoInput(true);
             File file = getFile(conn, path, urlStr);
             responce.url = conn.getURL();
             responce.code = conn.getResponseCode();
-            downloadFile(file, conn.getContentLength(), conn.getInputStream());
+            long length = 0;
+            try {
+                length = conn.getContentLengthLong();
+            } catch (Throwable e) {
+                length = conn.getContentLength();
+            }
+            downloadFile(file, length, conn.getInputStream());
             if (responce.code == HttpURLConnection.HTTP_PARTIAL) {
                 initHeaders(conn, responce);
             }
@@ -485,13 +502,19 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
     /**
      * 获取服务器文件大小
      */
+    @SuppressLint("NewApi")
     public long getContentLength(String urlStr) {
         long length = 0;
         try {
             URL url = new URL(urlStr);
             T conn = (T) url.openConnection();
             prepareGet(conn, timeOut, readTimeOut, null);
-            length = conn.getContentLength();
+            conn.setRequestProperty("Accept-Encoding", "identity");
+            try {
+                length = conn.getContentLengthLong();
+            } catch (Throwable e) {
+                length = conn.getContentLength();
+            }
             conn.disconnect();
         } catch (Throwable e) {
             System.out.println("cannot get contentlength");

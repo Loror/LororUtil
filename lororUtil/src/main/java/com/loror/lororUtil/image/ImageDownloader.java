@@ -11,6 +11,7 @@ import java.util.List;
 import com.loror.lororUtil.sql.ConditionBuilder;
 import com.loror.lororUtil.sql.SQLiteUtil;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Environment;
 
@@ -68,6 +69,7 @@ public class ImageDownloader {
     /**
      * 将网络图片存储到sd卡
      */
+    @SuppressLint("NewApi")
     public static boolean download(Context context, String urlStr, String path, boolean cover, boolean checkNet) {
         if (!Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
             return false;
@@ -87,7 +89,12 @@ public class ImageDownloader {
             conn.setConnectTimeout(10000);
             conn.setDoInput(true);
             conn.setRequestProperty("Accept-Encoding", "identity");
-            long length = conn.getContentLength();
+            long length = 0;
+            try {
+                length = conn.getContentLengthLong();
+            } catch (Throwable e) {
+                length = conn.getContentLength();
+            }
             if (compare == null) {
                 compare = new Compare();
             }
