@@ -1,5 +1,6 @@
 package com.loror.lororUtil.sql;
 
+import java.io.Closeable;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -9,7 +10,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
-public class SQLiteUtil {
+public class SQLiteUtil implements Closeable {
     private DataBaseHelper helper;
     private SQLiteDatabase database;
     private Context context;
@@ -424,6 +425,7 @@ public class SQLiteUtil {
     /**
      * 关闭
      */
+    @Override
     public void close() {
         if (this.database != null) {
             this.database.close();

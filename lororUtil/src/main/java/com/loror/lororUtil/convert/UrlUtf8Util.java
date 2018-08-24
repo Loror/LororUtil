@@ -10,17 +10,17 @@ public class UrlUtf8Util {
         try {
             urlStr = URLEncoder.encode(s, "UTF-8");
         } catch (Exception e) {
-            e.printStackTrace();
+            urlStr = s;
         }
         return urlStr;
     }
 
     // 转换为%E4%BD%A0形式
-    public static String toUrlStrings(String s) {
+    public static String toUrlString(String s, String enc) {
         if (s == null) {
             return null;
         }
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         for (int i = 0; i < s.length(); i++) {
             char c = s.charAt(i);
             if (c >= 0 && c <= 255) {
@@ -28,16 +28,16 @@ public class UrlUtf8Util {
             } else {
                 byte[] b;
                 try {
-                    b = String.valueOf(c).getBytes("utf-8");
+                    b = String.valueOf(c).getBytes(enc);
                 } catch (Exception ex) {
-                    System.out.println(ex);
+                    ex.printStackTrace();
                     b = new byte[0];
                 }
                 for (int j = 0; j < b.length; j++) {
                     int k = b[j];
                     if (k < 0)
                         k += 256;
-                    sb.append("%" + Integer.toHexString(k).toUpperCase(Locale.CHINA));
+                    sb.append("%").append(Integer.toHexString(k).toUpperCase(Locale.CHINA));
                 }
             }
         }
@@ -49,7 +49,7 @@ public class UrlUtf8Util {
         if (s == null) {
             return null;
         }
-        StringBuffer sbuf = new StringBuffer();
+        StringBuilder sbuf = new StringBuilder();
         int l = s.length();
         int ch = -1;
         int b, sumb = 0;
@@ -69,7 +69,7 @@ public class UrlUtf8Util {
                 default:
                     b = ch;
             }
-			/* Decode byte b as UTF-8, sumb collects incomplete chars */
+            /* Decode byte b as UTF-8, sumb collects incomplete chars */
             if ((b & 0xc0) == 0x80) { // 10xxxxxx (continuation byte)
                 sumb = (sumb << 6) | (b & 0x3f); // Add 6 bits to sumb
                 if (--more == 0)
@@ -92,7 +92,7 @@ public class UrlUtf8Util {
                 sumb = b & 0x01;
                 more = 5; // Expect 5 more bytes
             }
-			/* We don't test if the UTF-8 encoding is well-formed */
+            /* We don't test if the UTF-8 encoding is well-formed */
         }
         return sbuf.toString();
     }

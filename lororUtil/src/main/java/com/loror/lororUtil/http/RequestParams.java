@@ -1,5 +1,7 @@
 package com.loror.lororUtil.http;
 
+import com.loror.lororUtil.convert.UrlUtf8Util;
+
 import java.io.File;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -13,9 +15,14 @@ public class RequestParams {
 
     private HashMap<String, String> parmas = new HashMap<String, String>();
     private List<FileBody> files = new ArrayList<FileBody>();
-    private RequestConverter getConverter, postConverter, bodyConverter;
-
     protected HashMap<String, String> head = new HashMap<String, String>();
+    private RequestConverter getConverter, postConverter, bodyConverter;
+    private static RequestConverter defaultConverter = new RequestConverter() {
+        @Override
+        public String convert(String key, String value) {
+            return value == null ? "" : UrlUtf8Util.toUrlString(value);
+        }
+    };
 
     public List<FileBody> getFiles() {
         return files;
@@ -208,13 +215,13 @@ public class RequestParams {
             case "GET":
                 sb.append(key)
                         .append("=")
-                        .append(getConverter == null ? value : getConverter.convert(key, value))
+                        .append(getConverter == null ? defaultConverter.convert(key, value) : getConverter.convert(key, value))
                         .append("&");
                 break;
             case "POST":
                 sb.append(key)
                         .append("=")
-                        .append(postConverter == null ? value : postConverter.convert(key, value))
+                        .append(postConverter == null ? defaultConverter.convert(key, value) : postConverter.convert(key, value))
                         .append("&");
                 break;
             case "POST_FILE":
@@ -225,7 +232,7 @@ public class RequestParams {
                 sb.append("Content-Type: text/plain; charset=UTF-8" + Config.LINEND);
                 sb.append("Content-Transfer-Encoding: 8bit" + Config.LINEND);
                 sb.append(Config.LINEND);
-                sb.append(postConverter == null ? value : postConverter.convert(key, value));
+                sb.append(postConverter == null ? defaultConverter.convert(key, value) : postConverter.convert(key, value));
                 sb.append(Config.LINEND);
                 break;
         }
