@@ -81,7 +81,7 @@ HttpsClient监听器
 
 * 类RequestParmas HttpClient 
 HttpsClient使用参数类
-    * 方法asJson(String json) 已json形式上传参数，仅对post请求生效
+    * 方法asJson(String json) 以json形式上传参数，仅对post请求生效
     * 方法fromObject(Object object) 添加参数
     * 方法fromKeyValue(String params) 添加参数
     * 方法addParmas(String key, String value) 添加参数
@@ -90,6 +90,7 @@ HttpsClient使用参数类
     * 方法getParma(String key) 通过键获取参数类中参数
     * 方法addHead(String name, String value) 添加请求头
     * 方法packetOutParmas() 打包参数，HttpClient类调用
+    * 静态方法setDefaultNullToEmpty(boolean defaultNullToEmpty) 是否将上传的参数中null值转换为空串，默认为true
 
 
 * 类Responce 
