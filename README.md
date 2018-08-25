@@ -35,7 +35,7 @@ allprojects {
     * 方法setTargetDir(File targetDir) 设置缓存路径
     * 方法setLoadAnimation(Animation loadAnimation) 设置加载成功动画
     * 方法loadImage() 开始加载图片
-    * 方法releaseTag() 释放tag，若出现本地(drawable)与网络混加载图片，请为本地图片加载时调用该方法释放网络tag，避免图片显示错乱
+    * 方法releaseTag() 释放tag，若出现本地(drawable/mipmap等同步加载方式)与网络混加载图片，请为本地图片加载时调用该方法释放网络tag，避免图片显示错乱
 
 
 * 接口ImageUtilCallBack
