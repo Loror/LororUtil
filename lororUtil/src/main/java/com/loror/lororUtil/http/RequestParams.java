@@ -18,15 +18,26 @@ public class RequestParams {
     protected HashMap<String, String> head = new HashMap<String, String>();
     private RequestConverter getConverter, postConverter, bodyConverter;
     private static boolean useDefaultConverterInPost = false;
+    private static boolean defaultNullToEmpty = true;
     private static RequestConverter defaultConverter = new RequestConverter() {
         @Override
         public String convert(String key, String value) {
-            return value == null ? "" : UrlUtf8Util.toUrlString(value);
+            return value == null ? null : UrlUtf8Util.toUrlString(value);
         }
     };
 
+    /**
+     * 设置是否默认对post请求参数url编码
+     */
     public static void setUseDefaultConverterInPost(boolean useDefaultConverterInPost) {
         RequestParams.useDefaultConverterInPost = useDefaultConverterInPost;
+    }
+
+    /**
+     * 设置是否默认将null转化成“”
+     */
+    public static void setDefaultNullToEmpty(boolean defaultNullToEmpty) {
+        RequestParams.defaultNullToEmpty = defaultNullToEmpty;
     }
 
     public List<FileBody> getFiles() {
@@ -216,6 +227,9 @@ public class RequestParams {
     }
 
     private final void append(String method, StringBuilder sb, String key, String value) {
+        if (defaultNullToEmpty && value == null) {
+            value = "";
+        }
         switch (method) {
             case "GET":
                 sb.append(key)
