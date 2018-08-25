@@ -17,12 +17,17 @@ public class RequestParams {
     private List<FileBody> files = new ArrayList<FileBody>();
     protected HashMap<String, String> head = new HashMap<String, String>();
     private RequestConverter getConverter, postConverter, bodyConverter;
+    private static boolean useDefaultConverterInPost = false;
     private static RequestConverter defaultConverter = new RequestConverter() {
         @Override
         public String convert(String key, String value) {
             return value == null ? "" : UrlUtf8Util.toUrlString(value);
         }
     };
+
+    public static void setUseDefaultConverterInPost(boolean useDefaultConverterInPost) {
+        RequestParams.useDefaultConverterInPost = useDefaultConverterInPost;
+    }
 
     public List<FileBody> getFiles() {
         return files;
@@ -221,7 +226,7 @@ public class RequestParams {
             case "POST":
                 sb.append(key)
                         .append("=")
-                        .append(postConverter == null ? defaultConverter.convert(key, value) : postConverter.convert(key, value))
+                        .append(postConverter == null ? (useDefaultConverterInPost ? defaultConverter.convert(key, value) : value) : postConverter.convert(key, value))
                         .append("&");
                 break;
             case "POST_FILE":
@@ -232,7 +237,7 @@ public class RequestParams {
                 sb.append("Content-Type: text/plain; charset=UTF-8" + Config.LINEND);
                 sb.append("Content-Transfer-Encoding: 8bit" + Config.LINEND);
                 sb.append(Config.LINEND);
-                sb.append(postConverter == null ? defaultConverter.convert(key, value) : postConverter.convert(key, value));
+                sb.append(postConverter == null ? (useDefaultConverterInPost ? defaultConverter.convert(key, value) : value) : postConverter.convert(key, value));
                 sb.append(Config.LINEND);
                 break;
         }
