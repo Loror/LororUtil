@@ -28,7 +28,7 @@ allprojects {
     * 方法to(ImageView imageView) 设置加载到控件
     * 方法setWidthLimit(int widthLimit) 设置加载图片宽度限制，默认200
     * 方法setReadImage(ReadImage readImage) 设置自定义图片加载接口，内部已有实现接口，如您不清楚如何自定义，请谨慎使用
-    * 方法setRemoveOldTask(boolean removeOldTask) 设置是否移除被快速滑出的任务，任务一旦开始无法移除
+    * 方法setRemoveOldTask(boolean removeOldTask) 设置是否移除被快速滑出的任务，任务一旦开始无法移除，默认移除
     * 方法setCachUseAnimation(boolean cachUseAnimation) 是否为本地内存加载图片启用动画
     * 方法setIsGif(boolean isGif) 是否以gif方式加载图片，如图片不是gif图片将以静态图片加载，但不会进入内存的二级缓存
     * 方法setOnLoadListener(ImageUtilCallBack onLoadListener) 用于追踪图片加载的生命周期
@@ -46,8 +46,8 @@ ImageUtil回调接口
     * 方法onFailed(ImageView imageView, String path) 获取图片失败时回调
 
 
-* 接口ReadImageImageUtil
-后台读取图片接口
+* 接口ReadImage
+ImageUtil后台读取图片接口
     * 抽象方法readImage(String path, int widthLimit, boolean asGif) 子类重写读取图片方法
     * 已实现的实现类SmartReadImage，读取网络图片，ReadSDCardImage，读取sd卡图片，ReadSDCardVideo，读取sd卡视频缩略图。
 
