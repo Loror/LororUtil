@@ -1,6 +1,7 @@
 package com.loror.lororUtil.example;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -8,6 +9,8 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 
 import com.loror.lororUtil.image.ImageUtil;
+import com.loror.lororUtil.image.ImageUtilCallBack;
+import com.loror.lororUtil.image.ReadImageResult;
 import com.loror.lororUtil.view.Find;
 import com.loror.lororUtil.view.ViewUtil;
 
@@ -38,7 +41,7 @@ public class SimpleAdapter extends BaseAdapter {
     }
 
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
+    public View getView(final int position, View convertView, ViewGroup parent) {
         ViewHolder holder = null;
         if (convertView == null) {
             convertView = LayoutInflater.from(context).inflate(R.layout.item_simple, parent, false);
@@ -48,7 +51,33 @@ public class SimpleAdapter extends BaseAdapter {
         } else {
             holder = (ViewHolder) convertView.getTag();
         }
-        ImageUtil.with(context).from(images.get(position).path).to(holder.image).setWidthLimit(300).setErrorImage(R.mipmap.ic_launcher).loadImage();
+        ImageUtil.with(context)
+                .setOnLoadListener(new ImageUtilCallBack() {
+                    @Override
+                    public void onStart(ImageView imageView) {
+
+                    }
+
+                    @Override
+                    public void onLoadCach(ImageView imageView, ReadImageResult result) {
+                        Log.e("TAG_", position + " == cach." + result.getErrorCode());
+                    }
+
+                    @Override
+                    public void onFinish(ImageView imageView, ReadImageResult result) {
+                        Log.e("TAG_", position + " == finish." + result.getErrorCode());
+                    }
+
+                    @Override
+                    public void onFailed(ImageView imageView, ReadImageResult result) {
+                        Log.e("TAG_", position + " == fail");
+                    }
+                })
+                .from(images.get(position).path)
+                .to(holder.image)
+                .setWidthLimit(300)
+                .setErrorImage(R.mipmap.ic_launcher)
+                .loadImage();
         return convertView;
     }
 

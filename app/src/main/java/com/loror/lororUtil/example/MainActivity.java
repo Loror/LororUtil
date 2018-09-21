@@ -42,7 +42,7 @@ public class MainActivity extends AppCompatActivity {
                 util.insert(image);
             }
         }
-        Log.e("count", images.size() + "");
+        Log.e("TAG_", images.size() + " == count");
         util.close();
     }
 
