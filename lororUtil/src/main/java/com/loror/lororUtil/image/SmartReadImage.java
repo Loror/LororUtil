@@ -38,17 +38,10 @@ public class SmartReadImage implements ReadImage, Cloneable {
         ReadImageResult result = new ReadImageResult();
         if (url.startsWith("http")) {
             f = new File(targetFilePath);
-            LockMap.SingleLock lock = LockMap.getLock(url);//如出现下载同一张图片将获得同一把锁，只有一个任务去下载图片，其他任务只需等待下载完成即可
-            synchronized (lock) {
-                if (lock.mark == 0) {
-                    if (ImageDownloader.download(context, url, f.getAbsolutePath(), false, false)) {
-                        lock.mark = 1;
-                    } else {
-                        result.setErrorCode(1);
-                        result.setPath(f.getAbsolutePath());
-                        return result;
-                    }
-                }
+            if (!ImageDownloader.download(context, url, f.getAbsolutePath(), false, false)) {
+                result.setErrorCode(1);//网络下载失败，标注errorCode不为1
+                result.setPath(f.getAbsolutePath());
+                return result;
             }
         } else {
             f = new File(url);
@@ -94,7 +87,7 @@ public class SmartReadImage implements ReadImage, Cloneable {
         try {
             bitmap = BitmapUtil.compessBitmap(f.getAbsolutePath(), widthLimit);
             if (bitmap == null && url.startsWith("http")) {
-                f.delete();
+                f.delete();//无法解析的图片，删除
             }
         } catch (OutOfMemoryError e) {
             e.printStackTrace();

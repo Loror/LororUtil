@@ -226,7 +226,19 @@ public class ImageUtil implements Cloneable {
                     } else {
                         targetFile = path;
                     }
-                    return SmartReadImage.getInstance(context, targetFile).readImage(path, widthLimit, isGif);
+                    ReadImageResult result = null;
+                    LockMap.SingleLock lock = LockMap.getLock(path);//如出现加载同一张图片将获得同一把锁，只有一个任务去加载图片，其他任务只需等待加载完成即可
+                    synchronized (lock) {
+                        if (lock.mark == 0) {
+                            result = SmartReadImage.getInstance(context, targetFile).readImage(path, widthLimit, isGif);
+                            if (result.getErrorCode() == 0) {
+                                lock.mark = 1;
+                            }
+                        } else {
+                            result = ImageCach.getFromCache(path + widthLimit);//其他任务已加载该图片，从缓存中获取
+                        }
+                    }
+                    return result;
                 }
             };
         }
@@ -293,7 +305,7 @@ public class ImageUtil implements Cloneable {
 
                 private final void loadGif(final Handler handler, final ReadImageResult readImageResult) {
                     final int size = readImageResult.getCount();
-                    final boolean calledAnimation[] = { false };
+                    final boolean calledAnimation[] = {false};
                     Runnable runnable = new Runnable() {
 
                         @Override
