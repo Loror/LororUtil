@@ -55,7 +55,7 @@ public class SimpleAdapter extends BaseAdapter {
                 .setOnLoadListener(new ImageUtilCallBack() {
                     @Override
                     public void onStart(ImageView imageView) {
-
+                        Log.e("TAG_", position + " == start");
                     }
 
                     @Override
