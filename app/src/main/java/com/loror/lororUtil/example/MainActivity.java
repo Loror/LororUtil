@@ -2,6 +2,7 @@ package com.loror.lororUtil.example;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.GridView;
 
 import com.loror.lororUtil.sql.SQLiteUtil;
@@ -41,6 +42,7 @@ public class MainActivity extends AppCompatActivity {
                 util.insert(image);
             }
         }
+        Log.e("count", images.size() + "");
         util.close();
     }
 
