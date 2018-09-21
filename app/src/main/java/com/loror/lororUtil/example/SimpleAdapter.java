@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.loror.lororUtil.image.ImageUtil;
 import com.loror.lororUtil.view.Find;
@@ -54,11 +55,14 @@ public class SimpleAdapter extends BaseAdapter {
                 .setWidthLimit(300)
                 .setErrorImage(R.mipmap.ic_launcher)
                 .loadImage();
+        holder.text.setText("id:" + images.get(position).id);
         return convertView;
     }
 
     class ViewHolder {
         @Find
         ImageView image;
+        @Find
+        TextView text;
     }
 }
