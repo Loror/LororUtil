@@ -28,6 +28,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void initData() {
         SQLiteUtil util = new SQLiteUtil(this, "images", 1);
+        util.createTableIfNotExists(Image.class);
         if (util.count(Image.class) > 0) {
             images.addAll(util.getAll(Image.class));
         } else {
