@@ -39,7 +39,7 @@ public class SmartReadImage implements ReadImage, Cloneable {
         if (url.startsWith("http")) {
             f = new File(targetFilePath);
             if (!ImageDownloader.download(context, url, f.getAbsolutePath(), false, false)) {
-                result.setErrorCode(1);//网络下载失败，标注errorCode不为1
+                result.setErrorCode(1);//网络下载失败，标注errorCode为1
                 result.setPath(f.getAbsolutePath());
                 return result;
             }
