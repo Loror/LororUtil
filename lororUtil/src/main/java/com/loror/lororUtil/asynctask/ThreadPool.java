@@ -27,7 +27,7 @@ public class ThreadPool implements RemoveableThreadPool {
         Thread thread = new Thread() {
             @Override
             public void run() {
-                for (;;) {
+                for (; ; ) {
                     try {
                         sleep(delay);
                     } catch (InterruptedException e) {
@@ -73,6 +73,19 @@ public class ThreadPool implements RemoveableThreadPool {
             }
         };
         return thread;
+    }
+
+    /**
+     * 获取当前运行线程数
+     */
+    public int getAliveThread() {
+        int count = 0;
+        for (int i = 0; i < alive.length; i++) {
+            if (alive[i]) {
+                count++;
+            }
+        }
+        return count;
     }
 
     /**

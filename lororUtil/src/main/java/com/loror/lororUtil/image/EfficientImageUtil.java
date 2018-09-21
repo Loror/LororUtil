@@ -134,12 +134,11 @@ public class EfficientImageUtil {
                     imageView.setTag(cachTagKey, cachKey);
                 }
                 if (old != null && removeOldTask) {
-                    Runnable runnable = tasks.remove(old);
+                    Runnable runnable = tasks.remove(String.valueOf(old));
                     if (runnable != null) {
                         removeableThreadPool.removeTask(runnable);
                     }
                 }
-
                 if (hasImageView) {
                     imageView.setImageBitmap(defaultImage);
                 }
@@ -159,7 +158,6 @@ public class EfficientImageUtil {
                             }
                         }
                     }
-
                 } else {
                     Runnable runnable = new Runnable() {
                         public void run() {
@@ -197,7 +195,6 @@ public class EfficientImageUtil {
                                                 }
                                             }
                                         }
-
                                     }
                                 });
                             }
