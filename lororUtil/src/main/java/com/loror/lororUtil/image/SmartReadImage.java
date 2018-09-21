@@ -61,12 +61,12 @@ public class SmartReadImage implements ReadImage, Cloneable {
                     if (firstFrame != null) {
                         result.addFrame(new Frame(firstFrame, 0, widthLimit));
                     } else {
-                        result.setErrorCode(1);
+                        result.setErrorCode(2);
                     }
                 }
             } catch (Throwable e) {
                 System.gc();
-                result.setErrorCode(e instanceof OutOfMemoryError ? 1 : 2);
+                result.setErrorCode(e instanceof OutOfMemoryError ? 3 : 2);
                 result.setThrowable(e);
                 result.addFrame(new Frame(getFirstFrame(f, url, widthLimit), 0, widthLimit));
             }
@@ -75,7 +75,7 @@ public class SmartReadImage implements ReadImage, Cloneable {
             if (firstFrame != null) {
                 result.addFrame(new Frame(firstFrame, 0, widthLimit));
             } else {
-                result.setErrorCode(1);
+                result.setErrorCode(2);
             }
         }
         result.setPath(f.getAbsolutePath());

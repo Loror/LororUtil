@@ -242,7 +242,7 @@ public class ImageUtil implements Cloneable {
                                 if (System.currentTimeMillis() - time > 10000) {
                                     if (result == null) {
                                         result = new ReadImageResult();
-                                        result.setErrorCode(2);//超时无法获取，标记错误码2
+                                        result.setErrorCode(4);//超时无法获取，标记错误码4
                                     }
                                     break;//超过10秒无论是否获取到缓存都放弃
                                 }

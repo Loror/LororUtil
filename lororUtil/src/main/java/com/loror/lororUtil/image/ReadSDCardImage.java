@@ -40,7 +40,7 @@ public class ReadSDCardImage implements ReadImage {
                 }
             } catch (Throwable e) {
                 System.gc();
-                result.setErrorCode(e instanceof OutOfMemoryError ? 1 : 2);
+                result.setErrorCode(e instanceof OutOfMemoryError ? 3 : 2);
                 result.setThrowable(e);
                 result.addFrame(new Frame(getFirstFrame(path, widthLimit), 0, widthLimit));
             }
