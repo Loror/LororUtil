@@ -20,15 +20,16 @@ public class SmartReadImage implements ReadImage, Cloneable {
     }
 
     public static SmartReadImage getInstance(Context context, String targetFilePath) {
+        SmartReadImage smartReadImage = null;
         try {
-            SmartReadImage smartReadImage = (SmartReadImage) SingletonFactory.instance.clone();
-            smartReadImage.context = context;
-            smartReadImage.targetFilePath = targetFilePath;
-            return smartReadImage;
+            smartReadImage = (SmartReadImage) SingletonFactory.instance.clone();
         } catch (CloneNotSupportedException e) {
             e.printStackTrace();
+            smartReadImage = new SmartReadImage();
         }
-        return null;
+        smartReadImage.context = context;
+        smartReadImage.targetFilePath = targetFilePath;
+        return smartReadImage;
     }
 
     @Override
