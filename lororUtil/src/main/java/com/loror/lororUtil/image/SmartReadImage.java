@@ -38,7 +38,7 @@ public class SmartReadImage implements ReadImage, Cloneable {
         ReadImageResult result = new ReadImageResult();
         if (url.startsWith("http")) {
             f = new File(targetFilePath);
-            LockMap.SingleLock lock = LockMap.getLock(url);
+            LockMap.SingleLock lock = LockMap.getLock(url);//如出现下载同一张图片将获得同一把锁，只有一个任务去下载图片，其他任务只需等待下载完成即可
             synchronized (lock) {
                 if (lock.mark == 0) {
                     if (ImageDownloader.download(context, url, f.getAbsolutePath(), false, false)) {
