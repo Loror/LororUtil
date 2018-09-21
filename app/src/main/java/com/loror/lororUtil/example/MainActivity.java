@@ -7,7 +7,6 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.GridView;
 
-import com.loror.lororUtil.asynctask.ThreadPool;
 import com.loror.lororUtil.flyweight.ObjectPool;
 import com.loror.lororUtil.sql.SQLiteUtil;
 import com.loror.lororUtil.view.Find;
@@ -57,7 +56,7 @@ public class MainActivity extends AppCompatActivity {
         list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Log.e("TAG_", ((ThreadPool) ObjectPool.getInstance().getTheadPool()).getAliveThread() + " == alive");
+                Log.e("TAG_", ObjectPool.getInstance().getTheadPool().getAliveThread() + " == alive");
             }
         });
     }
