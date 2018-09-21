@@ -240,6 +240,10 @@ public class ImageUtil implements Cloneable {
                             while (result == null) {
                                 result = ImageCach.getFromCache(path + widthLimit);//其他任务已加载该图片，从缓存中获取
                                 if (System.currentTimeMillis() - time > 10000) {
+                                    if (result == null) {
+                                        result = new ReadImageResult();
+                                        result.setErrorCode(2);//超时无法获取，标记错误码2
+                                    }
                                     break;//超过10秒无论是否获取到缓存都放弃
                                 }
                                 try {
