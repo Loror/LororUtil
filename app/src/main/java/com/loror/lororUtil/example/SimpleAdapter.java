@@ -1,7 +1,6 @@
 package com.loror.lororUtil.example;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,8 +8,6 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 
 import com.loror.lororUtil.image.ImageUtil;
-import com.loror.lororUtil.image.ImageUtilCallBack;
-import com.loror.lororUtil.image.ReadImageResult;
 import com.loror.lororUtil.view.Find;
 import com.loror.lororUtil.view.ViewUtil;
 
@@ -52,27 +49,6 @@ public class SimpleAdapter extends BaseAdapter {
             holder = (ViewHolder) convertView.getTag();
         }
         ImageUtil.with(context)
-                .setOnLoadListener(new ImageUtilCallBack() {
-                    @Override
-                    public void onStart(ImageView imageView) {
-                        Log.e("TAG_", position + " == start");
-                    }
-
-                    @Override
-                    public void onLoadCach(ImageView imageView, ReadImageResult result) {
-                        Log.e("TAG_", position + " == cach." + result.getErrorCode());
-                    }
-
-                    @Override
-                    public void onFinish(ImageView imageView, ReadImageResult result) {
-                        Log.e("TAG_", position + " == finish." + result.getErrorCode());
-                    }
-
-                    @Override
-                    public void onFailed(ImageView imageView, ReadImageResult result) {
-                        Log.e("TAG_", position + " == fail");
-                    }
-                })
                 .from(images.get(position).path)
                 .to(holder.image)
                 .setWidthLimit(300)
