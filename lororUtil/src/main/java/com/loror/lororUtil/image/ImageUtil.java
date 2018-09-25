@@ -233,6 +233,9 @@ public class ImageUtil implements Cloneable {
                 synchronized (lock) {
                     if (lock.mark == 0) {
                         result = readImage.readImage(path, widthLimit, isGif);
+                        if (result == null) {
+                            throw new IllegalStateException("自定义ReadImage不允许返回null，请返回ReadImageResult并指定errorCode");
+                        }
                         if (result.getErrorCode() == 0) {
                             lock.mark = 1;
                         }
