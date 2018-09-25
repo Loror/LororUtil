@@ -206,58 +206,59 @@ public class ImageUtil implements Cloneable {
         final ImageUtilCallBack onLoadListener = this.onLoadListener;
         final Animation loadAnimation = this.loadAnimation;
 
-        ReadImage readImage = this.readImage != null ? this.readImage : globalReadImage;
-        if (readImage == null) {
-            init(context);
-            final String targetDirPath = this.targetDirPath;
-            final String targetName = this.targetName;
-            readImage = new ReadImage() {
+        ReadImage readImage = new ReadImage() {
 
-                @Override
-                public ReadImageResult readImage(String path, int widthLimit, boolean mutiCache) {
+            @Override
+            public ReadImageResult readImage(String path, int widthLimit, boolean mutiCache) {
+                ReadImage readImage = ImageUtil.this.readImage != null ? ImageUtil.this.readImage : ImageUtil.globalReadImage;
+                if (readImage == null) {
+                    init(context);
+                    String targetDirPath = ImageUtil.this.targetDirPath;
+                    String targetName = ImageUtil.this.targetName;
                     String targetFile;
                     if (path.startsWith("http")) {
                         File targetDir = new File(targetDirPath);
                         if (!targetDir.exists()) {
                             targetDir.mkdirs();
                         }
-                        String targetDirPath = targetDir.getAbsolutePath();
+                        targetDirPath = targetDir.getAbsolutePath();
                         targetFile = (targetDirPath.endsWith("/") ? targetDirPath : (targetDirPath + "/")) + targetName;
                     } else {
                         targetFile = path;
                     }
-                    ReadImageResult result = null;
-                    LockMap.SingleLock lock = LockMap.getLock(path);//如出现加载同一张图片将获得同一把锁，只有一个任务去加载图片，其他任务只需等待加载完成即可
-                    synchronized (lock) {
-                        if (lock.mark == 0) {
-                            result = SmartReadImage.getInstance(context, targetFile).readImage(path, widthLimit, isGif);
-                            if (result.getErrorCode() == 0) {
-                                lock.mark = 1;
+                    readImage = SmartReadImage.getInstance(context, targetFile);
+                }
+                ReadImageResult result = null;
+                LockMap.SingleLock lock = LockMap.getLock(path);//如出现加载同一张图片将获得同一把锁，只有一个任务去加载图片，其他任务只需等待加载完成即可
+                synchronized (lock) {
+                    if (lock.mark == 0) {
+                        result = readImage.readImage(path, widthLimit, isGif);
+                        if (result.getErrorCode() == 0) {
+                            lock.mark = 1;
+                        }
+                    } else {
+                        long time = System.currentTimeMillis();
+                        //拿到锁时可能缓存还未存入，应循环等待以获取数据
+                        while (result == null) {
+                            result = ImageCach.getFromCache(path + widthLimit);//其他任务已加载该图片，从缓存中获取
+                            if (System.currentTimeMillis() - time > 10000) {
+                                if (result == null) {
+                                    result = new ReadImageResult();
+                                    result.setErrorCode(4);//超时无法获取，标记错误码4
+                                }
+                                break;//超过10秒无论是否获取到缓存都放弃
                             }
-                        } else {
-                            long time = System.currentTimeMillis();
-                            //拿到锁时可能缓存还未存入，应循环等待以获取数据
-                            while (result == null) {
-                                result = ImageCach.getFromCache(path + widthLimit);//其他任务已加载该图片，从缓存中获取
-                                if (System.currentTimeMillis() - time > 10000) {
-                                    if (result == null) {
-                                        result = new ReadImageResult();
-                                        result.setErrorCode(4);//超时无法获取，标记错误码4
-                                    }
-                                    break;//超过10秒无论是否获取到缓存都放弃
-                                }
-                                try {
-                                    Thread.sleep(2);
-                                } catch (InterruptedException e) {
-                                    e.printStackTrace();
-                                }
+                            try {
+                                Thread.sleep(2);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
                             }
                         }
                     }
-                    return result;
                 }
-            };
-        }
+                return result;
+            }
+        };
 
         ImageUtilCallBack callback = this.callback;
         if (callback == null) {
