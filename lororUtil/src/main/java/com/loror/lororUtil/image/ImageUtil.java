@@ -237,7 +237,7 @@ public class ImageUtil implements Cloneable {
                             throw new IllegalStateException("自定义ReadImage不允许返回null，请返回ReadImageResult并指定errorCode");
                         }
                         if (result.getErrorCode() == 0) {
-                            lock.mark = 1;
+                            lock.mark = 1;//加载成功，锁耗尽
                         }
                     } else {
                         long time = System.currentTimeMillis();
