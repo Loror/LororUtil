@@ -244,12 +244,12 @@ public class ImageUtil implements Cloneable {
                         //拿到锁时可能缓存还未存入，应循环等待以获取数据
                         while (result == null) {
                             result = ImageCach.getFromCache(path + widthLimit);//其他任务已加载该图片，从缓存中获取
-                            if (System.currentTimeMillis() - time > 10000) {
+                            if (System.currentTimeMillis() - time > 5000) {
                                 if (result == null) {
                                     result = new ReadImageResult();
                                     result.setErrorCode(4);//超时无法获取，标记错误码4
                                 }
-                                break;//超过10秒无论是否获取到缓存都放弃
+                                break;//超过5秒无论是否获取到缓存都放弃
                             }
                             try {
                                 Thread.sleep(2);
@@ -294,6 +294,12 @@ public class ImageUtil implements Cloneable {
                 @Override
                 public void onLoadCach(final ImageView imageView, final ReadImageResult readImageResult) {
                     if (imageView != null) {
+                        if (readImageResult.getBitmap() == null) {
+                            if (errorImage != 0) {
+                                imageView.setImageResource(errorImage);
+                            }
+                            return;
+                        }
                         if (!isGif) {
                             if (cachUseAnimation && loadAnimation != null) {
                                 imageView.startAnimation(loadAnimation);
