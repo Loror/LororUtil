@@ -8,10 +8,12 @@ public class Frame {
     public Frame nextFrame = null;
 
     public Frame(Bitmap im, int del, int widthLimit) {
-        if (im.getWidth() > widthLimit) {
-            image = BitmapUtil.compessBitmap(im, widthLimit, false);
-        } else {
-            image = im;
+        if (im != null) {
+            if (im.getWidth() > widthLimit) {
+                image = BitmapUtil.compessBitmap(im, widthLimit, false);
+            } else {
+                image = im;
+            }
         }
         delay = del;
     }
