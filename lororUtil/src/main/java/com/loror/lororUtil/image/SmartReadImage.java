@@ -9,7 +9,7 @@ public class SmartReadImage extends ReadImageUtil implements ReadImage, Cloneabl
     private Context context;
 
     private SmartReadImage() {
-        // TODO Auto-generated constructor stub
+
     }
 
     private static class SingletonFactory {
