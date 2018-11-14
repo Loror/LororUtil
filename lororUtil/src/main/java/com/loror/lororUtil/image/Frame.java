@@ -7,14 +7,14 @@ public class Frame {
     public int delay;
     public Frame nextFrame = null;
 
-    public Frame(Bitmap im, int del, int widthLimit) {
-        if (im != null) {
-            if (im.getWidth() > widthLimit) {
-                image = BitmapUtil.compessBitmap(im, widthLimit, false);
+    public Frame(Bitmap bitmap, int delay, int widthLimit) {
+        if (bitmap != null) {
+            if (bitmap.getWidth() > widthLimit) {
+                image = BitmapUtil.compessBitmap(bitmap, widthLimit, false);
             } else {
-                image = im;
+                image = bitmap;
             }
         }
-        delay = del;
+        this.delay = delay;
     }
 }

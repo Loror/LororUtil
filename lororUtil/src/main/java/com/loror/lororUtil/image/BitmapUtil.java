@@ -78,6 +78,18 @@ public class BitmapUtil {
     }
 
     /**
+     * 压缩图片分辨率
+     */
+    public static Bitmap compessBitmap(byte[] source, int widthLimit) {
+        BitmapFactory.Options opt = new BitmapFactory.Options();
+        opt.inJustDecodeBounds = true;
+        BitmapFactory.decodeByteArray(source, 0, source.length, opt);
+        opt.inSampleSize = opt.outWidth / widthLimit;
+        opt.inJustDecodeBounds = false;
+        return compessBitmap(BitmapFactory.decodeByteArray(source, 0, source.length, opt), widthLimit, false);
+    }
+
+    /**
      * 压缩图片体积
      */
     public static Bitmap compessBitmapSize(Bitmap bitmap, int size) {
@@ -219,6 +231,16 @@ public class BitmapUtil {
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = true;
         BitmapFactory.decodeFile(path, options);
+        return options.outMimeType;
+    }
+
+    /**
+     * 获取图片类型
+     */
+    public static String getBitmapType(byte[] source) {
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inJustDecodeBounds = true;
+        BitmapFactory.decodeByteArray(source, 0, source.length, options);
         return options.outMimeType;
     }
 

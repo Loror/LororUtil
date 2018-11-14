@@ -28,6 +28,7 @@ public class ImageUtil implements Cloneable {
     private ImageView imageView;
     private String path;
     private int widthLimit = 200;
+    private boolean noSdCache;
     private ReadImage readImage;
     private boolean removeOldTask = true;
     private boolean cachUseAnimation;
@@ -38,8 +39,11 @@ public class ImageUtil implements Cloneable {
     private String targetName;
     private Animation loadAnimation;
     private Context context;
-    private static ImageUtil imageUtil;
     private static ExecutorService server;
+
+    private static class SingletonFactory {
+        private static ImageUtil imageUtil = new ImageUtil(null);
+    }
 
     private ImageUtil(Context context) {
         this.context = context;
@@ -81,11 +85,8 @@ public class ImageUtil implements Cloneable {
      * 获取实例
      */
     public static ImageUtil with(Context context) {
-        if (imageUtil == null) {
-            imageUtil = new ImageUtil(null);
-        }
         try {
-            ImageUtil imageUtil = (ImageUtil) ImageUtil.imageUtil.clone();
+            ImageUtil imageUtil = (ImageUtil) SingletonFactory.imageUtil.clone();
             imageUtil.context = context;
             return imageUtil;
         } catch (CloneNotSupportedException e) {
@@ -104,22 +105,13 @@ public class ImageUtil implements Cloneable {
         return this;
     }
 
-    public ImageUtil to(ImageView imageView) {
-        this.imageView = imageView;
-        if (this.loadAnimation == null) {
-            this.loadAnimation = new AlphaAnimation(0.0f, 1.0f);
-            this.loadAnimation.setDuration(300);
-        }
-        return this;
-    }
-
-    public ImageUtil from(String path) {
-        this.path = path;
-        return this;
-    }
-
     public ImageUtil setWidthLimit(int widthLimit) {
         this.widthLimit = widthLimit;
+        return this;
+    }
+
+    public ImageUtil setNoSdCache(boolean noSdCache) {
+        this.noSdCache = noSdCache;
         return this;
     }
 
@@ -192,6 +184,20 @@ public class ImageUtil implements Cloneable {
         return this;
     }
 
+    public ImageUtil from(String path) {
+        this.path = path;
+        return this;
+    }
+
+    public ImageUtil to(ImageView imageView) {
+        this.imageView = imageView;
+        if (this.loadAnimation == null) {
+            this.loadAnimation = new AlphaAnimation(0.0f, 1.0f);
+            this.loadAnimation.setDuration(300);
+        }
+        return this;
+    }
+
     /**
      * 执行
      */
@@ -212,21 +218,29 @@ public class ImageUtil implements Cloneable {
             public ReadImageResult readImage(String path, int widthLimit, boolean mutiCache) {
                 ReadImage readImage = ImageUtil.this.readImage != null ? ImageUtil.this.readImage : ImageUtil.globalReadImage;
                 if (readImage == null) {
-                    init(context);
-                    String targetDirPath = ImageUtil.this.targetDirPath;
-                    String targetName = ImageUtil.this.targetName;
-                    String targetFile;
-                    if (path.startsWith("http")) {
-                        File targetDir = new File(targetDirPath);
-                        if (!targetDir.exists()) {
-                            targetDir.mkdirs();
+                    if (noSdCache) {
+                        if (path.startsWith("http")) {
+                            readImage = ReadHttpImage.getInstance();
+                        } else {
+                            readImage = ReadSDCardImage.getInstance();
                         }
-                        targetDirPath = targetDir.getAbsolutePath();
-                        targetFile = (targetDirPath.endsWith("/") ? targetDirPath : (targetDirPath + "/")) + targetName;
                     } else {
-                        targetFile = path;
+                        init(context);
+                        String targetDirPath = ImageUtil.this.targetDirPath;
+                        String targetName = ImageUtil.this.targetName;
+                        String targetFile;
+                        if (path.startsWith("http")) {
+                            File targetDir = new File(targetDirPath);
+                            if (!targetDir.exists()) {
+                                targetDir.mkdirs();
+                            }
+                            targetDirPath = targetDir.getAbsolutePath();
+                            targetFile = (targetDirPath.endsWith("/") ? targetDirPath : (targetDirPath + "/")) + targetName;
+                        } else {
+                            targetFile = path;
+                        }
+                        readImage = SmartReadImage.getInstance(context, targetFile);
                     }
-                    readImage = SmartReadImage.getInstance(context, targetFile);
                 }
                 ReadImageResult result = null;
                 LockMap.SingleLock lock = LockMap.getLock(path);//如出现加载同一张图片将获得同一把锁，只有一个任务去加载图片，其他任务只需等待加载完成即可
