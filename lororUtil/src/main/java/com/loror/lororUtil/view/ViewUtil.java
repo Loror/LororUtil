@@ -37,27 +37,6 @@ public class ViewUtil {
     /**
      * 抽取控件
      */
-    private static void find(Object object, Class<?> idClass) {
-        boolean thisCheck = false;
-        if (!notClassAnotation) {
-            try {
-                injectOfClassAnotation(object, null, object);
-            } catch (Exception e) {
-                Log.e("TAG_", "进入反射模式");
-                e.printStackTrace();
-                notClassAnotation = true;
-                thisCheck = true;
-            }
-        }
-        if (!injectFind(object, new ViewFinder(object), idClass) && thisCheck) {
-            Log.e("TAG_", "退出反射模式");
-            notClassAnotation = false;
-        }
-    }
-
-    /**
-     * 抽取控件
-     */
     public static void find(Activity activity, Class<?> idClass) {
         find((Object) activity, idClass);
     }
@@ -114,29 +93,58 @@ public class ViewUtil {
     /**
      * 抽取控件
      */
-    public static void find(Object holder, View view, Class<?> idClass) {
-        boolean thisCheck = false;
-        if (!notClassAnotation) {
-            try {
-                injectOfClassAnotation(null, view, holder);
-            } catch (Exception e) {
-                Log.e("TAG_", "进入反射模式");
-                e.printStackTrace();
-                notClassAnotation = true;
-                thisCheck = true;
-            }
-        }
-        if (!injectFind(holder, new ViewFinder(view), idClass) && thisCheck) {
-            Log.e("TAG_", "退出反射模式");
-            notClassAnotation = false;
-        }
+    public static void find(Object holder, View view) {
+        find(holder, view, null);
     }
 
     /**
      * 抽取控件
      */
-    public static void find(Object holder, View view) {
-        find(holder, view, null);
+    private static void find(Object object, Class<?> idClass) {
+        boolean thisCheck = false;
+        if (!notClassAnotation) {
+            try {
+                injectOfClassAnotation(object, null, object);
+                return;
+            } catch (Exception e) {
+                if (!(e instanceof ClassNotFoundException)) {
+                    e.printStackTrace();
+                }
+                //进入反射模式
+                notClassAnotation = true;
+                thisCheck = true;
+            }
+        }
+        if (!injectFind(object, new ViewFinder(object), idClass) && thisCheck) {
+            //退出反射模式
+            notClassAnotation = false;
+        }
+        Log.e("TAG_FIND", notClassAnotation ? "反射模式" : "注解处理器模式");
+    }
+
+    /**
+     * 抽取控件
+     */
+    public static void find(Object holder, View view, Class<?> idClass) {
+        boolean thisCheck = false;
+        if (!notClassAnotation) {
+            try {
+                injectOfClassAnotation(null, view, holder);
+                return;
+            } catch (Exception e) {
+                if (!(e instanceof ClassNotFoundException)) {
+                    e.printStackTrace();
+                }
+                //进入反射模式
+                notClassAnotation = true;
+                thisCheck = true;
+            }
+        }
+        if (!injectFind(holder, new ViewFinder(view), idClass) && thisCheck) {
+            //退出反射模式
+            notClassAnotation = false;
+        }
+        Log.e("TAG_FIND", notClassAnotation ? "反射模式" : "注解处理器模式");
     }
 
     private static void injectOfClassAnotation(Object source, View parent, Object holder) throws Exception {
@@ -208,28 +216,6 @@ public class ViewUtil {
     /**
      * 抽取控件
      */
-    private static void click(Object Object) {
-        boolean thisCheck = false;
-        if (!notClassAnotation) {
-            try {
-                injectClickOfClassAnotation(Object, null, Object);
-                return;
-            } catch (Exception e) {
-                Log.e("TAG_", "进入反射模式");
-                e.printStackTrace();
-                notClassAnotation = true;
-                thisCheck = true;
-            }
-        }
-        if (!injectClick(Object, new ViewFinder(Object)) && thisCheck) {
-            Log.e("TAG_", "退出反射模式");
-            notClassAnotation = false;
-        }
-    }
-
-    /**
-     * 抽取控件
-     */
     public static void click(Activity activity) {
         click((Object) activity);
     }
@@ -258,6 +244,31 @@ public class ViewUtil {
     /**
      * 抽取控件
      */
+    private static void click(Object Object) {
+        boolean thisCheck = false;
+        if (!notClassAnotation) {
+            try {
+                injectClickOfClassAnotation(Object, null, Object);
+                return;
+            } catch (Exception e) {
+                if (!(e instanceof ClassNotFoundException)) {
+                    e.printStackTrace();
+                }
+                //进入反射模式
+                notClassAnotation = true;
+                thisCheck = true;
+            }
+        }
+        if (!injectClick(Object, new ViewFinder(Object)) && thisCheck) {
+            //退出反射模式
+            notClassAnotation = false;
+        }
+        Log.e("TAG_CLICK", notClassAnotation ? "反射模式" : "注解处理器模式");
+    }
+
+    /**
+     * 抽取控件
+     */
     public static void click(Object holder, View view) {
         boolean thisCheck = false;
         if (!notClassAnotation) {
@@ -265,16 +276,19 @@ public class ViewUtil {
                 injectClickOfClassAnotation(null, view, holder);
                 return;
             } catch (Exception e) {
-                Log.e("TAG_", "进入反射模式");
-                e.printStackTrace();
+                if (!(e instanceof ClassNotFoundException)) {
+                    e.printStackTrace();
+                }
+                //进入反射模式
                 notClassAnotation = true;
                 thisCheck = true;
             }
         }
         if (!injectClick(holder, new ViewFinder(view)) && thisCheck) {
-            Log.e("TAG_", "退出反射模式");
+            //退出反射模式
             notClassAnotation = false;
         }
+        Log.e("TAG_CLICK", notClassAnotation ? "反射模式" : "注解处理器模式");
     }
 
     private static void injectClickOfClassAnotation(Object source, View parent, Object holder) throws Exception {
