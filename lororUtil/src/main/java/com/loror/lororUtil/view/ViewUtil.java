@@ -101,7 +101,7 @@ public class ViewUtil {
      * 抽取控件
      */
     private static void find(Object object, Class<?> idClass) {
-        boolean thisCheck = false;
+        //非反射模式，尝试使用注解处理器类
         if (!notClassAnotation) {
             try {
                 injectOfClassAnotation(object, null, object);
@@ -110,23 +110,19 @@ public class ViewUtil {
                 if (!(e instanceof ClassNotFoundException)) {
                     e.printStackTrace();
                 }
-                //进入反射模式
-                notClassAnotation = true;
-                thisCheck = true;
             }
         }
-        if (!injectFind(object, new ViewFinder(object), idClass) && thisCheck) {
-            //退出反射模式
-            notClassAnotation = false;
+        if (injectFind(object, new ViewFinder(object), idClass) && !notClassAnotation) {
+            Log.e("TAG_FIND", "进入反射模式");
+            //进入反射模式
+            notClassAnotation = true;
         }
-        Log.e("TAG_FIND", notClassAnotation ? "反射模式" : "注解处理器模式");
     }
 
     /**
      * 抽取控件
      */
     public static void find(Object holder, View view, Class<?> idClass) {
-        boolean thisCheck = false;
         if (!notClassAnotation) {
             try {
                 injectOfClassAnotation(null, view, holder);
@@ -135,16 +131,12 @@ public class ViewUtil {
                 if (!(e instanceof ClassNotFoundException)) {
                     e.printStackTrace();
                 }
-                //进入反射模式
-                notClassAnotation = true;
-                thisCheck = true;
             }
         }
-        if (!injectFind(holder, new ViewFinder(view), idClass) && thisCheck) {
-            //退出反射模式
-            notClassAnotation = false;
+        if (injectFind(holder, new ViewFinder(view), idClass) && !notClassAnotation) {
+            Log.e("TAG_FIND", "进入反射模式");
+            notClassAnotation = true;
         }
-        Log.e("TAG_FIND", notClassAnotation ? "反射模式" : "注解处理器模式");
     }
 
     private static void injectOfClassAnotation(Object source, View parent, Object holder) throws Exception {
@@ -245,7 +237,6 @@ public class ViewUtil {
      * 抽取控件
      */
     private static void click(Object Object) {
-        boolean thisCheck = false;
         if (!notClassAnotation) {
             try {
                 injectClickOfClassAnotation(Object, null, Object);
@@ -254,23 +245,18 @@ public class ViewUtil {
                 if (!(e instanceof ClassNotFoundException)) {
                     e.printStackTrace();
                 }
-                //进入反射模式
-                notClassAnotation = true;
-                thisCheck = true;
             }
         }
-        if (!injectClick(Object, new ViewFinder(Object)) && thisCheck) {
-            //退出反射模式
-            notClassAnotation = false;
+        if (injectClick(Object, new ViewFinder(Object)) && !notClassAnotation) {
+            notClassAnotation = true;
+            Log.e("TAG_CLICK", "进入反射模式");
         }
-        Log.e("TAG_CLICK", notClassAnotation ? "反射模式" : "注解处理器模式");
     }
 
     /**
      * 抽取控件
      */
     public static void click(Object holder, View view) {
-        boolean thisCheck = false;
         if (!notClassAnotation) {
             try {
                 injectClickOfClassAnotation(null, view, holder);
@@ -279,16 +265,12 @@ public class ViewUtil {
                 if (!(e instanceof ClassNotFoundException)) {
                     e.printStackTrace();
                 }
-                //进入反射模式
-                notClassAnotation = true;
-                thisCheck = true;
             }
         }
-        if (!injectClick(holder, new ViewFinder(view)) && thisCheck) {
-            //退出反射模式
-            notClassAnotation = false;
+        if (injectClick(holder, new ViewFinder(view)) && !notClassAnotation) {
+            notClassAnotation = true;
+            Log.e("TAG_CLICK", "进入反射模式");
         }
-        Log.e("TAG_CLICK", notClassAnotation ? "反射模式" : "注解处理器模式");
     }
 
     private static void injectClickOfClassAnotation(Object source, View parent, Object holder) throws Exception {
