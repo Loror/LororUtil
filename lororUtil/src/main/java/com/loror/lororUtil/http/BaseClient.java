@@ -96,6 +96,7 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
                 list.add(bytes[i]);
             }
         }
+        inputStream.close();
         bytes = new byte[list.size()];
         for (int i = 0; i < list.size(); i++) {
             bytes[i] = list.get(i);
