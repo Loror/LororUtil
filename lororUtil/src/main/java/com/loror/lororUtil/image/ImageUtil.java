@@ -8,6 +8,7 @@ import java.util.concurrent.Executors;
 import com.loror.lororUtil.convert.MD5Util;
 import com.loror.lororUtil.flyweight.ObjectPool;
 
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Environment;
@@ -374,8 +375,15 @@ public class ImageUtil implements Cloneable {
                             if (useful) {
                                 if (readImageResult.isPause()) {
                                     long delay = readImageResult.getFrame(index % size).delay;
+                                    handler.removeCallbacks(this);
                                     handler.postDelayed(this, delay != 0 ? delay : 100);
                                 } else {
+                                    if (context instanceof Activity) {
+                                        Activity activity = (Activity) context;
+                                        if (activity.isFinishing()) {
+                                            return;
+                                        }
+                                    }
                                     if (index != 0 && index % size == 0 && !readImageResult.isRepeate()) {
                                         return;
                                     }
@@ -385,6 +393,7 @@ public class ImageUtil implements Cloneable {
                                         imageView.startAnimation(loadAnimation);
                                     }
                                     long delay = readImageResult.getFrame(index % size).delay;
+                                    handler.removeCallbacks(this);
                                     handler.postDelayed(this, delay != 0 ? delay : 100);
                                     index++;
                                 }
