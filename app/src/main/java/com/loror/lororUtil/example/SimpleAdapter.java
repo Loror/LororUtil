@@ -1,6 +1,7 @@
 package com.loror.lororUtil.example;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -8,6 +9,8 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.loror.lororUtil.image.BitmapConverter;
+import com.loror.lororUtil.image.BitmapUtil;
 import com.loror.lororUtil.image.ImageUtil;
 import com.loror.lororUtil.view.Find;
 import com.loror.lororUtil.view.ViewUtil;
@@ -54,6 +57,12 @@ public class SimpleAdapter extends BaseAdapter {
                 .to(holder.image)
                 .setWidthLimit(300)
                 .setErrorImage(R.mipmap.ic_launcher)
+                .setBitmapConverter(new BitmapConverter() {
+                    @Override
+                    public Bitmap convert(Bitmap original) {
+                        return BitmapUtil.centerRoundCorner(original);
+                    }
+                })
                 .loadImage();
         holder.text.setText("id:" + images.get(position).id);
         return convertView;
