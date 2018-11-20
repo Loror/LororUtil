@@ -375,7 +375,6 @@ public class ImageUtil implements Cloneable {
                             if (useful) {
                                 if (readImageResult.isPause()) {
                                     long delay = readImageResult.getFrame(index % size).delay;
-                                    handler.removeCallbacks(this);
                                     handler.postDelayed(this, delay != 0 ? delay : 100);
                                 } else {
                                     if (context instanceof Activity) {
@@ -393,7 +392,6 @@ public class ImageUtil implements Cloneable {
                                         imageView.startAnimation(loadAnimation);
                                     }
                                     long delay = readImageResult.getFrame(index % size).delay;
-                                    handler.removeCallbacks(this);
                                     handler.postDelayed(this, delay != 0 ? delay : 100);
                                     index++;
                                 }
