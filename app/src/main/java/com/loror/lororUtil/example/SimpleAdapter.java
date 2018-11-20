@@ -57,12 +57,12 @@ public class SimpleAdapter extends BaseAdapter {
                 .to(holder.image)
                 .setWidthLimit(300)
                 .setErrorImage(R.mipmap.ic_launcher)
-                .setBitmapConverter(new BitmapConverter() {
-                    @Override
-                    public Bitmap convert(Bitmap original) {
-                        return BitmapUtil.centerRoundCorner(original);
-                    }
-                })
+//                .setBitmapConverter(new BitmapConverter() {
+//                    @Override
+//                    public Bitmap convert(Context context, Bitmap original) {
+//                        return BitmapUtil.centerRoundCorner(original);
+//                    }
+//                })
                 .loadImage();
         holder.text.setText("id:" + images.get(position).id);
         return convertView;

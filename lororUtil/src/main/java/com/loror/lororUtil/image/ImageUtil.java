@@ -336,7 +336,7 @@ public class ImageUtil implements Cloneable {
                             if (cachUseAnimation && loadAnimation != null) {
                                 imageView.startAnimation(loadAnimation);
                             }
-                            imageView.setImageBitmap(bitmapConverter == null ? readImageResult.getBitmap() : bitmapConverter.convert(readImageResult.getBitmap()));
+                            imageView.setImageBitmap(bitmapConverter == null ? readImageResult.getBitmap() : bitmapConverter.convert(context, readImageResult.getBitmap()));
                         } else {
                             weakReference = new WeakReference<ImageView>(imageView);
                             final Handler handler = ObjectPool.getInstance().getHandler();
@@ -350,7 +350,7 @@ public class ImageUtil implements Cloneable {
                                         if (loadAnimation != null) {
                                             imageView.startAnimation(loadAnimation);
                                         }
-                                        imageView.setImageBitmap(bitmapConverter == null ? readImageResult.getBitmap() : bitmapConverter.convert(readImageResult.getBitmap()));
+                                        imageView.setImageBitmap(bitmapConverter == null ? readImageResult.getBitmap() : bitmapConverter.convert(context, readImageResult.getBitmap()));
                                     }
                                 });
                             }
@@ -387,7 +387,7 @@ public class ImageUtil implements Cloneable {
                                     if (index != 0 && index % size == 0 && !readImageResult.isRepeate()) {
                                         return;
                                     }
-                                    imageView.setImageBitmap(bitmapConverter == null ? readImageResult.getFrame(index % size).image : bitmapConverter.convert(readImageResult.getFrame(index % size).image));
+                                    imageView.setImageBitmap(bitmapConverter == null ? readImageResult.getFrame(index % size).image : bitmapConverter.convert(context, readImageResult.getFrame(index % size).image));
                                     if (!calledAnimation[0] && index == 0 && loadAnimation != null) {
                                         calledAnimation[0] = true;
                                         imageView.startAnimation(loadAnimation);
@@ -409,7 +409,7 @@ public class ImageUtil implements Cloneable {
                             if (loadAnimation != null) {
                                 imageView.startAnimation(loadAnimation);
                             }
-                            imageView.setImageBitmap(bitmapConverter == null ? readImageResult.getBitmap() : bitmapConverter.convert(readImageResult.getBitmap()));
+                            imageView.setImageBitmap(bitmapConverter == null ? readImageResult.getBitmap() : bitmapConverter.convert(context, readImageResult.getBitmap()));
                         } else {
                             weakReference = new WeakReference<ImageView>(imageView);
                             final Handler handler = ObjectPool.getInstance().getHandler();
@@ -423,7 +423,7 @@ public class ImageUtil implements Cloneable {
                                         if (loadAnimation != null) {
                                             imageView.startAnimation(loadAnimation);
                                         }
-                                        imageView.setImageBitmap(bitmapConverter == null ? readImageResult.getBitmap() : bitmapConverter.convert(readImageResult.getBitmap()));
+                                        imageView.setImageBitmap(bitmapConverter == null ? readImageResult.getBitmap() : bitmapConverter.convert(context, readImageResult.getBitmap()));
                                     }
                                 });
                             }
