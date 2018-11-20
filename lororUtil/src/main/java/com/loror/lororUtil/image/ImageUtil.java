@@ -65,6 +65,7 @@ public class ImageUtil implements Cloneable {
     /**
      * 设置全局bitmap预转换接口
      */
+    @Deprecated
     public static void setGlobalBitmapConverter(BitmapConverter globalBitmapConverter) {
         ImageUtil.globalBitmapConverter = globalBitmapConverter;
     }
