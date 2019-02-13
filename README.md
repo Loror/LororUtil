@@ -118,8 +118,14 @@ HttpClient HttpsClient使用参数类
 * 注解Click
     * @Click(id = R.id.xx) 用于绑定控件点击事件
     
+* 注解LongClick
+    * @LongClick(id = R.id.xx) 用于绑定控件点击事件
+    
 * 注解ItemClick
     * @ItemClick(id = R.id.xx) 用于绑定控件点击事件
+    
+* 注解ItemLongClick
+    * @ItemLongClick(id = R.id.xx) 用于绑定控件点击事件
 
 
 * 类ViewUtil
