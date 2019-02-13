@@ -61,6 +61,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void initView() {
         ViewUtil.find(this);
+        ViewUtil.click(this);
         adapter = new SimpleAdapter(this, images);
         list.setAdapter(adapter);
     }
