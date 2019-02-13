@@ -78,12 +78,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Click(id = R.id.button)
-    public void click(View v, int position) {
+    public void click(View v) {
         Toast.makeText(this, "click:短按点击", Toast.LENGTH_SHORT).show();
     }
 
     @LongClick(id = R.id.button)
-    public void longClick(View v, int position) {
+    public void longClick(View v) {
         Toast.makeText(this, "longClick:长按点击", Toast.LENGTH_SHORT).show();
     }
 
