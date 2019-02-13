@@ -69,12 +69,12 @@ public class MainActivity extends AppCompatActivity {
     @ItemClick(id = R.id.list)
     public void itemClick(View v, int position) {
         Log.e("TAG_", ObjectPool.getInstance().getTheadPool().getAliveThread() + " == alive");
-        Toast.makeText(this, "itemClick:" + position + "点击", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "itemClick:position(" + position + ")点击", Toast.LENGTH_SHORT).show();
     }
 
     @ItemLongClick(id = R.id.list)
     public void itemLongClick(View v, int position) {
-        Toast.makeText(this, "itemLongClick:" + position + "点击", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "itemLongClick:position(" + position + ")点击", Toast.LENGTH_SHORT).show();
     }
 
     @Click(id = R.id.button)
