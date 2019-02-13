@@ -294,7 +294,9 @@ public class ViewUtil {
         for (int i = 0; i < methods.length; i++) {
             final Method method = methods[i];
             Click click = (Click) method.getAnnotation(Click.class);
+            LongClick longClick = (LongClick) method.getAnnotation(LongClick.class);
             ItemClick itemClick = (ItemClick) method.getAnnotation(ItemClick.class);
+            ItemLongClick itemLongClick = (ItemLongClick) method.getAnnotation(ItemLongClick.class);
             if (click != null) {
                 int[] id = click.id();
                 for (int j = 0; j < id.length; j++) {
@@ -318,6 +320,28 @@ public class ViewUtil {
                                     }
 
                                 }
+                            }
+                        });
+                    }
+                }
+                injected = true;
+            } else if (longClick != null) {
+                int[] id = longClick.id();
+                for (int j = 0; j < id.length; j++) {
+                    View view = finder.findViewById(id[j]);
+                    if (view != null) {
+                        method.setAccessible(true);
+                        view.setOnLongClickListener(new View.OnLongClickListener() {
+                            @Override
+                            public boolean onLongClick(View v) {
+                                try {
+                                    method.invoke(holder, v);
+                                } catch (IllegalAccessException e) {
+                                    e.printStackTrace();
+                                } catch (InvocationTargetException e) {
+                                    e.printStackTrace();
+                                }
+                                return true;
                             }
                         });
                     }
@@ -384,6 +408,58 @@ public class ViewUtil {
                                     e.printStackTrace();
                                 }
                             }
+                        }
+                    });
+                }
+                injected = true;
+            } else if (itemLongClick != null) {
+                int id = itemLongClick.id();
+                if (id != 0) {
+                    View view = finder.findViewById(id);
+                    if (view != null) {
+                        method.setAccessible(true);
+                        if (view instanceof AbsListView) {
+                            ((AbsListView) view).setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+                                @Override
+                                public boolean onItemLongClick(AdapterView<?> adapterView, View view, int position, long l) {
+                                    try {
+                                        method.invoke(holder, view, position);
+                                    } catch (IllegalAccessException e) {
+                                        e.printStackTrace();
+                                    } catch (InvocationTargetException e) {
+                                        e.printStackTrace();
+                                    }
+                                    return true;
+                                }
+                            });
+                        } else if (view instanceof ItemLongClickAble) {
+                            ((ItemLongClickAble) view).setOnItemLongClickListener(new OnItemClickListener() {
+
+                                @Override
+                                public void onItemClick(View view, int position) {
+                                    try {
+                                        method.invoke(holder, view, position);
+                                    } catch (IllegalAccessException e) {
+                                        e.printStackTrace();
+                                    } catch (InvocationTargetException e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                            });
+                        }
+                    }
+                } else if (finder.getSource() instanceof View) {
+                    ((View) finder.getSource()).setOnLongClickListener(new View.OnLongClickListener() {
+                        @Override
+                        public boolean onLongClick(View v) {
+                            try {
+                                method.invoke(holder, v);
+                            } catch (IllegalAccessException e) {
+                                e.printStackTrace();
+                            } catch (InvocationTargetException e) {
+                                e.printStackTrace();
+                            }
+                            return true;
                         }
                     });
                 }
