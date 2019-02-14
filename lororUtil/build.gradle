@@ -25,5 +25,5 @@ android {
 }
 
 dependencies {
-    provided fileTree(include: ['*.jar'], dir: 'libs')
+    compileOnly fileTree(include: ['*.jar'], dir: 'libs')
 }
