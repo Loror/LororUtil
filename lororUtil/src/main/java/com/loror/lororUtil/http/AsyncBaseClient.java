@@ -51,6 +51,42 @@ public class AsyncBaseClient<T extends HttpURLConnection> extends BaseClient<T> 
         });
     }
 
+    public void asyncPut(final String urlStr, final RequestParams parmas, final AsyncClient<Responce> asyncClient) {
+        this.asyncClient = asyncClient;
+        asyncClient.runBack(new Runnable() {
+
+            @Override
+            public void run() {
+                final Responce responce = put(urlStr, parmas);
+                AsyncBaseClient.this.asyncClient = null;
+                asyncClient.runFore(new Runnable() {
+
+                    @Override
+                    public void run() {
+                        asyncClient.callBack(responce);
+                    }
+                });
+            }
+        });
+    }
+
+    public void asyncDelete(final String urlStr, final RequestParams parmas, final AsyncClient<Responce> asyncClient) {
+        asyncClient.runBack(new Runnable() {
+
+            @Override
+            public void run() {
+                final Responce responce = delete(urlStr, parmas);
+                asyncClient.runFore(new Runnable() {
+
+                    @Override
+                    public void run() {
+                        asyncClient.callBack(responce);
+                    }
+                });
+            }
+        });
+    }
+
     public void asyncDownload(final String urlStr, final String path, final boolean cover,
                               final AsyncClient<Responce> asyncClient) {
         this.asyncClient = asyncClient;

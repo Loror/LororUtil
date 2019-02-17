@@ -20,6 +20,7 @@ import com.loror.lororUtil.text.TextUtil;
 public abstract class BaseClient<T extends HttpURLConnection> extends Prepare implements Client {
     protected int timeOut = 10000;
     protected int readTimeOut;
+    protected boolean followRedirects;
     protected T conn;
     private ProgressListener progressListener;
 
@@ -44,6 +45,13 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
      */
     public void setReadTimeOut(int readTimeOut) {
         this.readTimeOut = readTimeOut;
+    }
+
+    /**
+     * 设置是否自动处理重定向
+     */
+    public void setFollowRedirects(boolean followRedirects) {
+        this.followRedirects = followRedirects;
     }
 
     /**
@@ -88,20 +96,25 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
      */
     protected byte[] getResponce(T conn) throws Exception {
         InputStream inputStream = conn.getInputStream();
-        List<Byte> list = new ArrayList<>();
+        List<byte[]> bytesList = new ArrayList<>();
         byte[] bytes = new byte[1024];
         int total = 0;
+        int length = 0;
         while ((total = inputStream.read(bytes)) != -1) {
-            for (int i = 0; i < total; i++) {
-                list.add(bytes[i]);
-            }
+            byte[] temp = new byte[total];
+            System.arraycopy(bytes, 0, temp, 0, total);
+            bytesList.add(temp);
+            length += total;
         }
-        inputStream.close();
-        bytes = new byte[list.size()];
-        for (int i = 0; i < list.size(); i++) {
-            bytes[i] = list.get(i);
+        byte[] result = new byte[length];
+        int position = 0;
+        for (int i = 0; i < bytesList.size(); i++) {
+            byte[] temp = bytesList.get(i);
+            System.arraycopy(temp, 0, result, position, temp.length);
+            position += temp.length;
         }
-        return bytes;
+        return result;
+
     }
 
     @Override
@@ -120,6 +133,9 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
             }
             URL url = new URL(urlStr);
             conn = (T) url.openConnection();
+            if (followRedirects) {
+                conn.setInstanceFollowRedirects(true);
+            }
             prepareGet(conn, timeOut, readTimeOut, parmas);
             responce.code = conn.getResponseCode();
             if (responce.code == HttpURLConnection.HTTP_OK) {
@@ -138,10 +154,231 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
     @Override
     public synchronized Responce post(String urlStr, RequestParams parmas) {
         if (parmas == null || parmas.getFiles().size() == 0) {
-            return postFrom(urlStr, parmas);
+            Responce responce = new Responce();
+            try {
+                URL url = new URL(urlStr);
+                conn = (T) url.openConnection();
+                if (followRedirects) {
+                    conn.setInstanceFollowRedirects(true);
+                }
+                preparePost(conn, timeOut, readTimeOut, parmas);
+                if (parmas != null) {
+                    String StrParmas = parmas.packetOutParams("POST");
+                    if (!TextUtil.isEmpty(StrParmas)) {
+                        PrintWriter pw = new PrintWriter(new OutputStreamWriter(conn.getOutputStream()));
+                        pw.print(StrParmas);
+                        pw.close();
+                    }
+                }
+                responce.url = conn.getURL();
+                responce.code = conn.getResponseCode();
+                if (responce.code == HttpURLConnection.HTTP_OK) {
+                    initHeaders(conn, responce);
+                }
+                responce.result = getResponce(conn);
+                conn.disconnect();
+            } catch (Throwable e) {
+                responce.setThrowable(e);
+            } finally {
+                conn = null;
+            }
+            return responce;
         } else {
-            return postFile(urlStr, parmas, parmas.getFiles());
+            List<FileBody> files = parmas.getFiles();
+            final Responce responce = new Responce();
+            try {
+                URL url = new URL(urlStr);// 服务器的域名
+                conn = (T) url.openConnection();
+                if (followRedirects) {
+                    conn.setInstanceFollowRedirects(true);
+                }
+                preparePostFile(conn, timeOut, readTimeOut, parmas);
+                OutputStream out = new DataOutputStream(conn.getOutputStream());
+                if (parmas != null) {
+                    String StrParmas = parmas.packetOutParams("POST_FILE");
+                    if (!TextUtil.isEmpty(StrParmas)) {
+                        out.write(StrParmas.getBytes());
+                    }
+                } // 提交参数
+                if (files != null) {
+                    int index = 0;
+                    for (FileBody file : files) {
+                        upLoadFile(file, index, out);
+                        index++;
+                    }
+                } // 上传文件
+                // 定义最后数据分隔线，即--加上BOUNDARY再加上--，写上结尾标识
+                byte[] end_data = (Config.PREFIX + Config.BOUNDARY + Config.PREFIX + Config.LINEND).getBytes();
+                out.write(end_data);
+                out.flush();
+                out.close();
+                responce.url = conn.getURL();
+                responce.code = conn.getResponseCode();
+                if (responce.code == HttpURLConnection.HTTP_OK) {
+                    initHeaders(conn, responce);
+                }
+                responce.result = getResponce(conn);
+                conn.disconnect();
+            } catch (Throwable e) {
+                responce.setThrowable(e);
+            } finally {
+                conn = null;
+                if (responce.result == null) {
+                    if (progressListener != null) {
+                        postRunnable(new Runnable() {
+
+                            @Override
+                            public void run() {
+                                progressListener.failed();
+                            }
+                        });
+                    }
+                } else {
+                    if (progressListener != null) {
+                        postRunnable(new Runnable() {
+
+                            @Override
+                            public void run() {
+                                progressListener.finish(responce.toString());
+                            }
+                        });
+                    }
+                }
+            }
+            return responce;
         }
+    }
+
+    @Override
+    public synchronized Responce put(String urlStr, RequestParams parmas) {
+        if (parmas == null || parmas.getFiles().size() == 0) {
+            Responce responce = new Responce();
+            try {
+                URL url = new URL(urlStr);
+                conn = (T) url.openConnection();
+                if (followRedirects) {
+                    conn.setInstanceFollowRedirects(true);
+                }
+                preparePut(conn, timeOut, readTimeOut, parmas);
+                if (parmas != null) {
+                    String StrParmas = parmas.packetOutParams("POST");
+                    if (!TextUtil.isEmpty(StrParmas)) {
+                        PrintWriter pw = new PrintWriter(new OutputStreamWriter(conn.getOutputStream()));
+                        pw.print(StrParmas);
+                        pw.close();
+                    }
+                }
+                responce.url = conn.getURL();
+                responce.code = conn.getResponseCode();
+                if (responce.code == HttpURLConnection.HTTP_OK) {
+                    initHeaders(conn, responce);
+                }
+                responce.result = getResponce(conn);
+                conn.disconnect();
+            } catch (Throwable e) {
+                responce.setThrowable(e);
+            } finally {
+                conn = null;
+            }
+            return responce;
+        } else {
+            List<FileBody> files = parmas.getFiles();
+            final Responce responce = new Responce();
+            try {
+                URL url = new URL(urlStr);// 服务器的域名
+                conn = (T) url.openConnection();
+                if (followRedirects) {
+                    conn.setInstanceFollowRedirects(true);
+                }
+                preparePutFile(conn, timeOut, readTimeOut, parmas);
+                OutputStream out = new DataOutputStream(conn.getOutputStream());
+                if (parmas != null) {
+                    String StrParmas = parmas.packetOutParams("POST_FILE");
+                    if (!TextUtil.isEmpty(StrParmas)) {
+                        out.write(StrParmas.getBytes());
+                    }
+                } // 提交参数
+                if (files != null) {
+                    int index = 0;
+                    for (FileBody file : files) {
+                        upLoadFile(file, index, out);
+                        index++;
+                    }
+                } // 上传文件
+                // 定义最后数据分隔线，即--加上BOUNDARY再加上--，写上结尾标识
+                byte[] end_data = (Config.PREFIX + Config.BOUNDARY + Config.PREFIX + Config.LINEND).getBytes();
+                out.write(end_data);
+                out.flush();
+                out.close();
+                responce.url = conn.getURL();
+                responce.code = conn.getResponseCode();
+                if (responce.code == HttpURLConnection.HTTP_OK) {
+                    initHeaders(conn, responce);
+                }
+                responce.result = getResponce(conn);
+                conn.disconnect();
+            } catch (Throwable e) {
+                responce.setThrowable(e);
+            } finally {
+                conn = null;
+                if (responce.result == null) {
+                    if (progressListener != null) {
+                        postRunnable(new Runnable() {
+
+                            @Override
+                            public void run() {
+                                progressListener.failed();
+                            }
+                        });
+                    }
+                } else {
+                    if (progressListener != null) {
+                        postRunnable(new Runnable() {
+
+                            @Override
+                            public void run() {
+                                progressListener.finish(responce.toString());
+                            }
+                        });
+                    }
+                }
+            }
+            return responce;
+        }
+    }
+
+    @Override
+    public synchronized Responce delete(String urlStr, RequestParams parmas) {
+        Responce responce = new Responce();
+        try {
+            if (parmas != null) {
+                String StrParmas = parmas.packetOutParams("GET");
+                if (!TextUtil.isEmpty(StrParmas)) {
+                    if (urlStr.indexOf("?") != -1) {
+                        urlStr += "&" + StrParmas;
+                    } else {
+                        urlStr += "?" + StrParmas;
+                    }
+                }
+            }
+            URL url = new URL(urlStr);
+            conn = (T) url.openConnection();
+            if (followRedirects) {
+                conn.setInstanceFollowRedirects(true);
+            }
+            prepareDelete(conn, timeOut, readTimeOut, parmas);
+            responce.code = conn.getResponseCode();
+            if (responce.code == HttpURLConnection.HTTP_OK) {
+                initHeaders(conn, responce);
+            }
+            responce.url = conn.getURL();
+            responce.result = getResponce(conn);
+            conn.disconnect();
+        } catch (Throwable e) {
+            responce.setThrowable(e);
+        }
+        conn = null;
+        return responce;
     }
 
     @Override
@@ -158,106 +395,9 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
     }
 
     /**
-     * post请求
-     */
-    protected Responce postFrom(String urlStr, RequestParams parmas) {
-        Responce responce = new Responce();
-        try {
-            URL url = new URL(urlStr);
-            HttpURLConnection.setFollowRedirects(true);
-            conn = (T) url.openConnection();
-            preparePost(conn, timeOut, readTimeOut, parmas);
-            if (parmas != null) {
-                String StrParmas = parmas.packetOutParams("POST");
-                if (!TextUtil.isEmpty(StrParmas)) {
-                    PrintWriter pw = new PrintWriter(new OutputStreamWriter(conn.getOutputStream()));
-                    pw.print(StrParmas);
-                    pw.close();
-                }
-            }
-            responce.url = conn.getURL();
-            responce.code = conn.getResponseCode();
-            if (responce.code == HttpURLConnection.HTTP_OK) {
-                initHeaders(conn, responce);
-            }
-            responce.result = getResponce(conn);
-            conn.disconnect();
-        } catch (Throwable e) {
-            responce.setThrowable(e);
-        } finally {
-            conn = null;
-        }
-        return responce;
-    }
-
-    /**
-     * 上传文件带参数
-     */
-    protected Responce postFile(final String urlStr, RequestParams parmas, List<FileBody> files) {
-        final Responce responce = new Responce();
-        try {
-            URL url = new URL(urlStr);// 服务器的域名
-            conn = (T) url.openConnection();
-            preparePostFile(conn, timeOut, readTimeOut, parmas);
-            OutputStream out = new DataOutputStream(conn.getOutputStream());
-            if (parmas != null) {
-                String StrParmas = parmas.packetOutParams("POST_FILE");
-                if (!TextUtil.isEmpty(StrParmas)) {
-                    out.write(StrParmas.getBytes());
-                }
-            } // 提交参数
-            if (files != null) {
-                int index = 0;
-                for (FileBody file : files) {
-                    upLoadFile(file, index, out);
-                    index++;
-                }
-            } // 上传文件
-            // 定义最后数据分隔线，即--加上BOUNDARY再加上--，写上结尾标识
-            byte[] end_data = (Config.PREFIX + Config.BOUNDARY + Config.PREFIX + Config.LINEND).getBytes();
-            out.write(end_data);
-            out.flush();
-            out.close();
-            responce.url = conn.getURL();
-            responce.code = conn.getResponseCode();
-            if (responce.code == HttpURLConnection.HTTP_OK) {
-                initHeaders(conn, responce);
-            }
-            responce.result = getResponce(conn);
-            conn.disconnect();
-        } catch (Throwable e) {
-            responce.setThrowable(e);
-        } finally {
-            conn = null;
-            if (responce.result == null) {
-                if (progressListener != null) {
-                    postRunnable(new Runnable() {
-
-                        @Override
-                        public void run() {
-                            progressListener.failed();
-                        }
-                    });
-                }
-            } else {
-                if (progressListener != null) {
-                    postRunnable(new Runnable() {
-
-                        @Override
-                        public void run() {
-                            progressListener.finish(responce.toString());
-                        }
-                    });
-                }
-            }
-        }
-        return responce;
-    }
-
-    /**
      * 上传一个文件
      */
-    protected void upLoadFile(FileBody file, final int index, OutputStream out) throws Throwable {
+    private void upLoadFile(FileBody file, final int index, OutputStream out) throws Throwable {
         if (file.getFile() == null) {
             return;
         }
@@ -288,7 +428,7 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
     /**
      * 通过流发送文件
      */
-    protected void sendFile(File file, OutputStream os) throws Throwable {
+    private void sendFile(File file, OutputStream os) throws Throwable {
         FileInputStream fis = new FileInputStream(file);
         final long length = file.length();
         long lastTime = System.currentTimeMillis(), transed = 0;
@@ -334,7 +474,7 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
     /**
      * 通过流接受文件
      */
-    protected void downloadFile(File file, final long length, InputStream is) throws Throwable {
+    private void downloadFile(File file, final long length, InputStream is) throws Throwable {
         long last = System.currentTimeMillis(), transed = 0;
         FileOutputStream fos = new FileOutputStream(file);
         byte[] out = new byte[1024 * 100];
@@ -381,7 +521,6 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
     /**
      * 下载文件
      */
-    @SuppressLint("NewApi")
     public synchronized Responce download(String urlStr, String path, boolean cover) {
         final Responce responce = new Responce();
         try {
@@ -390,14 +529,12 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
             }
             URL url = new URL(urlStr);
             conn = (T) url.openConnection();
+            if (followRedirects) {
+                conn.setInstanceFollowRedirects(true);
+            }
             prepareGet(conn, timeOut, readTimeOut, null);
             conn.setRequestProperty("Accept-Encoding", "identity");
-            long length = 0;
-            try {
-                length = conn.getContentLengthLong();
-            } catch (Throwable e) {
-                length = conn.getContentLength();
-            }
+            long length = length(conn);
             File file = getFile(conn, path, urlStr);
             responce.url = conn.getURL();
             responce.code = conn.getResponseCode();
@@ -442,7 +579,6 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
     /**
      * 断点续传下载
      */
-    @SuppressLint("NewApi")
     public synchronized Responce downloadInPeice(String urlStr, String path, long start, long end) {
         final Responce responce = new Responce();
         try {
@@ -451,6 +587,9 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
             }
             URL url = new URL(urlStr);// 服务器的域名
             conn = (T) url.openConnection();
+            if (followRedirects) {
+                conn.setInstanceFollowRedirects(true);
+            }
             conn.setConnectTimeout(timeOut);
             conn.setRequestMethod("GET");
             conn.setRequestProperty("Range", "bytes=" + start + "-" + end);
@@ -459,12 +598,7 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
             File file = getFile(conn, path, urlStr);
             responce.url = conn.getURL();
             responce.code = conn.getResponseCode();
-            long length = 0;
-            try {
-                length = conn.getContentLengthLong();
-            } catch (Throwable e) {
-                length = conn.getContentLength();
-            }
+            long length = length(conn);
             downloadFile(file, length, conn.getInputStream());
             if (responce.code == HttpURLConnection.HTTP_PARTIAL) {
                 initHeaders(conn, responce);
@@ -503,7 +637,6 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
     /**
      * 获取服务器文件大小
      */
-    @SuppressLint("NewApi")
     public long getContentLength(String urlStr) {
         long length = 0;
         try {
@@ -511,14 +644,21 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
             T conn = (T) url.openConnection();
             prepareGet(conn, timeOut, readTimeOut, null);
             conn.setRequestProperty("Accept-Encoding", "identity");
-            try {
-                length = conn.getContentLengthLong();
-            } catch (Throwable e) {
-                length = conn.getContentLength();
-            }
+            length = length(conn);
             conn.disconnect();
         } catch (Throwable e) {
             System.out.println("cannot get contentlength");
+        }
+        return length;
+    }
+
+    @SuppressLint("NewApi")
+    private long length(T conn) {
+        long length = 0;
+        try {
+            length = conn.getContentLengthLong();
+        } catch (Throwable e) {
+            length = conn.getContentLength();
         }
         return length;
     }

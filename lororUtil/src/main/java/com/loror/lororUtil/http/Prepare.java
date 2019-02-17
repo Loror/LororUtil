@@ -30,7 +30,7 @@ public class Prepare {
             }
         }
         conn.setRequestProperty("connection", "keep-alive");// 设置请求头参数
-        conn.setRequestProperty("Charsert", "UTF-8");
+        conn.setRequestProperty("Charset", "UTF-8");
         conn.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + Config.BOUNDARY);
     }
 
@@ -46,6 +46,7 @@ public class Prepare {
         }
         conn.setDoOutput(true);
         conn.setDoInput(true);
+        conn.setUseCaches(false);
         if (parmas != null && parmas.head.size() > 0) {
             for (String name : parmas.head.keySet()) {
                 conn.setRequestProperty(name, parmas.head.get(name));
@@ -53,7 +54,8 @@ public class Prepare {
         }
         conn.setRequestProperty("Content-Language", "zh-cn");
         conn.setRequestProperty("Connection", "keep-alive");
-        conn.setRequestProperty("Cache-Control", "no-cache");
+        conn.setRequestProperty("Charset", "UTF-8");
+//        conn.setRequestProperty("Cache-Control", "no-cache");
 
         if (parmas != null && parmas.getParma("RequestParamsAsJson") != null) {
             conn.setRequestProperty("contentType", "application/json");
@@ -66,6 +68,72 @@ public class Prepare {
     public void prepareGet(HttpURLConnection conn, int timeOut, int readTimeOut, RequestParams parmas)
             throws Exception {
         conn.setRequestMethod("GET");
+        conn.setConnectTimeout(timeOut);
+        if (readTimeOut != 0) {
+            conn.setReadTimeout(readTimeOut);
+        }
+        if (parmas != null && parmas.head.size() > 0) {
+            for (String name : parmas.head.keySet()) {
+                conn.setRequestProperty(name, parmas.head.get(name));
+            }
+        }
+        conn.setDoInput(true);
+    }
+
+    /**
+     * put文件准备
+     */
+    public void preparePutFile(HttpURLConnection conn, int timeOut, int readTimeOut, RequestParams parmas)
+            throws Exception {
+        conn.setRequestMethod("PUT");// 设置为PUT情
+        conn.setConnectTimeout(timeOut);
+        if (readTimeOut != 0) {
+            conn.setReadTimeout(readTimeOut);
+        }
+        conn.setDoOutput(true);// 发送POST请求必须设置如下两行
+        conn.setDoInput(true);
+        if (parmas != null && parmas.head.size() > 0) {
+            for (String name : parmas.head.keySet()) {
+                conn.setRequestProperty(name, parmas.head.get(name));
+            }
+        }
+        conn.setRequestProperty("connection", "keep-alive");// 设置请求头参数
+        conn.setRequestProperty("Charset", "UTF-8");
+        conn.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + Config.BOUNDARY);
+    }
+
+    /**
+     * put参数准备
+     */
+    public void preparePut(HttpURLConnection conn, int timeOut, int readTimeOut, RequestParams parmas)
+            throws Exception {
+        conn.setRequestMethod("PUT");
+        conn.setConnectTimeout(timeOut);
+        if (readTimeOut != 0) {
+            conn.setReadTimeout(readTimeOut);
+        }
+        conn.setDoOutput(true);
+        conn.setDoInput(true);
+        if (parmas != null && parmas.head.size() > 0) {
+            for (String name : parmas.head.keySet()) {
+                conn.setRequestProperty(name, parmas.head.get(name));
+            }
+        }
+        conn.setRequestProperty("Content-Language", "zh-cn");
+        conn.setRequestProperty("Connection", "keep-alive");
+        conn.setRequestProperty("Charset", "UTF-8");
+
+        if (parmas != null && parmas.getParma("RequestParamsAsJson") != null) {
+            conn.setRequestProperty("contentType", "application/json");
+        }
+    }
+
+    /**
+     * delete参数准备
+     */
+    public void prepareDelete(HttpURLConnection conn, int timeOut, int readTimeOut, RequestParams parmas)
+            throws Exception {
+        conn.setRequestMethod("DELETE");
         conn.setConnectTimeout(timeOut);
         if (readTimeOut != 0) {
             conn.setReadTimeout(readTimeOut);
