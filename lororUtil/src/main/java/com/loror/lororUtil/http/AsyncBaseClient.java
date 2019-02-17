@@ -5,6 +5,14 @@ import java.net.HttpURLConnection;
 public class AsyncBaseClient<T extends HttpURLConnection> extends BaseClient<T> {
 
     private AsyncClient<Responce> asyncClient;
+    private Client client;
+
+    /**
+     * 注入外部网路加载方式
+     */
+    public void setClient(Client client) {
+        this.client = client;
+    }
 
     @Override
     protected void postRunnable(Runnable runnable) {
@@ -21,7 +29,12 @@ public class AsyncBaseClient<T extends HttpURLConnection> extends BaseClient<T> 
 
             @Override
             public void run() {
-                final Responce responce = post(urlStr, parmas);
+                final Responce responce;
+                if (client == null) {
+                    responce = post(urlStr, parmas);
+                } else {
+                    responce = client.post(urlStr, parmas);
+                }
                 AsyncBaseClient.this.asyncClient = null;
                 asyncClient.runFore(new Runnable() {
 
@@ -39,7 +52,12 @@ public class AsyncBaseClient<T extends HttpURLConnection> extends BaseClient<T> 
 
             @Override
             public void run() {
-                final Responce responce = get(urlStr, parmas);
+                final Responce responce;
+                if (client == null) {
+                    responce = get(urlStr, parmas);
+                } else {
+                    responce = client.get(urlStr, parmas);
+                }
                 asyncClient.runFore(new Runnable() {
 
                     @Override
@@ -57,7 +75,12 @@ public class AsyncBaseClient<T extends HttpURLConnection> extends BaseClient<T> 
 
             @Override
             public void run() {
-                final Responce responce = put(urlStr, parmas);
+                final Responce responce;
+                if (client == null) {
+                    responce = put(urlStr, parmas);
+                } else {
+                    responce = client.put(urlStr, parmas);
+                }
                 AsyncBaseClient.this.asyncClient = null;
                 asyncClient.runFore(new Runnable() {
 
@@ -75,7 +98,12 @@ public class AsyncBaseClient<T extends HttpURLConnection> extends BaseClient<T> 
 
             @Override
             public void run() {
-                final Responce responce = delete(urlStr, parmas);
+                final Responce responce;
+                if (client == null) {
+                    responce = delete(urlStr, parmas);
+                } else {
+                    responce = client.delete(urlStr, parmas);
+                }
                 asyncClient.runFore(new Runnable() {
 
                     @Override

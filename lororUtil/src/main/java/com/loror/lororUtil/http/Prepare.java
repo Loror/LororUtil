@@ -184,10 +184,4 @@ public class Prepare {
         return true;
     }
 
-    /**
-     * 提交runable
-     */
-    protected void postRunnable(Runnable runnable) {
-        runnable.run();
-    }
 }

@@ -652,6 +652,13 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
         return length;
     }
 
+    /**
+     * 提交runable
+     */
+    protected void postRunnable(Runnable runnable) {
+        runnable.run();
+    }
+
     @SuppressLint("NewApi")
     private long length(T conn) {
         long length = 0;
