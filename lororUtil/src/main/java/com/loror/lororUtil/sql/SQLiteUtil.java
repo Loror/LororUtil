@@ -137,20 +137,10 @@ public class SQLiteUtil {
         String[] columnNames = cursor.getColumnNames();
         cursor.close();
         List<String> newColumnNames = new ArrayList<>();
-        HashMap<String, Object> objectHashMap = new HashMap<>();
+        HashMap<String, Class> objectHashMap = new HashMap<>();
         boolean hasId = false;
         Field[] fields = table.getDeclaredFields();
-        Object entity = null;
         int i;
-        try {
-            entity = newInstance(table);
-        } catch (Exception e1) {
-            e1.printStackTrace();
-            Log.e("SQLITE", "create object failed");
-        }
-        if (entity == null) {
-            return;
-        }
         for (i = 0; i < fields.length; i++) {
             Field field = fields[i];
             field.setAccessible(true);
@@ -162,7 +152,7 @@ public class SQLiteUtil {
                 }
                 newColumnNames.add(columnName);
                 try {
-                    objectHashMap.put(columnName, field.get(entity));
+                    objectHashMap.put(columnName, field.getType());
                 } catch (Exception e1) {
                     e1.printStackTrace();
                 }
@@ -190,10 +180,10 @@ public class SQLiteUtil {
         database.beginTransaction();
         for (i = 0; i < newColumnNames.size(); i++) {
             String type = "text";
-            Object object = objectHashMap.get(newColumnNames.get(i));
-            if (object instanceof Integer || object instanceof Long) {
+            Class objectType = objectHashMap.get(newColumnNames.get(i));
+            if (objectType == Integer.class || objectType == int.class || objectType == Long.class || objectType == long.class) {
                 type = "int";
-            } else if (object instanceof Float || object instanceof Double) {
+            } else if (objectType == Float.class || objectType == float.class || objectType == Double.class || objectType == double.class) {
                 type = "real";
             }
             database.execSQL("ALTER TABLE '" + TableFinder.getTableName(table) + "' ADD COLUMN '"
