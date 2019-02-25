@@ -9,6 +9,7 @@ import java.util.List;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 
 public class SQLiteUtil {
     private DataBaseHelper helper;
@@ -102,14 +103,7 @@ public class SQLiteUtil {
         try {
             return table.newInstance();
         } catch (Exception e) {
-            Constructor[] constructors = table.getConstructors();
-            Constructor constructor = constructors[0];
-            for (int i = 0; i < constructors.length; i++) {
-                if (constructors[i].getParameterTypes().length == 0) {
-                    constructor = constructors[i];
-                    break;
-                }
-            }
+            Constructor constructor = table.getDeclaredConstructor();
             constructor.setAccessible(true);
             return constructor.newInstance();
         }
@@ -152,6 +146,7 @@ public class SQLiteUtil {
             entity = newInstance(table);
         } catch (Exception e1) {
             e1.printStackTrace();
+            Log.e("SQLITE", "create object failed");
         }
         if (entity == null) {
             return;
@@ -302,6 +297,7 @@ public class SQLiteUtil {
                 TableFinder.find(entity, cursor);
             } catch (Exception e) {
                 e.printStackTrace();
+                Log.e("SQLITE", "create object failed");
             }
         }
         cursor.close();
@@ -323,6 +319,7 @@ public class SQLiteUtil {
                 TableFinder.find(entity, cursor);
             } catch (Exception e) {
                 e.printStackTrace();
+                Log.e("SQLITE", "create object failed");
             }
         }
         cursor.close();
@@ -348,6 +345,7 @@ public class SQLiteUtil {
                 TableFinder.find(entity, cursor);
             } catch (Exception e) {
                 e.printStackTrace();
+                Log.e("SQLITE", "create object failed");
             }
         }
         cursor.close();
@@ -372,6 +370,7 @@ public class SQLiteUtil {
                 entitys.add(entity);
             } catch (Exception e) {
                 e.printStackTrace();
+                Log.e("SQLITE", "create object failed");
             }
         }
         cursor.close();
@@ -394,9 +393,7 @@ public class SQLiteUtil {
                 TableFinder.find(entity, cursor);
             } catch (Exception e) {
                 e.printStackTrace();
-                if (e instanceof InstantiationException) {
-                    throw new IllegalStateException("cannot create object,please check for constructor");
-                }
+                Log.e("SQLITE", "create object failed");
             }
         }
         cursor.close();
