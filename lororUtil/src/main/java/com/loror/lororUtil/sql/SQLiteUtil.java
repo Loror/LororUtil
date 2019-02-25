@@ -1,5 +1,6 @@
 package com.loror.lororUtil.sql;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -95,6 +96,26 @@ public class SQLiteUtil {
     }
 
     /**
+     * 生成实例
+     */
+    private Object newInstance(Class<?> table) throws Exception {
+        try {
+            return table.newInstance();
+        } catch (Exception e) {
+            Constructor[] constructors = table.getConstructors();
+            Constructor constructor = constructors[0];
+            for (int i = 0; i < constructors.length; i++) {
+                if (constructors[i].getParameterTypes().length == 0) {
+                    constructor = constructors[i];
+                    break;
+                }
+            }
+            constructor.setAccessible(true);
+            return constructor.newInstance();
+        }
+    }
+
+    /**
      * 删除表
      */
     public void dropTable(Class<?> table) {
@@ -128,9 +149,12 @@ public class SQLiteUtil {
         Object entity = null;
         int i;
         try {
-            entity = table.newInstance();
+            entity = newInstance(table);
         } catch (Exception e1) {
             e1.printStackTrace();
+        }
+        if (entity == null) {
+            return;
         }
         for (i = 0; i < fields.length; i++) {
             Field field = fields[i];
@@ -274,7 +298,7 @@ public class SQLiteUtil {
                 new String[]{id});
         if (cursor.moveToNext()) {
             try {
-                entity = (T) table.newInstance();
+                entity = (T) newInstance(table);
                 TableFinder.find(entity, cursor);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -295,7 +319,7 @@ public class SQLiteUtil {
         Cursor cursor = database.rawQuery("select * from " + TableFinder.getTableName(table) + " limit 0,2", null);
         if (cursor.moveToNext()) {
             try {
-                entity = (T) table.newInstance();
+                entity = (T) newInstance(table);
                 TableFinder.find(entity, cursor);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -320,7 +344,7 @@ public class SQLiteUtil {
                         conditionBuilder.getColumnArray());
         if (cursor.moveToNext()) {
             try {
-                entity = (T) table.newInstance();
+                entity = (T) newInstance(table);
                 TableFinder.find(entity, cursor);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -343,7 +367,7 @@ public class SQLiteUtil {
                 conditionBuilder.getColumnArray());
         while (cursor.moveToNext()) {
             try {
-                T entity = (T) table.newInstance();
+                T entity = (T) newInstance(table);
                 TableFinder.find(entity, cursor);
                 entitys.add(entity);
             } catch (Exception e) {
@@ -365,11 +389,14 @@ public class SQLiteUtil {
         Cursor cursor = database.rawQuery("select * from " + TableFinder.getTableName(table), null);
         while (cursor.moveToNext()) {
             try {
-                T entity = (T) table.newInstance();
+                T entity = (T) newInstance(table);
                 entitys.add(entity);
                 TableFinder.find(entity, cursor);
             } catch (Exception e) {
                 e.printStackTrace();
+                if (e instanceof InstantiationException) {
+                    throw new IllegalStateException("cannot create object,please check for constructor");
+                }
             }
         }
         cursor.close();
