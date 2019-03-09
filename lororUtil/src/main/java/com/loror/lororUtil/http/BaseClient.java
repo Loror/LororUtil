@@ -20,7 +20,7 @@ import com.loror.lororUtil.text.TextUtil;
 public abstract class BaseClient<T extends HttpURLConnection> extends Prepare implements Client {
     protected int timeOut = 10000;
     protected int readTimeOut;
-    protected boolean followRedirects;
+    protected boolean followRedirects = true;
     protected T conn;
     private ProgressListener progressListener;
 
