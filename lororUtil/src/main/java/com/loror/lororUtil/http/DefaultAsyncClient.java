@@ -16,7 +16,7 @@ public abstract class DefaultAsyncClient implements AsyncClient<Responce> {
 	@Override
 	public void runBack(Runnable runnable) {
 		if (server == null) {
-			server = Executors.newFixedThreadPool(3);
+			server = Executors.newFixedThreadPool(5);
 		}
 		server.execute(runnable);
 	}
