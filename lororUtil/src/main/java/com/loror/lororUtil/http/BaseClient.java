@@ -156,6 +156,16 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
         if (parmas == null || parmas.getFiles().size() == 0) {
             Responce responce = new Responce();
             try {
+                if (parmas != null && parmas.isAsJson()) {
+                    String StrParmas = parmas.packetOutParams("GET");
+                    if (!TextUtil.isEmpty(StrParmas)) {
+                        if (urlStr.indexOf("?") != -1) {
+                            urlStr += "&" + StrParmas;
+                        } else {
+                            urlStr += "?" + StrParmas;
+                        }
+                    }
+                }
                 URL url = new URL(urlStr);
                 conn = (T) url.openConnection();
                 if (followRedirects) {
@@ -194,12 +204,10 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
                 }
                 preparePostFile(conn, timeOut, readTimeOut, parmas);
                 OutputStream out = new DataOutputStream(conn.getOutputStream());
-                if (parmas != null) {
-                    String StrParmas = parmas.packetOutParams("POST_FILE");
-                    if (!TextUtil.isEmpty(StrParmas)) {
-                        out.write(StrParmas.getBytes());
-                    }
-                } // 提交参数
+                String StrParmas = parmas.packetOutParams("POST_FORM");
+                if (!TextUtil.isEmpty(StrParmas)) {
+                    out.write(StrParmas.getBytes());
+                }// 提交参数
                 if (files != null) {
                     int index = 0;
                     for (FileBody file : files) {
@@ -254,6 +262,16 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
         if (parmas == null || parmas.getFiles().size() == 0) {
             Responce responce = new Responce();
             try {
+                if (parmas != null && parmas.isAsJson()) {
+                    String StrParmas = parmas.packetOutParams("GET");
+                    if (!TextUtil.isEmpty(StrParmas)) {
+                        if (urlStr.indexOf("?") != -1) {
+                            urlStr += "&" + StrParmas;
+                        } else {
+                            urlStr += "?" + StrParmas;
+                        }
+                    }
+                }
                 URL url = new URL(urlStr);
                 conn = (T) url.openConnection();
                 if (followRedirects) {
@@ -292,11 +310,9 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
                 }
                 preparePutFile(conn, timeOut, readTimeOut, parmas);
                 OutputStream out = new DataOutputStream(conn.getOutputStream());
-                if (parmas != null) {
-                    String StrParmas = parmas.packetOutParams("POST_FILE");
-                    if (!TextUtil.isEmpty(StrParmas)) {
-                        out.write(StrParmas.getBytes());
-                    }
+                String StrParmas = parmas.packetOutParams("POST_FORM");
+                if (!TextUtil.isEmpty(StrParmas)) {
+                    out.write(StrParmas.getBytes());
                 } // 提交参数
                 if (files != null) {
                     int index = 0;
@@ -398,10 +414,10 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
      * 上传一个文件
      */
     private void upLoadFile(FileBody file, final int index, OutputStream out) throws Throwable {
-        if (file.getFile() == null) {
+        if (file == null || file.getFile() == null) {
             return;
         }
-        if (progressListener != null && progressListener instanceof DetailProgressListener) {
+        if (progressListener instanceof DetailProgressListener) {
             postRunnable(new Runnable() {
 
                 @Override
@@ -415,9 +431,9 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
         sb.append(Config.BOUNDARY);
         sb.append(Config.LINEND);
         // name是post中传参的键 filename是文件的名称
-        sb.append("Content-Disposition: form-data; name=\"" + (file.getKey() == null ? "file" : file.getKey())
-                + "\"; filename=\"" + file.getName() + "\"" + Config.LINEND);
-        sb.append("Content-Type: " + file.getContentType() + "; charset=UTF-8" + Config.LINEND);
+        sb.append("Content-Disposition: form-data; name=\"").append(file.getKey() == null ? "file" : file.getKey())
+                .append("\"; filename=\"").append(file.getName()).append("\"" + Config.LINEND);
+        sb.append("Content-Type: ").append(file.getContentType()).append("; charset=UTF-8" + Config.LINEND);
         sb.append(Config.LINEND);
         out.write(sb.toString().getBytes());
 

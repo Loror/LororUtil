@@ -13,6 +13,7 @@ import java.util.List;
  */
 public class RequestParams {
 
+    private final String JSONKEY = "RequestParamsAsJson";
     private HashMap<String, String> parmas = new HashMap<String, String>();
     private List<FileBody> files = new ArrayList<FileBody>();
     protected HashMap<String, String> head = new HashMap<String, String>();
@@ -56,8 +57,14 @@ public class RequestParams {
      * 添加参数
      */
     public void asJson(String json) {
-        parmas.clear();
-        parmas.put("RequestParamsAsJson", json);
+        parmas.put(JSONKEY, json);
+    }
+
+    /**
+     * 是否已设置提交方式为json
+     */
+    public boolean isAsJson() {
+        return parmas.containsKey(JSONKEY);
     }
 
     /**
@@ -197,12 +204,15 @@ public class RequestParams {
      * 打包参数
      */
     protected String packetOutParams(String method) {
-        if ("POST".equals(method) && parmas.get("RequestParamsAsJson") != null) {
-            return parmas.get("RequestParamsAsJson");
+        if ("POST".equals(method) && parmas.containsKey(JSONKEY)) {
+            return parmas.get(JSONKEY);
         }
         String str = "";
         StringBuilder sb = new StringBuilder();
         for (String o : parmas.keySet()) {
+            if (JSONKEY.equals(o)) {
+                continue;
+            }//不拼接json
             String value = parmas.get(o);
             if (value != null && value.startsWith("array{")) {
                 value = value.substring(6, value.length() - 1);
@@ -217,7 +227,7 @@ public class RequestParams {
             }
         }
         if (sb.length() > 0) {
-            if (!"POST_FILE".equals(method)) {
+            if (!"POST_FORM".equals(method)) {
                 str = sb.deleteCharAt(sb.length() - 1).toString();
             } else {
                 str = sb.toString();
@@ -243,11 +253,11 @@ public class RequestParams {
                         .append(postConverter == null ? (useDefaultConverterInPost ? defaultConverter.convert(key, value) : value) : postConverter.convert(key, value))
                         .append("&");
                 break;
-            case "POST_FILE":
+            case "POST_FORM":
                 sb.append(Config.PREFIX);
                 sb.append(Config.BOUNDARY);
                 sb.append(Config.LINEND);
-                sb.append("Content-Disposition: form-data; name=\"" + key + "\"" + Config.LINEND);
+                sb.append("Content-Disposition: form-data; name=\"").append(key).append("\"" + Config.LINEND);
                 sb.append("Content-Type: text/plain; charset=UTF-8" + Config.LINEND);
                 sb.append("Content-Transfer-Encoding: 8bit" + Config.LINEND);
                 sb.append(Config.LINEND);
