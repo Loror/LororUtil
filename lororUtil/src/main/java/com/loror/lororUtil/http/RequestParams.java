@@ -76,6 +76,8 @@ public class RequestParams {
             String[] keyValue = keyValues[i].split("\\=");
             if (keyValue.length > 1) {
                 addParams(keyValue[0], keyValues[i].substring(keyValues[i].indexOf("=") + 1));
+            } else {
+                addParams(keyValue[0], "");
             }
         }
         return this;
