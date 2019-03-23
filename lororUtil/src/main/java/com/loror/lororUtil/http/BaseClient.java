@@ -74,15 +74,13 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
                 if (cookie == null) {
                     continue;
                 }
-                cookie = cookie.trim();
                 try {
+                    cookie = cookie.trim();
                     String[] keyValue = cookie.split("\\=");
-                    if (keyValue == null) {
-                        System.err.println("error expected cookie");
-                    } else if (keyValue.length == 1) {
+                    if (keyValue.length == 1) {
                         responce.cookies.put(keyValue[0], null);
                     } else {
-                        responce.cookies.put(keyValue[0], cookie.substring(keyValue[0].length() + 1, cookie.length()));
+                        responce.cookies.put(keyValue[0], cookie.substring(keyValue[0].length() + 1));
                     }
                 } catch (Exception e) {
                     e.printStackTrace();

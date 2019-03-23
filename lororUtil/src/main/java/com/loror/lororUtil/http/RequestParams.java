@@ -14,7 +14,7 @@ import java.util.List;
 public class RequestParams {
 
     private final String JSONKEY = "RequestParamsAsJson";
-    private HashMap<String, String> parmas = new HashMap<String, String>();
+    private HashMap<String, String> params = new HashMap<String, String>();
     private List<FileBody> files = new ArrayList<FileBody>();
     protected HashMap<String, String> head = new HashMap<String, String>();
     private RequestConverter getConverter, postConverter, bodyConverter;
@@ -41,6 +41,9 @@ public class RequestParams {
         RequestParams.defaultNullToEmpty = defaultNullToEmpty;
     }
 
+    /**
+     * 获取所有文件
+     */
     public List<FileBody> getFiles() {
         return files;
     }
@@ -54,17 +57,24 @@ public class RequestParams {
     }
 
     /**
+     * 获取所有header
+     */
+    public HashMap<String, String> getHeader() {
+        return head;
+    }
+
+    /**
      * 添加参数
      */
     public void asJson(String json) {
-        parmas.put(JSONKEY, json);
+        params.put(JSONKEY, json);
     }
 
     /**
      * 是否已设置提交方式为json
      */
     public boolean isAsJson() {
-        return parmas.containsKey(JSONKEY);
+        return params.containsKey(JSONKEY);
     }
 
     /**
@@ -92,6 +102,10 @@ public class RequestParams {
         for (int i = 0; i < fields.length; i++) {
             Field field = fields[i];
             field.setAccessible(true);
+            //transient|static修饰(10001000)，放弃
+            if ((field.getModifiers() & 136) != 0) {
+                continue;
+            }
             try {
                 String key = field.getName();
                 Object value = field.get(object);
@@ -153,7 +167,7 @@ public class RequestParams {
      */
     public RequestParams addParams(String key, String value) {
         if (key != null) {
-            parmas.put(key, value);
+            params.put(key, value);
         }
         return this;
     }
@@ -170,15 +184,15 @@ public class RequestParams {
     /**
      * 获取参数
      */
-    public String getParma(String key) {
-        return parmas.get(key);
+    public String getParam(String key) {
+        return params.get(key);
     }
 
     /**
      * 获取所有参数
      */
-    public HashMap<String, String> getParmas() {
-        return parmas;
+    public HashMap<String, String> getParams() {
+        return params;
     }
 
     /**
@@ -206,16 +220,16 @@ public class RequestParams {
      * 打包参数
      */
     protected String packetOutParams(String method) {
-        if ("POST".equals(method) && parmas.containsKey(JSONKEY)) {
-            return parmas.get(JSONKEY);
+        if ("POST".equals(method) && params.containsKey(JSONKEY)) {
+            return params.get(JSONKEY);
         }
         String str = "";
         StringBuilder sb = new StringBuilder();
-        for (String o : parmas.keySet()) {
+        for (String o : params.keySet()) {
             if (JSONKEY.equals(o)) {
                 continue;
             }//不拼接json
-            String value = parmas.get(o);
+            String value = params.get(o);
             if (value != null && value.startsWith("array{")) {
                 value = value.substring(6, value.length() - 1);
                 String[] values = value.split(",");
@@ -238,6 +252,9 @@ public class RequestParams {
         return bodyConverter == null ? str : bodyConverter.convert(method, str);
     }
 
+    /**
+     * 最终拼接
+     */
     private final void append(String method, StringBuilder sb, String key, String value) {
         if (defaultNullToEmpty && value == null) {
             value = "";
@@ -272,23 +289,47 @@ public class RequestParams {
     @Override
     public String toString() {
         StringBuilder buffer = new StringBuilder();
-        buffer.append("[");
-        for (String o : parmas.keySet()) {
-            buffer.append(o)
-                    .append("=")
-                    .append(parmas.get(o))
-                    .append(",");
-        }
-        for (FileBody fileBody : files) {
-            buffer.append(fileBody.getKey())
-                    .append("=")
-                    .append(fileBody.getName())
-                    .append(",");
-        }
-        if (buffer.length() > 1) {
+        buffer.append("{");
+        buffer.append("[headers:");
+        if (head.size() > 0) {
+            for (String o : head.keySet()) {
+                buffer.append(o)
+                        .append("=")
+                        .append(head.get(o))
+                        .append(",");
+            }
             buffer.deleteCharAt(buffer.length() - 1);
+        } else {
+            buffer.append("empty");
+        }
+        buffer.append("]\n");
+        buffer.append("[params:");
+        if (params.size() > 0) {
+            for (String o : params.keySet()) {
+                buffer.append(o)
+                        .append("=")
+                        .append(params.get(o))
+                        .append(",");
+            }
+            buffer.deleteCharAt(buffer.length() - 1);
+        } else {
+            buffer.append("empty");
+        }
+        buffer.append("]\n");
+        buffer.append("[files:");
+        if (files.size() > 0) {
+            for (FileBody fileBody : files) {
+                buffer.append(fileBody.getKey())
+                        .append("=")
+                        .append(fileBody.getName())
+                        .append(",");
+            }
+            buffer.deleteCharAt(buffer.length() - 1);
+        } else {
+            buffer.append("empty");
         }
         buffer.append("]");
+        buffer.append("}");
         return buffer.toString();
     }
 }
