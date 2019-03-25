@@ -12,6 +12,8 @@ import android.widget.GridView;
 import android.widget.Toast;
 
 import com.loror.lororUtil.flyweight.ObjectPool;
+import com.loror.lororUtil.sql.ConditionBuilder;
+import com.loror.lororUtil.sql.Order;
 import com.loror.lororUtil.sql.SQLiteUtil;
 import com.loror.lororUtil.view.Click;
 import com.loror.lororUtil.view.Find;
@@ -55,6 +57,12 @@ public class MainActivity extends AppCompatActivity {
         }
         images.addAll(util.getAll(Image.class));
         Log.e("TAG_", images.size() + " == count");
+        List<Image> images = util.getByCondition(ConditionBuilder.builder()
+                .withOrder("id", Order.ORDER_DESC)
+                .withPagination(1, 5), Image.class);
+        for (int i = 0; i < images.size(); i++) {
+            Log.e("TAG_", images.get(i) + " == image");
+        }
         util.close();
         adapter.notifyDataSetChanged();
     }

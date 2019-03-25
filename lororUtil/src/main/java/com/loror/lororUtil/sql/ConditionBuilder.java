@@ -12,6 +12,7 @@ public class ConditionBuilder {
     private List<Condition> conditions = new ArrayList<>();
     private List<Order> orders = new ArrayList<>();
     private Page page;
+    private boolean hasNull;
 
     private ConditionBuilder() {
 
@@ -36,6 +37,10 @@ public class ConditionBuilder {
         return orders;
     }
 
+    public boolean isHasNull() {
+        return hasNull;
+    }
+
     /**
      * 分页
      */
@@ -56,15 +61,17 @@ public class ConditionBuilder {
      * 增加条件
      */
     public ConditionBuilder addIdCondition(Object column) {
-        conditions.add(new Condition("id", "=", String.valueOf(column)));
-        return this;
+        return addIdCondition(column == null ? "is" : "=", column);
     }
 
     /**
      * 增加条件
      */
     public ConditionBuilder addIdCondition(String operator, Object column) {
-        conditions.add(new Condition("id", operator, String.valueOf(column)));
+        if (column == null) {
+            hasNull = true;
+        }
+        conditions.add(new Condition("id", operator, column == null ? null : String.valueOf(column)));
         return this;
     }
 
@@ -72,15 +79,17 @@ public class ConditionBuilder {
      * 增加条件
      */
     public ConditionBuilder addCondition(String key, Object column) {
-        conditions.add(new Condition(key, "=", String.valueOf(column)));
-        return this;
+        return addCondition(key, column == null ? "is" : "=", column);
     }
 
     /**
      * 增加条件
      */
     public ConditionBuilder addCondition(String key, String operator, Object column) {
-        conditions.add(new Condition(key, operator, String.valueOf(column)));
+        if (column == null) {
+            hasNull = true;
+        }
+        conditions.add(new Condition(key, operator, column == null ? null : String.valueOf(column)));
         return this;
     }
 
@@ -88,58 +97,58 @@ public class ConditionBuilder {
      * 增加条件
      */
     public ConditionBuilder addOrCondition(String key, Object column) {
-        conditions.add(new Condition(key, "=", String.valueOf(column), 1));
-        return this;
+        return addOrCondition(key, column == null ? "is" : "=", column);
     }
 
     /**
      * 增加条件
      */
     public ConditionBuilder addOrCondition(String key, String operator, Object column) {
-        conditions.add(new Condition(key, operator, String.valueOf(column), 1));
+        if (column == null) {
+            hasNull = true;
+        }
+        conditions.add(new Condition(key, operator, column == null ? null : String.valueOf(column), 1));
         return this;
     }
 
     /**
-     * 增加条件
+     * 追加条件
      */
     public ConditionBuilder withCondition(String key, Object column) {
-        if (conditions.size() > 0) {
-            Condition condition = conditions.get(conditions.size() - 1);
-            condition.addCondition(new Condition(key, "=", String.valueOf(column)));
-        }
-        return this;
+        return withCondition(key, column == null ? "is" : "=", column);
     }
 
     /**
-     * 增加条件
+     * 追加条件
      */
     public ConditionBuilder withCondition(String key, String operator, Object column) {
         if (conditions.size() > 0) {
+            if (column == null) {
+                hasNull = true;
+            }
             Condition condition = conditions.get(conditions.size() - 1);
-            condition.addCondition(new Condition(key, operator, String.valueOf(column)));
+            condition.addCondition(new Condition(key, operator, column == null ? null : String.valueOf(column)));
         }
         return this;
     }
 
     /**
-     * 增加条件
+     * 追加条件
      */
     public ConditionBuilder withOrCondition(String key, Object column) {
-        if (conditions.size() > 0) {
-            Condition condition = conditions.get(conditions.size() - 1);
-            condition.addCondition(new Condition(key, "=", String.valueOf(column), 1));
-        }
-        return this;
+        return withOrCondition(key, column == null ? "is" : "=", column);
     }
 
     /**
-     * 增加条件
+     * 追加条件
      */
     public ConditionBuilder withOrCondition(String key, String operator, Object column) {
         if (conditions.size() > 0) {
+            if (column == null) {
+                hasNull = true;
+            }
             Condition condition = conditions.get(conditions.size() - 1);
-            condition.addCondition(new Condition(key, operator, String.valueOf(column), 1));
+            condition.addCondition(new Condition(key, operator, column == null ? null : String.valueOf(column), 1));
         }
         return this;
     }
@@ -206,17 +215,14 @@ public class ConditionBuilder {
                 builder.append(" where ");
             }
             Condition that = conditions.get(i).getCondition();
-            if (that == null) {
-                builder.append(conditions.get(i).getKey());
-                builder.append(" ");
-                builder.append(conditions.get(i).getOperator());
-                builder.append(" ?");
-            } else {
+            if (that != null) {
                 builder.append("(");
-                builder.append(conditions.get(i).getKey());
-                builder.append(" ");
-                builder.append(conditions.get(i).getOperator());
-                builder.append(" ?");
+            }
+            builder.append(conditions.get(i).getKey());
+            builder.append(" ");
+            builder.append(conditions.get(i).getOperator());
+            builder.append(" ?");
+            if (that != null) {
                 do {
                     builder.append(that.getType() == 0 ? " and " : " or ");
                     builder.append(that.getKey());
@@ -250,5 +256,10 @@ public class ConditionBuilder {
             }
         }
         return array.toArray(new String[0]);
+    }
+
+    @Override
+    public String toString() {
+        return getConditions();
     }
 }

@@ -10,4 +10,9 @@ public class Image {
     public long id;
     @Column(notNull = true)
     public String path;
+
+    @Override
+    public String toString() {
+        return "{id=" + id + ",path=" + path + "}";
+    }
 }

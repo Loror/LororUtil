@@ -138,7 +138,7 @@ public class SQLiteUtil {
         cursor.close();
         List<String> newColumnNames = new ArrayList<>();
         HashMap<String, Class> objectHashMap = new HashMap<>();
-        boolean hasId = false;
+        String idName = null;
         Field[] fields = table.getDeclaredFields();
         int i;
         for (i = 0; i < fields.length; i++) {
@@ -159,14 +159,14 @@ public class SQLiteUtil {
             } else {
                 Id id = (Id) field.getAnnotation(Id.class);
                 if (id != null) {
-                    hasId = true;
+                    idName = id.name().length() == 0 ? "id" : id.name();
                 }
             }
         }
         List<String> different = new ArrayList<>();
         for (i = 0; i < columnNames.length; i++) {
             String columnName = columnNames[i];
-            if (hasId && "id".equals(columnName)) {
+            if (idName != null && idName.equals(columnName)) {
                 continue;
             }
             boolean remove = newColumnNames.remove(columnName);
@@ -324,11 +324,18 @@ public class SQLiteUtil {
      */
     public <T> T getFirstByCondition(ConditionBuilder conditionBuilder, Class<T> table) {
         T entity = null;
-        Cursor cursor = database
-                .rawQuery(
-                        "select * from " + TableFinder.getTableName(table)
-                                + conditionBuilder.getNoColumnConditionsWithoutPage() + " limit 0,2",
-                        conditionBuilder.getColumnArray());
+        Cursor cursor = null;
+        if (conditionBuilder.isHasNull()) {
+            cursor = database.rawQuery(
+                    "select * from " + TableFinder.getTableName(table)
+                            + conditionBuilder.getConditionsWithoutPage() + " limit 0,2",
+                    null);
+        } else {
+            cursor = database.rawQuery(
+                    "select * from " + TableFinder.getTableName(table)
+                            + conditionBuilder.getNoColumnConditionsWithoutPage() + " limit 0,2",
+                    conditionBuilder.getColumnArray());
+        }
         if (cursor.moveToNext()) {
             try {
                 entity = (T) newInstance(table);
@@ -350,9 +357,16 @@ public class SQLiteUtil {
      */
     public <T> List<T> getByCondition(ConditionBuilder conditionBuilder, Class<T> table) {
         List<T> entitys = new ArrayList<>();
-        Cursor cursor = database.rawQuery(
-                "select * from " + TableFinder.getTableName(table) + conditionBuilder.getNoColumnConditions(),
-                conditionBuilder.getColumnArray());
+        Cursor cursor = null;
+        if (conditionBuilder.isHasNull()) {
+            cursor = database.rawQuery(
+                    "select * from " + TableFinder.getTableName(table) + conditionBuilder.getConditions(),
+                    null);
+        } else {
+            cursor = database.rawQuery(
+                    "select * from " + TableFinder.getTableName(table) + conditionBuilder.getNoColumnConditions(),
+                    conditionBuilder.getColumnArray());
+        }
         while (cursor.moveToNext()) {
             try {
                 T entity = (T) newInstance(table);
@@ -418,9 +432,16 @@ public class SQLiteUtil {
      */
     public int countByCondition(ConditionBuilder conditionBuilder, Class<?> table) {
         int count = 0;
-        Cursor cursor = database.rawQuery(
-                "select count(1) from " + TableFinder.getTableName(table) + conditionBuilder.getNoColumnConditions(),
-                conditionBuilder.getColumnArray());
+        Cursor cursor = null;
+        if (conditionBuilder.isHasNull()) {
+            cursor = database.rawQuery(
+                    "select count(1) from " + TableFinder.getTableName(table) + conditionBuilder.getConditions(),
+                    null);
+        } else {
+            cursor = database.rawQuery(
+                    "select count(1) from " + TableFinder.getTableName(table) + conditionBuilder.getNoColumnConditions(),
+                    conditionBuilder.getColumnArray());
+        }
         if (cursor.moveToNext()) {
             try {
                 count = cursor.getInt(0);

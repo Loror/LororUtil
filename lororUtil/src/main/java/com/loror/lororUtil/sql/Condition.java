@@ -12,9 +12,7 @@ public class Condition {
     private Condition condition;
 
     public Condition(String key, String operator, String column) {
-        this.key = key;
-        this.operator = operator;
-        this.column = column;
+        this(key, operator, column, 0);
     }
 
     public Condition(String key, String operator, String column, int type) {
@@ -72,29 +70,32 @@ public class Condition {
     public String toString() {
         StringBuilder builder = new StringBuilder();
         Condition that = condition;
-        if (that == null) {
-            builder.append(key);
-            builder.append(" ");
-            builder.append(operator);
-            builder.append(" '");
-            builder.append(column);
-            builder.append("'");
-        } else {
+        if (that != null) {
             builder.append("(");
-            builder.append(key);
-            builder.append(" ");
-            builder.append(operator);
+        }
+        builder.append(key);
+        builder.append(" ");
+        builder.append(operator);
+        if (column == null) {
+            builder.append(" null");
+        } else {
             builder.append(" '");
             builder.append(column);
             builder.append("'");
+        }
+        if (that != null) {
             do {
                 builder.append(that.getType() == 0 ? " and " : " or ");
                 builder.append(that.getKey());
                 builder.append(" ");
                 builder.append(that.getOperator());
-                builder.append(" '");
-                builder.append(that.getColumn());
-                builder.append("'");
+                if (that.getColumn() == null) {
+                    builder.append(" null");
+                } else {
+                    builder.append(" '");
+                    builder.append(that.getColumn());
+                    builder.append("'");
+                }
             } while ((that = that.getCondition()) != null);
             builder.append(")");
         }
