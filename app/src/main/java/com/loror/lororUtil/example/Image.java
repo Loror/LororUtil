@@ -8,7 +8,7 @@ import com.loror.lororUtil.sql.Table;
 public class Image {
     @Id
     public long id;
-    @Column(notNull = true)
+    @Column(notNull = true, encryption = Code.class)
     public String path;
 
     @Override
