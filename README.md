@@ -62,9 +62,10 @@ ImageUtil后台读取图片接口
     * 方法asyncPost(final String urlStr, final RequestParams parmas, final AsyncClient<Responce> asyncClient) 异步Post请求，已有AsyncClient实现类DefaultAsyncClient可用
     * 方法asyncGet(final String urlStr, final RequestParams parmas, final AsyncClient<Responce> asyncClient) 异步Get请求，已有AsyncClient实现类DefaultAsyncClient可用
     * 方法download(String urlStr, String path, boolean cover) 通过http下载文件，路径为文件夹路径时将以服务器端文件名存储到该文件下，若为文件路径则直接存储，cover为false时先检查服务器端文件与本地文件大小是否一致，不一致方下载文件，否则忽略，cover为true时不检查直接覆盖下载
-    * 方法downloadInPeice(String urlStr, String path, long start, long end) 断点下载，该方法含同步锁，若需多线程下载文件，应实例化多个HttpClient对象
+    * 方法downloadInPeice(String urlStr, String path, long start, long end) 断点下载
     * 方法cancel() 取消当前请求
     * 方法setProgressListener(ProgressListener progressListener) 设置下载或上传文件进度监听
+    * 一个对象只能注册一个监听，若需监听多个请求，应实例化多个HttpClient对象避免混乱
 
 
 * 类HttpsClient

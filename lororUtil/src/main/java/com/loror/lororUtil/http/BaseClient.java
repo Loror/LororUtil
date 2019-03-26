@@ -116,7 +116,7 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
     }
 
     @Override
-    public synchronized Responce get(String urlStr, RequestParams parmas) {
+    public Responce get(String urlStr, RequestParams parmas) {
         Responce responce = new Responce();
         try {
             if (parmas != null) {
@@ -150,7 +150,11 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
     }
 
     @Override
-    public synchronized Responce post(String urlStr, RequestParams parmas) {
+    public Responce post(String urlStr, RequestParams parmas) {
+        return post(urlStr, parmas, null);
+    }
+
+    protected Responce post(String urlStr, RequestParams parmas, Excutor excutor) {
         if (parmas == null || parmas.getFiles().size() == 0) {
             Responce responce = new Responce();
             try {
@@ -209,7 +213,7 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
                 if (files != null) {
                     int index = 0;
                     for (FileBody file : files) {
-                        upLoadFile(file, index, out);
+                        upLoadFile(file, index, out, excutor);
                         index++;
                     }
                 } // 上传文件
@@ -231,23 +235,33 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
                 conn = null;
                 if (responce.result == null) {
                     if (progressListener != null) {
-                        postRunnable(new Runnable() {
+                        Runnable runnable = new Runnable() {
 
                             @Override
                             public void run() {
                                 progressListener.failed();
                             }
-                        });
+                        };
+                        if (excutor != null) {
+                            excutor.run(runnable);
+                        } else {
+                            runnable.run();
+                        }
                     }
                 } else {
                     if (progressListener != null) {
-                        postRunnable(new Runnable() {
+                        Runnable runnable = new Runnable() {
 
                             @Override
                             public void run() {
                                 progressListener.finish(responce.toString());
                             }
-                        });
+                        };
+                        if (excutor != null) {
+                            excutor.run(runnable);
+                        } else {
+                            runnable.run();
+                        }
                     }
                 }
             }
@@ -256,7 +270,11 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
     }
 
     @Override
-    public synchronized Responce put(String urlStr, RequestParams parmas) {
+    public Responce put(String urlStr, RequestParams parmas) {
+        return put(urlStr, parmas, null);
+    }
+
+    protected Responce put(String urlStr, RequestParams parmas, Excutor excutor) {
         if (parmas == null || parmas.getFiles().size() == 0) {
             Responce responce = new Responce();
             try {
@@ -315,7 +333,7 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
                 if (files != null) {
                     int index = 0;
                     for (FileBody file : files) {
-                        upLoadFile(file, index, out);
+                        upLoadFile(file, index, out, excutor);
                         index++;
                     }
                 } // 上传文件
@@ -337,23 +355,33 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
                 conn = null;
                 if (responce.result == null) {
                     if (progressListener != null) {
-                        postRunnable(new Runnable() {
+                        Runnable runnable = new Runnable() {
 
                             @Override
                             public void run() {
                                 progressListener.failed();
                             }
-                        });
+                        };
+                        if (excutor != null) {
+                            excutor.run(runnable);
+                        } else {
+                            runnable.run();
+                        }
                     }
                 } else {
                     if (progressListener != null) {
-                        postRunnable(new Runnable() {
+                        Runnable runnable = new Runnable() {
 
                             @Override
                             public void run() {
                                 progressListener.finish(responce.toString());
                             }
-                        });
+                        };
+                        if (excutor != null) {
+                            excutor.run(runnable);
+                        } else {
+                            runnable.run();
+                        }
                     }
                 }
             }
@@ -362,7 +390,7 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
     }
 
     @Override
-    public synchronized Responce delete(String urlStr, RequestParams parmas) {
+    public Responce delete(String urlStr, RequestParams parmas) {
         Responce responce = new Responce();
         try {
             if (parmas != null) {
@@ -411,18 +439,23 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
     /**
      * 上传一个文件
      */
-    private void upLoadFile(FileBody file, final int index, OutputStream out) throws Throwable {
+    private void upLoadFile(FileBody file, final int index, OutputStream out, Excutor excutor) throws Throwable {
         if (file == null || file.getFile() == null) {
             return;
         }
         if (progressListener instanceof DetailProgressListener) {
-            postRunnable(new Runnable() {
+            Runnable runnable = new Runnable() {
 
                 @Override
                 public void run() {
                     ((DetailProgressListener) progressListener).fileIndex(index);
                 }
-            });
+            };
+            if (excutor != null) {
+                excutor.run(runnable);
+            } else {
+                runnable.run();
+            }
         }
         StringBuilder sb = new StringBuilder();
         sb.append(Config.PREFIX);
@@ -435,14 +468,14 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
         sb.append(Config.LINEND);
         out.write(sb.toString().getBytes());
 
-        sendFile(file.getFile(), out);
+        sendFile(file.getFile(), out, excutor);
         out.write(Config.LINEND.getBytes());
     }
 
     /**
      * 通过流发送文件
      */
-    private void sendFile(File file, OutputStream os) throws Throwable {
+    private void sendFile(File file, OutputStream os, Excutor excutor) throws Throwable {
         FileInputStream fis = new FileInputStream(file);
         final long length = file.length();
         long lastTime = System.currentTimeMillis(), transed = 0;
@@ -459,13 +492,18 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
                 final int progress = (int) (transed * 100 / length);
                 final int finalSpeed = speed;
                 if (progressListener != null) {
-                    postRunnable(new Runnable() {
+                    Runnable runnable = new Runnable() {
 
                         @Override
                         public void run() {
                             progressListener.transing(progress, (int) (finalSpeed * 1000L / timeGo), length);
                         }
-                    });
+                    };
+                    if (excutor != null) {
+                        excutor.run(runnable);
+                    } else {
+                        runnable.run();
+                    }
                 }
                 speed = 0;
                 lastTime = now;
@@ -474,13 +512,18 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
         if (progressListener != null) {
             final long timeGo = (System.currentTimeMillis() - lastTime);
             final int finalSpeed = speed;
-            postRunnable(new Runnable() {
+            Runnable runnable = new Runnable() {
 
                 @Override
                 public void run() {
                     progressListener.transing(100, timeGo == 0 ? 0 : (int) (finalSpeed * 1000L / timeGo), length);
                 }
-            });
+            };
+            if (excutor != null) {
+                excutor.run(runnable);
+            } else {
+                runnable.run();
+            }
         }
         fis.close();
     }
@@ -488,7 +531,7 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
     /**
      * 通过流接受文件
      */
-    private void downloadFile(File file, final long length, InputStream is) throws Throwable {
+    private void downloadFile(File file, final long length, InputStream is, Excutor excutor) throws Throwable {
         long last = System.currentTimeMillis(), transed = 0;
         FileOutputStream fos = new FileOutputStream(file);
         byte[] out = new byte[1024 * 100];
@@ -505,13 +548,18 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
                 final int progress = (int) (transed * 1.0 / length * 100);
                 final int finalSpeed = speed;
                 if (progressListener != null) {
-                    postRunnable(new Runnable() {
+                    Runnable runnable = new Runnable() {
 
                         @Override
                         public void run() {
                             progressListener.transing(progress, (int) (finalSpeed * 1000L / timeGo), length);
                         }
-                    });
+                    };
+                    if (excutor != null) {
+                        excutor.run(runnable);
+                    } else {
+                        runnable.run();
+                    }
                 }
                 speed = 0;
                 last = now;
@@ -520,13 +568,18 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
         if (progressListener != null) {
             final long timeGo = (System.currentTimeMillis() - last);
             final int finalSpeed = speed;
-            postRunnable(new Runnable() {
+            Runnable runnable = new Runnable() {
 
                 @Override
                 public void run() {
                     progressListener.transing(100, timeGo == 0 ? 0 : (int) (finalSpeed * 1000L / timeGo), length);
                 }
-            });
+            };
+            if (excutor != null) {
+                excutor.run(runnable);
+            } else {
+                runnable.run();
+            }
         }
         is.close();
         fos.close();
@@ -535,7 +588,11 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
     /**
      * 下载文件
      */
-    public synchronized Responce download(String urlStr, String path, boolean cover) {
+    public Responce download(String urlStr, String path, boolean cover) {
+        return download(urlStr, path, cover, null);
+    }
+
+    protected Responce download(String urlStr, String path, boolean cover, Excutor excutor) {
         final Responce responce = new Responce();
         try {
             if (!checkState()) {
@@ -555,7 +612,7 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
             if (file.exists() && !cover && file.length() == length) {
                 conn.disconnect();
             } else {
-                downloadFile(file, length, conn.getInputStream());
+                downloadFile(file, length, conn.getInputStream(), excutor);
                 if (responce.code == HttpURLConnection.HTTP_OK) {
                     initHeaders(conn, responce);
                 }
@@ -567,23 +624,33 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
             conn = null;
             if (responce.result == null) {
                 if (progressListener != null) {
-                    postRunnable(new Runnable() {
+                    Runnable runnable = new Runnable() {
 
                         @Override
                         public void run() {
                             progressListener.failed();
                         }
-                    });
+                    };
+                    if (excutor != null) {
+                        excutor.run(runnable);
+                    } else {
+                        runnable.run();
+                    }
                 }
             } else {
                 if (progressListener != null) {
-                    postRunnable(new Runnable() {
+                    Runnable runnable = new Runnable() {
 
                         @Override
                         public void run() {
                             progressListener.finish(responce.toString());
                         }
-                    });
+                    };
+                    if (excutor != null) {
+                        excutor.run(runnable);
+                    } else {
+                        runnable.run();
+                    }
                 }
             }
         }
@@ -593,7 +660,11 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
     /**
      * 断点续传下载
      */
-    public synchronized Responce downloadInPeice(String urlStr, String path, long start, long end) {
+    public Responce downloadInPiece(String urlStr, String path, long start, long end) {
+        return downloadInPiece(urlStr, path, start, end, null);
+    }
+
+    protected Responce downloadInPiece(String urlStr, String path, long start, long end, Excutor excutor) {
         final Responce responce = new Responce();
         try {
             if (!checkState()) {
@@ -613,7 +684,7 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
             responce.url = conn.getURL();
             responce.code = conn.getResponseCode();
             long length = length(conn);
-            downloadFile(file, length, conn.getInputStream());
+            downloadFile(file, length, conn.getInputStream(), excutor);
             if (responce.code == HttpURLConnection.HTTP_PARTIAL) {
                 initHeaders(conn, responce);
             }
@@ -625,23 +696,33 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
             conn = null;
             if (responce.result == null) {
                 if (progressListener != null) {
-                    postRunnable(new Runnable() {
+                    Runnable runnable = new Runnable() {
 
                         @Override
                         public void run() {
                             progressListener.failed();
                         }
-                    });
+                    };
+                    if (excutor != null) {
+                        excutor.run(runnable);
+                    } else {
+                        runnable.run();
+                    }
                 }
             } else {
                 if (progressListener != null) {
-                    postRunnable(new Runnable() {
+                    Runnable runnable = new Runnable() {
 
                         @Override
                         public void run() {
                             progressListener.finish(responce.toString());
                         }
-                    });
+                    };
+                    if (excutor != null) {
+                        excutor.run(runnable);
+                    } else {
+                        runnable.run();
+                    }
                 }
             }
         }
@@ -664,13 +745,6 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
             System.out.println("cannot get contentlength");
         }
         return length;
-    }
-
-    /**
-     * 提交runable
-     */
-    protected void postRunnable(Runnable runnable) {
-        runnable.run();
     }
 
     @SuppressLint("NewApi")
