@@ -60,24 +60,6 @@ public class ConditionBuilder {
     /**
      * 增加条件
      */
-    public ConditionBuilder addIdCondition(Object column) {
-        return addIdCondition(column == null ? "is" : "=", column);
-    }
-
-    /**
-     * 增加条件
-     */
-    public ConditionBuilder addIdCondition(String operator, Object column) {
-        if (column == null) {
-            hasNull = true;
-        }
-        conditions.add(new Condition("id", operator, column == null ? null : String.valueOf(column)));
-        return this;
-    }
-
-    /**
-     * 增加条件
-     */
     public ConditionBuilder addCondition(String key, Object column) {
         return addCondition(key, column == null ? "is" : "=", column);
     }

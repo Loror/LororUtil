@@ -138,6 +138,7 @@ public class SQLiteUtil {
         cursor.close();
         List<String> newColumnNames = new ArrayList<>();
         HashMap<String, Class> objectHashMap = new HashMap<>();
+        HashMap<String, Column> columnHashMap = new HashMap<>();
         String idName = null;
         Field[] fields = table.getDeclaredFields();
         int i;
@@ -147,10 +148,11 @@ public class SQLiteUtil {
             Column column = field.getAnnotation(Column.class);
             if (column != null) {
                 String columnName = column.name();
-                if ("".equals(columnName)) {
+                if (columnName.length() == 0) {
                     columnName = field.getName();
                 }
                 newColumnNames.add(columnName);
+                columnHashMap.put(columnName, column);
                 try {
                     objectHashMap.put(columnName, field.getType());
                 } catch (Exception e1) {
@@ -186,8 +188,14 @@ public class SQLiteUtil {
             } else if (objectType == Float.class || objectType == float.class || objectType == Double.class || objectType == double.class) {
                 type = "real";
             }
+            Column column = columnHashMap.get(newColumnNames.get(i));
+            String defaultValue = column.defaultValue();
+            if (defaultValue.length() != 0 && column.encryption() != Encryption.class) {
+                defaultValue = TableFinder.getEncryption(column.encryption()).encrypt(defaultValue);
+            }
             database.execSQL("ALTER TABLE '" + TableFinder.getTableName(table) + "' ADD COLUMN '"
-                    + newColumnNames.get(i) + "' " + type);
+                    + newColumnNames.get(i) + "' " + type
+                    + (defaultValue.length() == 0 ? "" : (" default '" + defaultValue.replace("'", "''") + "'")));
         }
         database.setTransactionSuccessful();
         database.endTransaction();
@@ -226,7 +234,7 @@ public class SQLiteUtil {
      * 删除数据
      */
     public void delete(Object entity) {
-        database.execSQL(TableFinder.getdeleteSql(entity));
+        database.execSQL(TableFinder.getDeleteSql(entity));
         if (mitiProgress) {
             SQLiteDatabase.releaseMemory();
         }

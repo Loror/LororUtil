@@ -49,16 +49,27 @@ public class TableFinder {
                     if (columnName.length() == 0) {
                         columnName = field.getName();
                     }
+                    String defaultValue = column.defaultValue();
+                    if (defaultValue.length() != 0 && column.encryption() != Encryption.class) {
+                        defaultValue = getEncryption(column.encryption()).encrypt(defaultValue);
+                    }
                     Class<?> type = field.getType();
                     if (type == int.class || type == long.class || type == Integer.class || type == Long.class) {
                         builder.append(columnName)
-                                .append(" int,");
+                                .append(" int");
                     } else if (type == float.class || type == double.class || type == Float.class || type == Double.class) {
                         builder.append(columnName)
-                                .append(" real,");
+                                .append(" real");
                     } else if (type == String.class) {
                         builder.append(columnName)
-                                .append(" text,");
+                                .append(" text");
+                    }
+                    if (defaultValue.length() == 0) {
+                        builder.append(",");
+                    } else {
+                        builder.append(" default '")
+                                .append(defaultValue.replace("'", "''"))
+                                .append("',");
                     }
                     columnCount++;
                 } else {
@@ -79,7 +90,7 @@ public class TableFinder {
             }
         }
         if (columnCount == 0) {
-            throw new IllegalStateException("this object does not contains any colume");
+            throw new IllegalStateException("this object does not contains any column");
         }
         if (mainCount > 1) {
             throw new IllegalStateException("cannot contain more than 1 primary key");
@@ -127,10 +138,14 @@ public class TableFinder {
                         }
                         columns.put(columnName, value);
                     } else {
-                        if (column.notNull() && "".equals(column.defaultValue())) {
+                        if (column.notNull() && column.defaultValue().length() == 0) {
                             throw new NullPointerException("column " + columnName + " can not be null");
                         }
-                        columns.put(columnName, "".equals(column.defaultValue()) ? null : column.defaultValue());
+                        String defaultValue = column.defaultValue();
+                        if (defaultValue.length() != 0 && column.encryption() != Encryption.class) {
+                            defaultValue = getEncryption(column.encryption()).encrypt(defaultValue);
+                        }
+                        columns.put(columnName, defaultValue.length() == 0 ? null : defaultValue);
                     }
                 } else {
                     Id id = (Id) field.getAnnotation(Id.class);
@@ -151,7 +166,7 @@ public class TableFinder {
             }
         }
         if (columns.size() == 0) {
-            throw new IllegalStateException("this object does not contains any colume");
+            throw new IllegalStateException("this object does not contains any column");
         }
         StringBuilder builder = new StringBuilder();
         builder.append("update ")
@@ -160,10 +175,10 @@ public class TableFinder {
         for (String o : columns.keySet()) {
             if (columns.get(o) == null) {
                 builder.append(o)
-                        .append("= null ,");
+                        .append(" = null,");
             } else {
                 builder.append(o)
-                        .append("='")
+                        .append(" = '")
                         .append(columns.get(o).replace("'", "''"))
                         .append("',");
             }
@@ -205,14 +220,18 @@ public class TableFinder {
                         }
                         columns.put(columnName, value);
                     } else {
-                        if (column.notNull()) {
-                            if (column.defaultValue().length() == 0) {
+                        if (column.defaultValue().length() == 0) {
+                            if (column.notNull()) {
                                 throw new NullPointerException("column " + columnName + " can not be null");
-                            } else {
-                                columns.put(columnName, column.defaultValue());
                             }
+                            columns.put(columnName, null);
+                        } else {
+                            String defaultValue = column.defaultValue();
+                            if (column.encryption() != Encryption.class) {
+                                defaultValue = getEncryption(column.encryption()).encrypt(defaultValue);
+                            }
+                            columns.put(columnName, defaultValue);
                         }
-
                     }
                 } else {
                     Id id = (Id) field.getAnnotation(Id.class);
@@ -235,16 +254,20 @@ public class TableFinder {
             }
         }
         if (columns.size() == 0) {
-            throw new IllegalStateException("this object does not contains any colume");
+            throw new IllegalStateException("this object does not contains any column");
         }
         StringBuilder keys = new StringBuilder();
         StringBuilder values = new StringBuilder();
         for (String o : columns.keySet()) {
             keys.append(o)
                     .append(",");
-            values.append("'")
-                    .append(columns.get(o).replace("'", "''"))
-                    .append("',");
+            if (columns.get(o) == null) {
+                values.append("null,");
+            } else {
+                values.append("'")
+                        .append(columns.get(o).replace("'", "''"))
+                        .append("',");
+            }
         }
         keys.deleteCharAt(keys.length() - 1);
         values.deleteCharAt(values.length() - 1);
@@ -254,7 +277,7 @@ public class TableFinder {
     /**
      * 获得删除语句
      */
-    public static String getdeleteSql(Object entity) {
+    public static String getDeleteSql(Object entity) {
         String tableName = getTableName(entity.getClass());
         HashMap<String, String> columns = new HashMap<>();
         Class<?> handlerType = entity.getClass();
@@ -279,6 +302,12 @@ public class TableFinder {
                             value = getEncryption(column.encryption()).encrypt(value);
                         }
                         columns.put(columnName, value);
+                    } else {
+                        String defaultValue = column.defaultValue();
+                        if (defaultValue.length() != 0 && column.encryption() != Encryption.class) {
+                            defaultValue = getEncryption(column.encryption()).encrypt(defaultValue);
+                        }
+                        columns.put(columnName, defaultValue.length() == 0 ? null : defaultValue);
                     }
                 } else {
                     Id id = (Id) field.getAnnotation(Id.class);
@@ -300,10 +329,15 @@ public class TableFinder {
                 .append(tableName)
                 .append(" where ");
         for (String o : columns.keySet()) {
-            builder.append(o)
-                    .append("='")
-                    .append(columns.get(o).replace("'", "''"))
-                    .append("' and ");
+            if (columns.get(o) == null) {
+                builder.append(o)
+                        .append(" is null and ");
+            } else {
+                builder.append(o)
+                        .append(" = '")
+                        .append(columns.get(o).replace("'", "''"))
+                        .append("' and ");
+            }
         }
         return builder.toString().substring(0, builder.toString().length() - 5);
     }
@@ -329,19 +363,25 @@ public class TableFinder {
                     }
                     Class<?> type = field.getType();
                     String result = cursor.getString(cursor.getColumnIndex(columnName));
-                    if (result != null && column.encryption() != Encryption.class) {
-                        result = getEncryption(column.encryption()).decrypt(result);
+                    if (result != null) {
+                        if (column.encryption() != Encryption.class) {
+                            result = getEncryption(column.encryption()).decrypt(result);
+                        }
+                    } else if (column.defaultValue().length() != 0) {
+                        result = column.defaultValue();
                     }
-                    if (type == int.class || type == Integer.class) {
-                        field.set(entity, Integer.parseInt(result));
-                    } else if (type == long.class || type == Long.class) {
-                        field.set(entity, Long.parseLong(result));
-                    } else if (type == float.class || type == Float.class) {
-                        field.set(entity, Float.parseFloat(result));
-                    } else if (type == double.class || type == Double.class) {
-                        field.set(entity, Double.parseDouble(result));
-                    } else if (type == String.class) {
-                        field.set(entity, result);
+                    if (result != null) {
+                        if (type == int.class || type == Integer.class) {
+                            field.set(entity, Integer.parseInt(result));
+                        } else if (type == long.class || type == Long.class) {
+                            field.set(entity, Long.parseLong(result));
+                        } else if (type == float.class || type == Float.class) {
+                            field.set(entity, Float.parseFloat(result));
+                        } else if (type == double.class || type == Double.class) {
+                            field.set(entity, Double.parseDouble(result));
+                        } else if (type == String.class) {
+                            field.set(entity, result);
+                        }
                     }
                 } else {
                     Id id = (Id) field.getAnnotation(Id.class);
@@ -368,7 +408,7 @@ public class TableFinder {
 
     private static List<Encryption> encryptions = new ArrayList<>();
 
-    private static Encryption getEncryption(Class<? extends Encryption> encryptionType) throws Exception {
+    protected static Encryption getEncryption(Class<? extends Encryption> encryptionType) {
         Encryption encryption = null;
         for (int i = 0; i < encryptions.size(); i++) {
             if (encryptions.get(i).getClass() == encryptionType) {
@@ -377,7 +417,12 @@ public class TableFinder {
             }
         }
         if (encryption == null) {
-            encryption = encryptionType.newInstance();
+            try {
+                encryption = encryptionType.newInstance();
+            } catch (Exception e) {
+                e.printStackTrace();
+                throw new IllegalArgumentException(encryptionType.getSimpleName() + " have no non parametric constructor");
+            }
         }
         if (encryptions.size() > 10) {
             encryptions.remove(0);
