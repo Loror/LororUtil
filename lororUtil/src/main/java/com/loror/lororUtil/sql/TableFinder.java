@@ -138,10 +138,10 @@ public class TableFinder {
                         }
                         columns.put(columnName, value);
                     } else {
-                        if (column.notNull() && column.defaultValue().length() == 0) {
+                        String defaultValue = column.defaultValue();
+                        if (column.notNull() && defaultValue.length() == 0) {
                             throw new NullPointerException("column " + columnName + " can not be null");
                         }
-                        String defaultValue = column.defaultValue();
                         if (defaultValue.length() != 0 && column.encryption() != Encryption.class) {
                             defaultValue = getEncryption(column.encryption()).encrypt(defaultValue);
                         }
@@ -220,13 +220,13 @@ public class TableFinder {
                         }
                         columns.put(columnName, value);
                     } else {
-                        if (column.defaultValue().length() == 0) {
+                        String defaultValue = column.defaultValue();
+                        if (defaultValue.length() == 0) {
                             if (column.notNull()) {
                                 throw new NullPointerException("column " + columnName + " can not be null");
                             }
                             columns.put(columnName, null);
                         } else {
-                            String defaultValue = column.defaultValue();
                             if (column.encryption() != Encryption.class) {
                                 defaultValue = getEncryption(column.encryption()).encrypt(defaultValue);
                             }
