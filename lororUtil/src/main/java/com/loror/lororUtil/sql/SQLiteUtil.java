@@ -295,7 +295,9 @@ public class SQLiteUtil {
                 TableFinder.find(entity, cursor);
             } catch (Exception e) {
                 e.printStackTrace();
-                Log.e("SQLITE", "create object failed");
+                if (entity == null) {
+                    throw new IllegalArgumentException(table.getSimpleName() + " have no non parametric constructor");
+                }
             }
         }
         cursor.close();
@@ -317,7 +319,9 @@ public class SQLiteUtil {
                 TableFinder.find(entity, cursor);
             } catch (Exception e) {
                 e.printStackTrace();
-                Log.e("SQLITE", "create object failed");
+                if (entity == null) {
+                    throw new IllegalArgumentException(table.getSimpleName() + " have no non parametric constructor");
+                }
             }
         }
         cursor.close();
@@ -350,7 +354,9 @@ public class SQLiteUtil {
                 TableFinder.find(entity, cursor);
             } catch (Exception e) {
                 e.printStackTrace();
-                Log.e("SQLITE", "create object failed");
+                if (entity == null) {
+                    throw new IllegalArgumentException(table.getSimpleName() + " have no non parametric constructor");
+                }
             }
         }
         cursor.close();
@@ -376,13 +382,16 @@ public class SQLiteUtil {
                     conditionBuilder.getColumnArray());
         }
         while (cursor.moveToNext()) {
+            T entity = null;
             try {
-                T entity = (T) newInstance(table);
+                entity = (T) newInstance(table);
                 TableFinder.find(entity, cursor);
                 entitys.add(entity);
             } catch (Exception e) {
                 e.printStackTrace();
-                Log.e("SQLITE", "create object failed");
+                if (entity == null) {
+                    throw new IllegalArgumentException(table.getSimpleName() + " have no non parametric constructor");
+                }
             }
         }
         cursor.close();
@@ -399,13 +408,16 @@ public class SQLiteUtil {
         List<T> entitys = new ArrayList<>();
         Cursor cursor = database.rawQuery("select * from " + TableFinder.getTableName(table), null);
         while (cursor.moveToNext()) {
+            T entity = null;
             try {
-                T entity = (T) newInstance(table);
+                entity = (T) newInstance(table);
                 entitys.add(entity);
                 TableFinder.find(entity, cursor);
             } catch (Exception e) {
                 e.printStackTrace();
-                Log.e("SQLITE", "create object failed");
+                if (entity == null) {
+                    throw new IllegalArgumentException(table.getSimpleName() + " have no non parametric constructor");
+                }
             }
         }
         cursor.close();
