@@ -31,7 +31,7 @@ public class TableFinder {
         String tableName = getTableName(entityType);
         Field[] fields = entityType.getDeclaredFields();
         if (fields == null) {
-            throw new IllegalStateException("this object does not contains any field");
+            throw new IllegalArgumentException("this object does not contains any field");
         }
         int mainCount = 0;
         int columnCount = 0;
@@ -77,7 +77,7 @@ public class TableFinder {
                     if (id != null) {
                         Class<?> type = field.getType();
                         if (type != int.class && type != long.class && type != Integer.class && type != Long.class) {
-                            throw new IllegalStateException("primary key must be Integer or Long");
+                            throw new IllegalArgumentException("primary key must be Integer or Long");
                         }
                         String idName = id.name();
                         builder.append(idName.length() == 0 ? "id" : idName)
@@ -86,14 +86,17 @@ public class TableFinder {
                     }
                 }
             } catch (Exception e) {
+                if(e instanceof IllegalArgumentException){
+                    throw e;
+                }
                 e.printStackTrace();
             }
         }
         if (columnCount == 0) {
-            throw new IllegalStateException("this object does not contains any column");
+            throw new IllegalArgumentException("this object does not contains any column");
         }
         if (mainCount > 1) {
-            throw new IllegalStateException("cannot contain more than 1 primary key");
+            throw new IllegalArgumentException("cannot contain more than 1 primary key");
         }
         builder.deleteCharAt(builder.length() - 1);
         builder.append(")");
@@ -118,7 +121,7 @@ public class TableFinder {
         Class<?> handlerType = entity.getClass();
         Field[] fields = handlerType.getDeclaredFields();
         if (fields == null) {
-            throw new IllegalStateException("this object does not contains any field");
+            throw new IllegalArgumentException("this object does not contains any field");
         }
         for (int i = 0; i < fields.length; i++) {
             Field field = fields[i];
@@ -166,7 +169,7 @@ public class TableFinder {
             }
         }
         if (columns.size() == 0) {
-            throw new IllegalStateException("this object does not contains any column");
+            throw new IllegalArgumentException("this object does not contains any column");
         }
         StringBuilder builder = new StringBuilder();
         builder.append("update ")
@@ -200,7 +203,7 @@ public class TableFinder {
         Class<?> handlerType = entity.getClass();
         Field[] fields = handlerType.getDeclaredFields();
         if (fields == null) {
-            throw new IllegalStateException("this object does not contains any colume");
+            throw new IllegalArgumentException("this object does not contains any field");
         }
         for (int i = 0; i < fields.length; i++) {
             Field field = fields[i];
@@ -254,7 +257,7 @@ public class TableFinder {
             }
         }
         if (columns.size() == 0) {
-            throw new IllegalStateException("this object does not contains any column");
+            throw new IllegalArgumentException("this object does not contains any column");
         }
         StringBuilder keys = new StringBuilder();
         StringBuilder values = new StringBuilder();
@@ -283,7 +286,7 @@ public class TableFinder {
         Class<?> handlerType = entity.getClass();
         Field[] fields = handlerType.getDeclaredFields();
         if (fields == null) {
-            throw new IllegalStateException("this object does not contains any colume");
+            throw new IllegalStateException("this object does not contains any column");
         }
         for (int i = 0; i < fields.length; i++) {
             Field field = fields[i];
@@ -322,7 +325,7 @@ public class TableFinder {
             }
         }
         if (columns.size() == 0) {
-            throw new IllegalStateException("this object does not contains any colume");
+            throw new IllegalArgumentException("this object does not contains any column");
         }
         StringBuilder builder = new StringBuilder();
         builder.append("delete from ")
