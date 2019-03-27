@@ -15,7 +15,7 @@ public class TableFinder {
         String tableName = null;
         Table table = (Table) entityType.getAnnotation(Table.class);
         if (table == null) {
-            throw new IllegalStateException("this object does not define table");
+            throw new IllegalArgumentException("this object does not define table");
         }
         tableName = table.name();
         if (tableName.length() == 0) {
