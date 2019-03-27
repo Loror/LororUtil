@@ -57,15 +57,15 @@ public class SQLiteUtil {
     /**
      * 初始化
      */
-    protected void init(final Class<?> table) {
+    private void init(final Class<?> table) {
         close();
         this.helper = new DataBaseHelper(context, dbName, version, onChange != null ? onChange : new OnChange() {
 
             @Override
             public void onUpdate(SQLiteUtil sqLiteUtil) {
                 if (table != null) {
-                    sqLiteUtil.dropTable(table);
                     sqLiteUtil.createTableIfNotExists(table);
+                    sqLiteUtil.changeTableIfColumnAdd(table);
                 }
             }
 
@@ -85,8 +85,8 @@ public class SQLiteUtil {
         this.database = this.helper.getWritableDatabase();
     }
 
-    public void setMitiProgress(boolean mitiProgress) {
-        this.mitiProgress = mitiProgress;
+    public void setMutiProgress(boolean mutiProgress) {
+        this.mitiProgress = mutiProgress;
     }
 
     /**
