@@ -18,10 +18,10 @@ import java.util.List;
 import com.loror.lororUtil.text.TextUtil;
 
 public abstract class BaseClient<T extends HttpURLConnection> extends Prepare implements Client {
-    protected int timeOut = 10000;
-    protected int readTimeOut;
-    protected boolean followRedirects = true;
-    protected T conn;
+    private int timeOut = 10000;
+    private int readTimeOut;
+    private boolean followRedirects = true;
+    private T conn;
     private ProgressListener progressListener;
 
     /**
@@ -120,12 +120,12 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
         Responce responce = new Responce();
         try {
             if (parmas != null) {
-                String StrParmas = parmas.packetOutParams("GET");
-                if (!TextUtil.isEmpty(StrParmas)) {
+                String strParams = parmas.packetOutParams("GET");
+                if (!TextUtil.isEmpty(strParams)) {
                     if (urlStr.indexOf("?") != -1) {
-                        urlStr += "&" + StrParmas;
+                        urlStr += "&" + strParams;
                     } else {
-                        urlStr += "?" + StrParmas;
+                        urlStr += "?" + strParams;
                     }
                 }
             }
@@ -159,12 +159,12 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
             Responce responce = new Responce();
             try {
                 if (parmas != null && parmas.isAsJson()) {
-                    String StrParmas = parmas.packetOutParams("GET");
-                    if (!TextUtil.isEmpty(StrParmas)) {
+                    String strParams = parmas.packetOutParams("GET");
+                    if (!TextUtil.isEmpty(strParams)) {
                         if (urlStr.indexOf("?") != -1) {
-                            urlStr += "&" + StrParmas;
+                            urlStr += "&" + strParams;
                         } else {
-                            urlStr += "?" + StrParmas;
+                            urlStr += "?" + strParams;
                         }
                     }
                 }
@@ -175,10 +175,10 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
                 }
                 preparePost(conn, timeOut, readTimeOut, parmas);
                 if (parmas != null) {
-                    String StrParmas = parmas.packetOutParams("POST");
-                    if (!TextUtil.isEmpty(StrParmas)) {
+                    String strParams = parmas.packetOutParams("POST");
+                    if (!TextUtil.isEmpty(strParams)) {
                         PrintWriter pw = new PrintWriter(new OutputStreamWriter(conn.getOutputStream()));
-                        pw.print(StrParmas);
+                        pw.print(strParams);
                         pw.close();
                     }
                 }
@@ -279,12 +279,12 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
             Responce responce = new Responce();
             try {
                 if (parmas != null && parmas.isAsJson()) {
-                    String StrParmas = parmas.packetOutParams("GET");
-                    if (!TextUtil.isEmpty(StrParmas)) {
+                    String strParams = parmas.packetOutParams("GET");
+                    if (!TextUtil.isEmpty(strParams)) {
                         if (urlStr.indexOf("?") != -1) {
-                            urlStr += "&" + StrParmas;
+                            urlStr += "&" + strParams;
                         } else {
-                            urlStr += "?" + StrParmas;
+                            urlStr += "?" + strParams;
                         }
                     }
                 }
@@ -295,10 +295,10 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
                 }
                 preparePut(conn, timeOut, readTimeOut, parmas);
                 if (parmas != null) {
-                    String StrParmas = parmas.packetOutParams("POST");
-                    if (!TextUtil.isEmpty(StrParmas)) {
+                    String strParams = parmas.packetOutParams("POST");
+                    if (!TextUtil.isEmpty(strParams)) {
                         PrintWriter pw = new PrintWriter(new OutputStreamWriter(conn.getOutputStream()));
-                        pw.print(StrParmas);
+                        pw.print(strParams);
                         pw.close();
                     }
                 }
@@ -326,9 +326,9 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
                 }
                 preparePutFile(conn, timeOut, readTimeOut, parmas);
                 OutputStream out = new DataOutputStream(conn.getOutputStream());
-                String StrParmas = parmas.packetOutParams("POST_FORM");
-                if (!TextUtil.isEmpty(StrParmas)) {
-                    out.write(StrParmas.getBytes());
+                String strParams = parmas.packetOutParams("POST_FORM");
+                if (!TextUtil.isEmpty(strParams)) {
+                    out.write(strParams.getBytes());
                 } // 提交参数
                 if (files != null) {
                     int index = 0;
@@ -394,12 +394,12 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
         Responce responce = new Responce();
         try {
             if (parmas != null) {
-                String StrParmas = parmas.packetOutParams("GET");
-                if (!TextUtil.isEmpty(StrParmas)) {
+                String strParams = parmas.packetOutParams("GET");
+                if (!TextUtil.isEmpty(strParams)) {
                     if (urlStr.indexOf("?") != -1) {
-                        urlStr += "&" + StrParmas;
+                        urlStr += "&" + strParams;
                     } else {
-                        urlStr += "?" + StrParmas;
+                        urlStr += "?" + strParams;
                     }
                 }
             }
