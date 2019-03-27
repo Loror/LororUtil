@@ -1,14 +1,37 @@
 package com.loror.lororUtil.convert;
 
+import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.Locale;
 
 public class UrlUtf8Util {
+
     // 转换为%E4%BD%A0形式
     public static String toUrlString(String s) {
+        return toUrlString(s, "UTF-8");
+    }
+
+    // 转换为%E4%BD%A0形式
+    public static String toUrlString(String s, String enc) {
         String urlStr = null;
         try {
-            urlStr = URLEncoder.encode(s, "UTF-8");
+            urlStr = URLEncoder.encode(s, enc);
+        } catch (Exception e) {
+            urlStr = s;
+        }
+        return urlStr;
+    }
+
+    // 将%E4%BD%A0转换为汉字
+    public static String toUtf8String(String s) {
+        return toUtf8String(s, "UTF-8");
+    }
+
+    // 将%E4%BD%A0转换为汉字
+    public static String toUtf8String(String s, String enc) {
+        String urlStr = null;
+        try {
+            urlStr = URLDecoder.decode(s, enc);
         } catch (Exception e) {
             urlStr = s;
         }
@@ -16,7 +39,7 @@ public class UrlUtf8Util {
     }
 
     // 转换为%E4%BD%A0形式
-    public static String toUrlString(String s, String enc) {
+    public static String toUrlStringLocal(String s, String enc) {
         if (s == null) {
             return null;
         }
@@ -45,7 +68,7 @@ public class UrlUtf8Util {
     }
 
     // 将%E4%BD%A0转换为汉字
-    public static String toUtf8String(String s) {
+    public static String toUtf8StringLocal(String s) {
         if (s == null) {
             return null;
         }

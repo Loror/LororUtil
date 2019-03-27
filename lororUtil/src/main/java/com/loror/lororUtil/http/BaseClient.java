@@ -213,8 +213,7 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
                 if (files != null) {
                     int index = 0;
                     for (FileBody file : files) {
-                        upLoadFile(file, index, out, excutor);
-                        index++;
+                        upLoadFile(file, index++, out, excutor);
                     }
                 } // 上传文件
                 // 定义最后数据分隔线，即--加上BOUNDARY再加上--，写上结尾标识
@@ -333,8 +332,7 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
                 if (files != null) {
                     int index = 0;
                     for (FileBody file : files) {
-                        upLoadFile(file, index, out, excutor);
-                        index++;
+                        upLoadFile(file, index++, out, excutor);
                     }
                 } // 上传文件
                 // 定义最后数据分隔线，即--加上BOUNDARY再加上--，写上结尾标识

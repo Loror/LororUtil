@@ -12,6 +12,9 @@ import android.widget.GridView;
 import android.widget.Toast;
 
 import com.loror.lororUtil.flyweight.ObjectPool;
+import com.loror.lororUtil.http.DefaultAsyncClient;
+import com.loror.lororUtil.http.HttpClient;
+import com.loror.lororUtil.http.Responce;
 import com.loror.lororUtil.sql.SQLiteUtil;
 import com.loror.lororUtil.view.Click;
 import com.loror.lororUtil.view.Find;
@@ -37,6 +40,17 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         initView();
         requestPermission("android.permission.WRITE_EXTERNAL_STORAGE", 0);
+        connectNet();
+    }
+
+    private void connectNet() {
+        HttpClient client = new HttpClient();
+        client.asyncGet("https://www.baidu.com", null, new DefaultAsyncClient() {
+            @Override
+            public void callBack(Responce responce) {
+                Log.e("RESULT_", responce.getCode() + " = " + responce);
+            }
+        });
     }
 
     private void initData() {
