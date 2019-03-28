@@ -1,21 +1,33 @@
 package com.loror.lororUtil.http;
 
+import com.loror.lororUtil.flyweight.ObjectPool;
+
 import java.net.HttpURLConnection;
 
 public class AsyncBaseClient<T extends HttpURLConnection> extends BaseClient<T> {
 
+    /**
+     * 设置回调主线程执行
+     */
+    private void initCallbackExcutor() {
+        if (callbackActuator == null) {
+            callbackActuator = new Actuator() {
+                @Override
+                public void run(Runnable runnable) {
+                    ObjectPool.getInstance().getHandler().post(runnable);
+                }
+            };
+        }
+    }
+
     public void asyncPost(final String urlStr, final RequestParams parmas, final AsyncClient<Responce> asyncClient) {
+        initCallbackExcutor();
         asyncClient.runBack(new Runnable() {
 
             @Override
             public void run() {
-                final Responce responce = post(urlStr, parmas, new Excutor() {
-                    @Override
-                    public void run(Runnable runnable) {
-                        asyncClient.runFore(runnable);
-                    }
-                });
-                asyncClient.runFore(new Runnable() {
+                final Responce responce = post(urlStr, parmas);
+                callbackActuator.run(new Runnable() {
 
                     @Override
                     public void run() {
@@ -27,12 +39,13 @@ public class AsyncBaseClient<T extends HttpURLConnection> extends BaseClient<T> 
     }
 
     public void asyncGet(final String urlStr, final RequestParams parmas, final AsyncClient<Responce> asyncClient) {
+        initCallbackExcutor();
         asyncClient.runBack(new Runnable() {
 
             @Override
             public void run() {
                 final Responce responce = get(urlStr, parmas);
-                asyncClient.runFore(new Runnable() {
+                callbackActuator.run(new Runnable() {
 
                     @Override
                     public void run() {
@@ -44,17 +57,13 @@ public class AsyncBaseClient<T extends HttpURLConnection> extends BaseClient<T> 
     }
 
     public void asyncPut(final String urlStr, final RequestParams parmas, final AsyncClient<Responce> asyncClient) {
+        initCallbackExcutor();
         asyncClient.runBack(new Runnable() {
 
             @Override
             public void run() {
-                final Responce responce = put(urlStr, parmas, new Excutor() {
-                    @Override
-                    public void run(Runnable runnable) {
-                        asyncClient.runFore(runnable);
-                    }
-                });
-                asyncClient.runFore(new Runnable() {
+                final Responce responce = put(urlStr, parmas);
+                callbackActuator.run(new Runnable() {
 
                     @Override
                     public void run() {
@@ -66,12 +75,13 @@ public class AsyncBaseClient<T extends HttpURLConnection> extends BaseClient<T> 
     }
 
     public void asyncDelete(final String urlStr, final RequestParams parmas, final AsyncClient<Responce> asyncClient) {
+        initCallbackExcutor();
         asyncClient.runBack(new Runnable() {
 
             @Override
             public void run() {
                 final Responce responce = delete(urlStr, parmas);
-                asyncClient.runFore(new Runnable() {
+                callbackActuator.run(new Runnable() {
 
                     @Override
                     public void run() {
@@ -84,17 +94,13 @@ public class AsyncBaseClient<T extends HttpURLConnection> extends BaseClient<T> 
 
     public void asyncDownload(final String urlStr, final String path, final boolean cover,
                               final AsyncClient<Responce> asyncClient) {
+        initCallbackExcutor();
         asyncClient.runBack(new Runnable() {
 
             @Override
             public void run() {
-                final Responce responce = download(urlStr, path, cover, new Excutor() {
-                    @Override
-                    public void run(Runnable runnable) {
-                        asyncClient.runFore(runnable);
-                    }
-                });
-                asyncClient.runFore(new Runnable() {
+                final Responce responce = download(urlStr, path, cover);
+                callbackActuator.run(new Runnable() {
 
                     @Override
                     public void run() {
@@ -107,17 +113,13 @@ public class AsyncBaseClient<T extends HttpURLConnection> extends BaseClient<T> 
 
     public void asyncDownloadInPiece(final String urlStr, final String path, final long start,
                                      final long end, final AsyncClient<Responce> asyncClient) {
+        initCallbackExcutor();
         asyncClient.runBack(new Runnable() {
 
             @Override
             public void run() {
-                final Responce responce = downloadInPiece(urlStr, path, start, end, new Excutor() {
-                    @Override
-                    public void run(Runnable runnable) {
-                        asyncClient.runFore(runnable);
-                    }
-                });
-                asyncClient.runFore(new Runnable() {
+                final Responce responce = downloadInPiece(urlStr, path, start, end);
+                callbackActuator.run(new Runnable() {
 
                     @Override
                     public void run() {

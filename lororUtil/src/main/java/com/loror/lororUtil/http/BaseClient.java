@@ -23,6 +23,14 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
     private boolean followRedirects = true;
     private T conn;
     private ProgressListener progressListener;
+    protected Actuator callbackActuator;
+
+    /**
+     * 设置回调执行器
+     */
+    public void setCallbackActuator(Actuator callbackActuator) {
+        this.callbackActuator = callbackActuator;
+    }
 
     /**
      * 进度监听
@@ -116,11 +124,11 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
     }
 
     @Override
-    public Responce get(String urlStr, RequestParams parmas) {
+    public Responce get(String urlStr, RequestParams params) {
         Responce responce = new Responce();
         try {
-            if (parmas != null) {
-                String strParams = parmas.packetOutParams("GET");
+            if (params != null) {
+                String strParams = params.packetOutParams("GET");
                 if (!TextUtil.isEmpty(strParams)) {
                     if (urlStr.indexOf("?") != -1) {
                         urlStr += "&" + strParams;
@@ -134,7 +142,7 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
             if (followRedirects) {
                 conn.setInstanceFollowRedirects(true);
             }
-            prepareGet(conn, timeOut, readTimeOut, parmas);
+            prepareGet(conn, timeOut, readTimeOut, params);
             responce.code = conn.getResponseCode();
             if (responce.code == HttpURLConnection.HTTP_OK) {
                 initHeaders(conn, responce);
@@ -150,16 +158,12 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
     }
 
     @Override
-    public Responce post(String urlStr, RequestParams parmas) {
-        return post(urlStr, parmas, null);
-    }
-
-    protected Responce post(String urlStr, RequestParams parmas, Excutor excutor) {
-        if (parmas == null || parmas.getFiles().size() == 0) {
+    public Responce post(String urlStr, RequestParams params) {
+        if (params == null || params.getFiles().size() == 0) {
             Responce responce = new Responce();
             try {
-                if (parmas != null && parmas.isAsJson()) {
-                    String strParams = parmas.packetOutParams("GET");
+                if (params != null && params.isAsJson()) {
+                    String strParams = params.packetOutParams("GET");
                     if (!TextUtil.isEmpty(strParams)) {
                         if (urlStr.indexOf("?") != -1) {
                             urlStr += "&" + strParams;
@@ -173,9 +177,9 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
                 if (followRedirects) {
                     conn.setInstanceFollowRedirects(true);
                 }
-                preparePost(conn, timeOut, readTimeOut, parmas);
-                if (parmas != null) {
-                    String strParams = parmas.packetOutParams("POST");
+                preparePost(conn, timeOut, readTimeOut, params);
+                if (params != null) {
+                    String strParams = params.packetOutParams("POST");
                     if (!TextUtil.isEmpty(strParams)) {
                         PrintWriter pw = new PrintWriter(new OutputStreamWriter(conn.getOutputStream()));
                         pw.print(strParams);
@@ -196,7 +200,7 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
             }
             return responce;
         } else {
-            List<FileBody> files = parmas.getFiles();
+            List<FileBody> files = params.getFiles();
             final Responce responce = new Responce();
             try {
                 URL url = new URL(urlStr);// 服务器的域名
@@ -204,16 +208,16 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
                 if (followRedirects) {
                     conn.setInstanceFollowRedirects(true);
                 }
-                preparePostFile(conn, timeOut, readTimeOut, parmas);
+                preparePostFile(conn, timeOut, readTimeOut, params);
                 OutputStream out = new DataOutputStream(conn.getOutputStream());
-                String StrParmas = parmas.packetOutParams("POST_FORM");
+                String StrParmas = params.packetOutParams("POST_FORM");
                 if (!TextUtil.isEmpty(StrParmas)) {
                     out.write(StrParmas.getBytes());
                 }// 提交参数
                 if (files != null) {
                     int index = 0;
                     for (FileBody file : files) {
-                        upLoadFile(file, index++, out, excutor);
+                        upLoadFile(file, index++, out, callbackActuator);
                     }
                 } // 上传文件
                 // 定义最后数据分隔线，即--加上BOUNDARY再加上--，写上结尾标识
@@ -241,8 +245,8 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
                                 progressListener.failed();
                             }
                         };
-                        if (excutor != null) {
-                            excutor.run(runnable);
+                        if (callbackActuator != null) {
+                            callbackActuator.run(runnable);
                         } else {
                             runnable.run();
                         }
@@ -256,8 +260,8 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
                                 progressListener.finish(responce.toString());
                             }
                         };
-                        if (excutor != null) {
-                            excutor.run(runnable);
+                        if (callbackActuator != null) {
+                            callbackActuator.run(runnable);
                         } else {
                             runnable.run();
                         }
@@ -269,16 +273,12 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
     }
 
     @Override
-    public Responce put(String urlStr, RequestParams parmas) {
-        return put(urlStr, parmas, null);
-    }
-
-    protected Responce put(String urlStr, RequestParams parmas, Excutor excutor) {
-        if (parmas == null || parmas.getFiles().size() == 0) {
+    public Responce put(String urlStr, RequestParams params) {
+        if (params == null || params.getFiles().size() == 0) {
             Responce responce = new Responce();
             try {
-                if (parmas != null && parmas.isAsJson()) {
-                    String strParams = parmas.packetOutParams("GET");
+                if (params != null && params.isAsJson()) {
+                    String strParams = params.packetOutParams("GET");
                     if (!TextUtil.isEmpty(strParams)) {
                         if (urlStr.indexOf("?") != -1) {
                             urlStr += "&" + strParams;
@@ -292,9 +292,9 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
                 if (followRedirects) {
                     conn.setInstanceFollowRedirects(true);
                 }
-                preparePut(conn, timeOut, readTimeOut, parmas);
-                if (parmas != null) {
-                    String strParams = parmas.packetOutParams("POST");
+                preparePut(conn, timeOut, readTimeOut, params);
+                if (params != null) {
+                    String strParams = params.packetOutParams("POST");
                     if (!TextUtil.isEmpty(strParams)) {
                         PrintWriter pw = new PrintWriter(new OutputStreamWriter(conn.getOutputStream()));
                         pw.print(strParams);
@@ -315,7 +315,7 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
             }
             return responce;
         } else {
-            List<FileBody> files = parmas.getFiles();
+            List<FileBody> files = params.getFiles();
             final Responce responce = new Responce();
             try {
                 URL url = new URL(urlStr);// 服务器的域名
@@ -323,16 +323,16 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
                 if (followRedirects) {
                     conn.setInstanceFollowRedirects(true);
                 }
-                preparePutFile(conn, timeOut, readTimeOut, parmas);
+                preparePutFile(conn, timeOut, readTimeOut, params);
                 OutputStream out = new DataOutputStream(conn.getOutputStream());
-                String strParams = parmas.packetOutParams("POST_FORM");
+                String strParams = params.packetOutParams("POST_FORM");
                 if (!TextUtil.isEmpty(strParams)) {
                     out.write(strParams.getBytes());
                 } // 提交参数
                 if (files != null) {
                     int index = 0;
                     for (FileBody file : files) {
-                        upLoadFile(file, index++, out, excutor);
+                        upLoadFile(file, index++, out, callbackActuator);
                     }
                 } // 上传文件
                 // 定义最后数据分隔线，即--加上BOUNDARY再加上--，写上结尾标识
@@ -360,8 +360,8 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
                                 progressListener.failed();
                             }
                         };
-                        if (excutor != null) {
-                            excutor.run(runnable);
+                        if (callbackActuator != null) {
+                            callbackActuator.run(runnable);
                         } else {
                             runnable.run();
                         }
@@ -375,8 +375,8 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
                                 progressListener.finish(responce.toString());
                             }
                         };
-                        if (excutor != null) {
-                            excutor.run(runnable);
+                        if (callbackActuator != null) {
+                            callbackActuator.run(runnable);
                         } else {
                             runnable.run();
                         }
@@ -388,11 +388,11 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
     }
 
     @Override
-    public Responce delete(String urlStr, RequestParams parmas) {
+    public Responce delete(String urlStr, RequestParams params) {
         Responce responce = new Responce();
         try {
-            if (parmas != null) {
-                String strParams = parmas.packetOutParams("GET");
+            if (params != null) {
+                String strParams = params.packetOutParams("GET");
                 if (!TextUtil.isEmpty(strParams)) {
                     if (urlStr.indexOf("?") != -1) {
                         urlStr += "&" + strParams;
@@ -406,7 +406,7 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
             if (followRedirects) {
                 conn.setInstanceFollowRedirects(true);
             }
-            prepareDelete(conn, timeOut, readTimeOut, parmas);
+            prepareDelete(conn, timeOut, readTimeOut, params);
             responce.code = conn.getResponseCode();
             if (responce.code == HttpURLConnection.HTTP_OK) {
                 initHeaders(conn, responce);
@@ -437,7 +437,7 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
     /**
      * 上传一个文件
      */
-    private void upLoadFile(FileBody file, final int index, OutputStream out, Excutor excutor) throws Throwable {
+    private void upLoadFile(FileBody file, final int index, OutputStream out, Actuator actuator) throws Throwable {
         if (file == null || file.getFile() == null) {
             return;
         }
@@ -449,8 +449,8 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
                     ((DetailProgressListener) progressListener).fileIndex(index);
                 }
             };
-            if (excutor != null) {
-                excutor.run(runnable);
+            if (actuator != null) {
+                actuator.run(runnable);
             } else {
                 runnable.run();
             }
@@ -466,14 +466,14 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
         sb.append(Config.LINEND);
         out.write(sb.toString().getBytes());
 
-        sendFile(file.getFile(), out, excutor);
+        sendFile(file.getFile(), out, actuator);
         out.write(Config.LINEND.getBytes());
     }
 
     /**
      * 通过流发送文件
      */
-    private void sendFile(File file, OutputStream os, Excutor excutor) throws Throwable {
+    private void sendFile(File file, OutputStream os, Actuator actuator) throws Throwable {
         FileInputStream fis = new FileInputStream(file);
         final long length = file.length();
         long lastTime = System.currentTimeMillis(), transed = 0;
@@ -497,8 +497,8 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
                             progressListener.transing(progress, (int) (finalSpeed * 1000L / timeGo), length);
                         }
                     };
-                    if (excutor != null) {
-                        excutor.run(runnable);
+                    if (actuator != null) {
+                        actuator.run(runnable);
                     } else {
                         runnable.run();
                     }
@@ -517,8 +517,8 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
                     progressListener.transing(100, timeGo == 0 ? 0 : (int) (finalSpeed * 1000L / timeGo), length);
                 }
             };
-            if (excutor != null) {
-                excutor.run(runnable);
+            if (actuator != null) {
+                actuator.run(runnable);
             } else {
                 runnable.run();
             }
@@ -529,7 +529,7 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
     /**
      * 通过流接受文件
      */
-    private void downloadFile(File file, final long length, InputStream is, Excutor excutor) throws Throwable {
+    private void downloadFile(File file, final long length, InputStream is, Actuator actuator) throws Throwable {
         long last = System.currentTimeMillis(), transed = 0;
         FileOutputStream fos = new FileOutputStream(file);
         byte[] out = new byte[1024 * 100];
@@ -553,8 +553,8 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
                             progressListener.transing(progress, (int) (finalSpeed * 1000L / timeGo), length);
                         }
                     };
-                    if (excutor != null) {
-                        excutor.run(runnable);
+                    if (actuator != null) {
+                        actuator.run(runnable);
                     } else {
                         runnable.run();
                     }
@@ -573,8 +573,8 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
                     progressListener.transing(100, timeGo == 0 ? 0 : (int) (finalSpeed * 1000L / timeGo), length);
                 }
             };
-            if (excutor != null) {
-                excutor.run(runnable);
+            if (actuator != null) {
+                actuator.run(runnable);
             } else {
                 runnable.run();
             }
@@ -587,10 +587,6 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
      * 下载文件
      */
     public Responce download(String urlStr, String path, boolean cover) {
-        return download(urlStr, path, cover, null);
-    }
-
-    protected Responce download(String urlStr, String path, boolean cover, Excutor excutor) {
         final Responce responce = new Responce();
         try {
             if (!checkState()) {
@@ -610,7 +606,7 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
             if (file.exists() && !cover && file.length() == length) {
                 conn.disconnect();
             } else {
-                downloadFile(file, length, conn.getInputStream(), excutor);
+                downloadFile(file, length, conn.getInputStream(), callbackActuator);
                 if (responce.code == HttpURLConnection.HTTP_OK) {
                     initHeaders(conn, responce);
                 }
@@ -629,8 +625,8 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
                             progressListener.failed();
                         }
                     };
-                    if (excutor != null) {
-                        excutor.run(runnable);
+                    if (callbackActuator != null) {
+                        callbackActuator.run(runnable);
                     } else {
                         runnable.run();
                     }
@@ -644,8 +640,8 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
                             progressListener.finish(responce.toString());
                         }
                     };
-                    if (excutor != null) {
-                        excutor.run(runnable);
+                    if (callbackActuator != null) {
+                        callbackActuator.run(runnable);
                     } else {
                         runnable.run();
                     }
@@ -659,10 +655,6 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
      * 断点续传下载
      */
     public Responce downloadInPiece(String urlStr, String path, long start, long end) {
-        return downloadInPiece(urlStr, path, start, end, null);
-    }
-
-    protected Responce downloadInPiece(String urlStr, String path, long start, long end, Excutor excutor) {
         final Responce responce = new Responce();
         try {
             if (!checkState()) {
@@ -682,7 +674,7 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
             responce.url = conn.getURL();
             responce.code = conn.getResponseCode();
             long length = length(conn);
-            downloadFile(file, length, conn.getInputStream(), excutor);
+            downloadFile(file, length, conn.getInputStream(), callbackActuator);
             if (responce.code == HttpURLConnection.HTTP_PARTIAL) {
                 initHeaders(conn, responce);
             }
@@ -701,8 +693,8 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
                             progressListener.failed();
                         }
                     };
-                    if (excutor != null) {
-                        excutor.run(runnable);
+                    if (callbackActuator != null) {
+                        callbackActuator.run(runnable);
                     } else {
                         runnable.run();
                     }
@@ -716,8 +708,8 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
                             progressListener.finish(responce.toString());
                         }
                     };
-                    if (excutor != null) {
-                        excutor.run(runnable);
+                    if (callbackActuator != null) {
+                        callbackActuator.run(runnable);
                     } else {
                         runnable.run();
                     }

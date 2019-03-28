@@ -1,5 +1,5 @@
 package com.loror.lororUtil.http;
 
-public interface Excutor {
+public interface Actuator {
     void run(Runnable runnable);
 }
