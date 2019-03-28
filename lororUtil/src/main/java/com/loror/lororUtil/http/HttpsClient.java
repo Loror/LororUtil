@@ -27,10 +27,10 @@ public class HttpsClient extends AsyncBaseClient<HttpsURLConnection> {
         }
     }
 
-    public static void init(InputStream keyPath, String password) {
+    public static void init(InputStream keyStream, String password) {
         try {
             SSLContext sslcontext = SSLContext.getInstance("SSL", "SunJSSE");
-            sslcontext.init(null, new TrustManager[]{new LororX509TrustManager(keyPath, password)},
+            sslcontext.init(null, new TrustManager[]{new LororX509TrustManager(keyStream, password)},
                     new java.security.SecureRandom());
             HostnameVerifier ignoreHostnameVerifier = new HostnameVerifier() {
                 public boolean verify(String s, SSLSession sslsession) {
