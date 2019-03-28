@@ -57,10 +57,14 @@ ImageUtil后台读取图片接口
 * 类HttpClient
     * 方法setTimeOut(int timeOut) 设置http连接超时时间
     * 方法setReadTimeOut(int readTimeOut) 设置读取超时时间
-    * 方法post(String urlStr, RequestParmas parmas) post网络请求，返回responce对象
-    * 方法get(String urlStr, RequestParmas parmas) get网络请求，返回responce对象
-    * 方法asyncPost(final String urlStr, final RequestParams parmas, final AsyncClient<Responce> asyncClient) 异步Post请求，已有AsyncClient实现类DefaultAsyncClient可用
-    * 方法asyncGet(final String urlStr, final RequestParams parmas, final AsyncClient<Responce> asyncClient) 异步Get请求，已有AsyncClient实现类DefaultAsyncClient可用
+    * 方法post(String urlStr, RequestParams params) post网络请求，返回responce对象
+    * 方法get(String urlStr, RequestParams params) get网络请求，返回responce对象
+    * 方法put(String urlStr, RequestParams params) put网络请求，返回responce对象
+    * 方法delete(String urlStr, RequestParams params) delete网络请求，返回responce对象
+    * 方法asyncPost(final String urlStr, final RequestParams params, final AsyncClient<Responce> asyncClient) 异步Post请求，已有AsyncClient实现类DefaultAsyncClient可用
+    * 方法asyncGet(final String urlStr, final RequestParams params, final AsyncClient<Responce> asyncClient) 异步Get请求，已有AsyncClient实现类DefaultAsyncClient可用
+    * 方法asyncPut(final String urlStr, final RequestParams params, final AsyncClient<Responce> asyncClient) 异步Put请求，已有AsyncClient实现类DefaultAsyncClient可用
+    * 方法asyncDelete(final String urlStr, final RequestParams params, final AsyncClient<Responce> asyncClient) 异步Delete请求，已有AsyncClient实现类DefaultAsyncClient可用
     * 方法download(String urlStr, String path, boolean cover) 通过http下载文件，路径为文件夹路径时将以服务器端文件名存储到该文件下，若为文件路径则直接存储，cover为false时先检查服务器端文件与本地文件大小是否一致，不一致方下载文件，否则忽略，cover为true时不检查直接覆盖下载
     * 方法downloadInPeice(String urlStr, String path, long start, long end) 断点下载
     * 方法cancel() 取消当前请求
