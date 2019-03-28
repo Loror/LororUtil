@@ -1,6 +1,7 @@
 package com.loror.lororUtil.example;
 
 import android.content.pm.PackageManager;
+import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -48,7 +49,8 @@ public class MainActivity extends AppCompatActivity {
         client.asyncGet("https://www.baidu.com", null, new DefaultAsyncClient() {
             @Override
             public void callBack(Responce responce) {
-                Log.e("RESULT_", responce.getCode() + " = " + responce);
+                Log.e("RESULT_", (Looper.getMainLooper().getThread() == Thread.currentThread() ? "主线程" : "子线程") + " = " +
+                        responce.getCode() + " = " + responce);
             }
         });
     }

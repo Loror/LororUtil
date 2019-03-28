@@ -9,7 +9,7 @@ public class AsyncBaseClient<T extends HttpURLConnection> extends BaseClient<T> 
     /**
      * 设置回调主线程执行
      */
-    private void initCallbackExcutor() {
+    private void initCallbackActuator() {
         if (callbackActuator == null) {
             callbackActuator = new Actuator() {
                 @Override
@@ -21,7 +21,7 @@ public class AsyncBaseClient<T extends HttpURLConnection> extends BaseClient<T> 
     }
 
     public void asyncPost(final String urlStr, final RequestParams parmas, final AsyncClient<Responce> asyncClient) {
-        initCallbackExcutor();
+        initCallbackActuator();
         asyncClient.runBack(new Runnable() {
 
             @Override
@@ -39,7 +39,7 @@ public class AsyncBaseClient<T extends HttpURLConnection> extends BaseClient<T> 
     }
 
     public void asyncGet(final String urlStr, final RequestParams parmas, final AsyncClient<Responce> asyncClient) {
-        initCallbackExcutor();
+        initCallbackActuator();
         asyncClient.runBack(new Runnable() {
 
             @Override
@@ -57,7 +57,7 @@ public class AsyncBaseClient<T extends HttpURLConnection> extends BaseClient<T> 
     }
 
     public void asyncPut(final String urlStr, final RequestParams parmas, final AsyncClient<Responce> asyncClient) {
-        initCallbackExcutor();
+        initCallbackActuator();
         asyncClient.runBack(new Runnable() {
 
             @Override
@@ -75,7 +75,7 @@ public class AsyncBaseClient<T extends HttpURLConnection> extends BaseClient<T> 
     }
 
     public void asyncDelete(final String urlStr, final RequestParams parmas, final AsyncClient<Responce> asyncClient) {
-        initCallbackExcutor();
+        initCallbackActuator();
         asyncClient.runBack(new Runnable() {
 
             @Override
@@ -94,7 +94,7 @@ public class AsyncBaseClient<T extends HttpURLConnection> extends BaseClient<T> 
 
     public void asyncDownload(final String urlStr, final String path, final boolean cover,
                               final AsyncClient<Responce> asyncClient) {
-        initCallbackExcutor();
+        initCallbackActuator();
         asyncClient.runBack(new Runnable() {
 
             @Override
@@ -113,7 +113,7 @@ public class AsyncBaseClient<T extends HttpURLConnection> extends BaseClient<T> 
 
     public void asyncDownloadInPiece(final String urlStr, final String path, final long start,
                                      final long end, final AsyncClient<Responce> asyncClient) {
-        initCallbackExcutor();
+        initCallbackActuator();
         asyncClient.runBack(new Runnable() {
 
             @Override
