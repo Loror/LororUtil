@@ -200,6 +200,8 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
             }
             return responce;
         } else {
+            final ProgressListener progressListener = this.progressListener;
+            final Actuator callbackActuator = this.callbackActuator;
             List<FileBody> files = params.getFiles();
             final Responce responce = new Responce();
             try {
@@ -217,7 +219,7 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
                 if (files != null) {
                     int index = 0;
                     for (FileBody file : files) {
-                        upLoadFile(file, index++, out, callbackActuator);
+                        upLoadFile(file, index++, out, progressListener, callbackActuator);
                     }
                 } // 上传文件
                 // 定义最后数据分隔线，即--加上BOUNDARY再加上--，写上结尾标识
@@ -236,8 +238,8 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
                 responce.setThrowable(e);
             } finally {
                 conn = null;
-                if (responce.result == null) {
-                    if (progressListener != null) {
+                if (progressListener != null) {
+                    if (responce.result == null) {
                         Runnable runnable = new Runnable() {
 
                             @Override
@@ -250,9 +252,7 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
                         } else {
                             runnable.run();
                         }
-                    }
-                } else {
-                    if (progressListener != null) {
+                    } else {
                         Runnable runnable = new Runnable() {
 
                             @Override
@@ -315,6 +315,8 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
             }
             return responce;
         } else {
+            final ProgressListener progressListener = this.progressListener;
+            final Actuator callbackActuator = this.callbackActuator;
             List<FileBody> files = params.getFiles();
             final Responce responce = new Responce();
             try {
@@ -332,7 +334,7 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
                 if (files != null) {
                     int index = 0;
                     for (FileBody file : files) {
-                        upLoadFile(file, index++, out, callbackActuator);
+                        upLoadFile(file, index++, out, progressListener, callbackActuator);
                     }
                 } // 上传文件
                 // 定义最后数据分隔线，即--加上BOUNDARY再加上--，写上结尾标识
@@ -351,8 +353,8 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
                 responce.setThrowable(e);
             } finally {
                 conn = null;
-                if (responce.result == null) {
-                    if (progressListener != null) {
+                if (progressListener != null) {
+                    if (responce.result == null) {
                         Runnable runnable = new Runnable() {
 
                             @Override
@@ -365,9 +367,7 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
                         } else {
                             runnable.run();
                         }
-                    }
-                } else {
-                    if (progressListener != null) {
+                    } else {
                         Runnable runnable = new Runnable() {
 
                             @Override
@@ -437,7 +437,7 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
     /**
      * 上传一个文件
      */
-    private void upLoadFile(FileBody file, final int index, OutputStream out, Actuator actuator) throws Throwable {
+    private void upLoadFile(FileBody file, final int index, OutputStream out, final ProgressListener progressListener, Actuator actuator) throws Throwable {
         if (file == null || file.getFile() == null) {
             return;
         }
@@ -466,14 +466,14 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
         sb.append(Config.LINEND);
         out.write(sb.toString().getBytes());
 
-        sendFile(file.getFile(), out, actuator);
+        sendFile(file.getFile(), out, progressListener, actuator);
         out.write(Config.LINEND.getBytes());
     }
 
     /**
      * 通过流发送文件
      */
-    private void sendFile(File file, OutputStream os, Actuator actuator) throws Throwable {
+    private void sendFile(File file, OutputStream os, final ProgressListener progressListener, Actuator actuator) throws Throwable {
         FileInputStream fis = new FileInputStream(file);
         final long length = file.length();
         long lastTime = System.currentTimeMillis(), transed = 0;
@@ -529,7 +529,7 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
     /**
      * 通过流接受文件
      */
-    private void downloadFile(File file, final long length, InputStream is, Actuator actuator) throws Throwable {
+    private void downloadFile(File file, final long length, InputStream is, final ProgressListener progressListener, Actuator actuator) throws Throwable {
         long last = System.currentTimeMillis(), transed = 0;
         FileOutputStream fos = new FileOutputStream(file);
         byte[] out = new byte[1024 * 100];
@@ -588,6 +588,8 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
      */
     public Responce download(String urlStr, String path, boolean cover) {
         final Responce responce = new Responce();
+        final ProgressListener progressListener = this.progressListener;
+        final Actuator callbackActuator = this.callbackActuator;
         try {
             if (!checkState()) {
                 throw new IllegalArgumentException("no permission to visit file");
@@ -606,7 +608,7 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
             if (file.exists() && !cover && file.length() == length) {
                 conn.disconnect();
             } else {
-                downloadFile(file, length, conn.getInputStream(), callbackActuator);
+                downloadFile(file, length, conn.getInputStream(), progressListener, callbackActuator);
                 if (responce.code == HttpURLConnection.HTTP_OK) {
                     initHeaders(conn, responce);
                 }
@@ -616,8 +618,8 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
             responce.setThrowable(e);
         } finally {
             conn = null;
-            if (responce.result == null) {
-                if (progressListener != null) {
+            if (progressListener != null) {
+                if (responce.result == null) {
                     Runnable runnable = new Runnable() {
 
                         @Override
@@ -630,9 +632,7 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
                     } else {
                         runnable.run();
                     }
-                }
-            } else {
-                if (progressListener != null) {
+                } else {
                     Runnable runnable = new Runnable() {
 
                         @Override
@@ -656,6 +656,8 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
      */
     public Responce downloadInPiece(String urlStr, String path, long start, long end) {
         final Responce responce = new Responce();
+        final ProgressListener progressListener = this.progressListener;
+        final Actuator callbackActuator = this.callbackActuator;
         try {
             if (!checkState()) {
                 throw new IllegalArgumentException("no permission to visit file");
@@ -674,7 +676,7 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
             responce.url = conn.getURL();
             responce.code = conn.getResponseCode();
             long length = length(conn);
-            downloadFile(file, length, conn.getInputStream(), callbackActuator);
+            downloadFile(file, length, conn.getInputStream(), progressListener, callbackActuator);
             if (responce.code == HttpURLConnection.HTTP_PARTIAL) {
                 initHeaders(conn, responce);
             }
@@ -684,8 +686,8 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
             e.printStackTrace();
         } finally {
             conn = null;
-            if (responce.result == null) {
-                if (progressListener != null) {
+            if (progressListener != null) {
+                if (responce.result == null) {
                     Runnable runnable = new Runnable() {
 
                         @Override
@@ -698,9 +700,7 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
                     } else {
                         runnable.run();
                     }
-                }
-            } else {
-                if (progressListener != null) {
+                } else {
                     Runnable runnable = new Runnable() {
 
                         @Override
