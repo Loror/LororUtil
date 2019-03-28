@@ -65,7 +65,7 @@ ImageUtil后台读取图片接口
     * 方法downloadInPeice(String urlStr, String path, long start, long end) 断点下载
     * 方法cancel() 取消当前请求
     * 方法setProgressListener(ProgressListener progressListener) 设置下载或上传文件进度监听
-    * 一个对象只能注册一个监听，若需监听多个请求，应实例化多个HttpClient对象避免混乱
+    * 一个对象只能注册一个监听，若需监听多个请求，应实例化多个HttpClient对象避免可能出现的混乱
 
 
 * 类HttpsClient
