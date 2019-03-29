@@ -9,7 +9,6 @@ import java.util.List;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.util.Log;
 
 public class SQLiteUtil {
     private DataBaseHelper helper;
@@ -194,8 +193,11 @@ public class SQLiteUtil {
                 defaultValue = TableFinder.getEncryption(column.encryption()).encrypt(defaultValue);
             }
             database.execSQL("ALTER TABLE '" + TableFinder.getTableName(table) + "' ADD COLUMN '"
-                    + newColumnNames.get(i) + "' " + type
-                    + (defaultValue.length() == 0 ? "" : (" default '" + defaultValue.replace("'", "''") + "'")));
+                    + newColumnNames.get(i) + "' " + type);
+            if (defaultValue.length() > 0) {
+                database.execSQL("update " + TableFinder.getTableName(table) + " set " + newColumnNames.get(i) +
+                        " = '" + defaultValue.replace("'", "''") + "'");
+            }
         }
         database.setTransactionSuccessful();
         database.endTransaction();

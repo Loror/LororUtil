@@ -302,7 +302,7 @@ public class RequestParams {
         } else {
             buffer.append("empty");
         }
-        buffer.append("]\n");
+        buffer.append("],");
         buffer.append("[params:");
         if (params.size() > 0) {
             for (String o : params.keySet()) {
@@ -315,7 +315,7 @@ public class RequestParams {
         } else {
             buffer.append("empty");
         }
-        buffer.append("]\n");
+        buffer.append("],");
         buffer.append("[files:");
         if (files.size() > 0) {
             for (FileBody fileBody : files) {

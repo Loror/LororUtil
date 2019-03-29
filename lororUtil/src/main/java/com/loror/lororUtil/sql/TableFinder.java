@@ -49,27 +49,16 @@ public class TableFinder {
                     if (columnName.length() == 0) {
                         columnName = field.getName();
                     }
-                    String defaultValue = column.defaultValue();
-                    if (defaultValue.length() != 0 && column.encryption() != Encryption.class) {
-                        defaultValue = getEncryption(column.encryption()).encrypt(defaultValue);
-                    }
                     Class<?> type = field.getType();
                     if (type == int.class || type == long.class || type == Integer.class || type == Long.class) {
                         builder.append(columnName)
-                                .append(" int");
+                                .append(" int,");
                     } else if (type == float.class || type == double.class || type == Float.class || type == Double.class) {
                         builder.append(columnName)
-                                .append(" real");
+                                .append(" real,");
                     } else if (type == String.class) {
                         builder.append(columnName)
-                                .append(" text");
-                    }
-                    if (defaultValue.length() == 0) {
-                        builder.append(",");
-                    } else {
-                        builder.append(" default '")
-                                .append(defaultValue.replace("'", "''"))
-                                .append("',");
+                                .append(" text,");
                     }
                     columnCount++;
                 } else {
