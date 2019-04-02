@@ -9,6 +9,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.loror.lororUtil.image.ImageUtil;
+import com.loror.lororUtil.image.ImageUtilCallBack;
+import com.loror.lororUtil.image.ReadImageResult;
 import com.loror.lororUtil.view.Find;
 import com.loror.lororUtil.view.ViewUtil;
 
@@ -52,7 +54,7 @@ public class SimpleAdapter extends BaseAdapter {
         ImageUtil.with(context)
                 .from(images.get(position).path)
                 .to(holder.image)
-                .setWidthLimit(300)
+//                .setWidthLimit(300)
                 .setErrorImage(R.mipmap.ic_launcher)
 //                .setBitmapConverter(new BitmapConverter() {
 //                    @Override
