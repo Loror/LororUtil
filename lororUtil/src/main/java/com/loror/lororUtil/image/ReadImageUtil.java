@@ -21,7 +21,7 @@ public class ReadImageUtil {
         if (type != null && type.contains("gif")) {
             try {
                 GifDecoder decoder = resource != null ? new GifDecoder(resource) : new GifDecoder(new FileInputStream(new File(path)));
-                decoder.setWidthLimit(widthLimit);
+                decoder.setWidthLimit(widthLimit <= 0 ? 300 : widthLimit);
                 decoder.decode();
                 if (decoder.getStatus() == GifDecoder.STATUS_FINISH) {
                     for (int i = 0; i < decoder.getFrameCount(); i++) {
@@ -45,7 +45,9 @@ public class ReadImageUtil {
 
     private void addFirstFrame(ReadImageResult result, String path, byte[] resource, int widthLimit) {
         try {
-            Bitmap bitmap = resource != null ? BitmapUtil.compessBitmap(resource, widthLimit) : BitmapUtil.compessBitmap(path, widthLimit);
+            Bitmap bitmap = resource != null ?
+                    BitmapUtil.compessBitmap(resource, widthLimit <= 0 ? 720 : widthLimit) :
+                    BitmapUtil.compessBitmap(path, widthLimit <= 0 ? 720 : widthLimit);
             if (bitmap != null) {
                 result.setErrorCode(0);
                 result.addFrame(new Frame(bitmap, 0, widthLimit));

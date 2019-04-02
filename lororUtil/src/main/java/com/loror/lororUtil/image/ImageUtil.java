@@ -29,7 +29,7 @@ public class ImageUtil implements Cloneable {
     private int errorImage;
     private ImageView imageView;
     private String path;
-    private int widthLimit = 200;
+    private int widthLimit;
     private boolean noSdCache;
     private ReadImage readImage;
     private BitmapConverter bitmapConverter;

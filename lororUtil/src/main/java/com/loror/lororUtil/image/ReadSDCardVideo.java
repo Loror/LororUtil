@@ -8,7 +8,7 @@ import android.media.ThumbnailUtils;
  */
 public class ReadSDCardVideo implements ReadImage {
     private ReadSDCardVideo() {
-        // TODO Auto-generated constructor stub
+
     }
 
     private static class SingletonFactory {
@@ -21,7 +21,7 @@ public class ReadSDCardVideo implements ReadImage {
 
     @Override
     public ReadImageResult readImage(String path, int widthLimit, boolean mutiCache) {
-        Bitmap bitmap = BitmapUtil.compessBitmap(ThumbnailUtils.createVideoThumbnail(path, 320), widthLimit, true);
+        Bitmap bitmap = ThumbnailUtils.createVideoThumbnail(path, 320);
         ReadImageResult result = new ReadImageResult();
         result.addFrame(new Frame(bitmap, 0, widthLimit));
         result.setPath(path);

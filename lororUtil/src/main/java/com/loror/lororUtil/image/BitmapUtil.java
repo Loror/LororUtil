@@ -72,7 +72,7 @@ public class BitmapUtil {
         BitmapFactory.Options opt = new BitmapFactory.Options();
         opt.inJustDecodeBounds = true;
         BitmapFactory.decodeFile(path, opt);
-        opt.inSampleSize = opt.outWidth / widthLimit;
+        opt.inSampleSize = opt.outWidth < widthLimit ? 1 : opt.outWidth / widthLimit;
         opt.inJustDecodeBounds = false;
         return compessBitmap(BitmapFactory.decodeFile(path, opt), widthLimit, false);
     }
@@ -84,7 +84,7 @@ public class BitmapUtil {
         BitmapFactory.Options opt = new BitmapFactory.Options();
         opt.inJustDecodeBounds = true;
         BitmapFactory.decodeByteArray(source, 0, source.length, opt);
-        opt.inSampleSize = opt.outWidth / widthLimit;
+        opt.inSampleSize = opt.outWidth < widthLimit ? 1 : opt.outWidth / widthLimit;
         opt.inJustDecodeBounds = false;
         return compessBitmap(BitmapFactory.decodeByteArray(source, 0, source.length, opt), widthLimit, false);
     }

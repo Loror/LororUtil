@@ -55,7 +55,7 @@ public class SimpleAdapter extends BaseAdapter {
         ImageUtil.with(context)
                 .from(images.get(position).path)
                 .to(holder.image)
-                .setWidthLimit(300)
+//                .setWidthLimit(300)
                 .setErrorImage(R.mipmap.ic_launcher)
 //                .setBitmapConverter(new BitmapConverter() {
 //                    @Override

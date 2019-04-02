@@ -6,7 +6,7 @@ package com.loror.lororUtil.image;
 public class ReadSDCardImage extends ReadImageUtil implements ReadImage {
 
     private ReadSDCardImage() {
-        // TODO Auto-generated constructor stub
+
     }
 
     private static class SingletonFactory {
