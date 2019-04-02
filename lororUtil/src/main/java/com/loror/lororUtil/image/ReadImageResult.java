@@ -9,6 +9,7 @@ public class ReadImageResult {
 	private List<Frame> frames = new ArrayList<>();
 	private String originPath;
 	private String path;
+	//-1，加载路劲为空 0，成功 1，网络下载失败 2,图片解析错误 3，内存溢出 4，超时无法获取
 	private int errorCode;
 	private Throwable throwable;
 	private boolean repeate = true;

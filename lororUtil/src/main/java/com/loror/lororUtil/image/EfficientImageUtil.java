@@ -206,6 +206,11 @@ public class EfficientImageUtil {
                     removeableThreadPool.excute(runnable, RemoveableThreadPool.EXCUTETYPE_ORDER);
                 }
             }
+        } else if (callback != null) {
+            callback.onStart(imageView);
+            ReadImageResult result = new ReadImageResult();
+            result.setErrorCode(-1);//加载路劲为空
+            callback.onFailed(imageView, result);
         }
     }
 }
