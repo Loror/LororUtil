@@ -14,6 +14,7 @@ import android.graphics.Bitmap;
 import android.os.Environment;
 import android.os.Handler;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.widget.ImageView;
@@ -215,11 +216,36 @@ public class ImageUtil implements Cloneable {
     }
 
     /**
+     * 获取控件宽度
+     */
+    private int getViewWidth(ImageView view) {
+        if (view != null) {
+            int width = view.getWidth();
+            if (width == 0) {
+                width = view.getMeasuredWidth();
+            }
+            if (width == 0) {
+                ViewGroup.LayoutParams params = view.getLayoutParams();
+                if (params != null) {
+                    if (params.width > 0) {
+                        width = params.width;
+                    } else {
+                        view.measure(params.width, params.height);
+                        width = view.getMeasuredWidth();
+                    }
+                }
+            }
+            return width;
+        }
+        return 500;
+    }
+
+    /**
      * 执行
      */
     public void loadImage() {
         final Context context = this.context;
-        final int widthLimit = this.widthLimit;
+        final int widthLimit = this.widthLimit > 0 ? this.widthLimit : getViewWidth(this.imageView);
         final int defaultImage = this.defaultImage != 0 ? this.defaultImage : globalDefaultImage;
         final int errorImage = this.errorImage != 0 ? this.errorImage : globalErrorImage;
         final boolean isGif = this.isGif;
