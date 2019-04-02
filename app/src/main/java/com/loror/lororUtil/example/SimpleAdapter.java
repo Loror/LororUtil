@@ -1,7 +1,6 @@
 package com.loror.lororUtil.example;
 
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,8 +8,6 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.loror.lororUtil.image.BitmapConverter;
-import com.loror.lororUtil.image.BitmapUtil;
 import com.loror.lororUtil.image.ImageUtil;
 import com.loror.lororUtil.view.Find;
 import com.loror.lororUtil.view.ViewUtil;
@@ -55,12 +52,32 @@ public class SimpleAdapter extends BaseAdapter {
         ImageUtil.with(context)
                 .from(images.get(position).path)
                 .to(holder.image)
-//                .setWidthLimit(300)
+                .setWidthLimit(300)
                 .setErrorImage(R.mipmap.ic_launcher)
 //                .setBitmapConverter(new BitmapConverter() {
 //                    @Override
 //                    public Bitmap convert(Context context, Bitmap original) {
 //                        return BitmapUtil.centerRoundCorner(original);
+//                    }
+//                })
+//                .setOnLoadListener(new ImageUtilCallBack() {
+//                    @Override
+//                    public void onStart(ImageView imageView) {
+//
+//                    }
+//
+//                    @Override
+//                    public void onLoadCach(ImageView imageView, ReadImageResult result) {
+//                    }
+//
+//                    @Override
+//                    public void onFinish(ImageView imageView, ReadImageResult result) {
+//
+//                    }
+//
+//                    @Override
+//                    public void onFailed(ImageView imageView, ReadImageResult result) {
+//
 //                    }
 //                })
                 .loadImage();
