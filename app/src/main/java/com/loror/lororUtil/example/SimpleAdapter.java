@@ -1,6 +1,7 @@
 package com.loror.lororUtil.example;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -8,6 +9,8 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.loror.lororUtil.image.BitmapConverter;
+import com.loror.lororUtil.image.BitmapUtil;
 import com.loror.lororUtil.image.ImageUtil;
 import com.loror.lororUtil.image.ImageUtilCallBack;
 import com.loror.lororUtil.image.ReadImageResult;
@@ -54,14 +57,14 @@ public class SimpleAdapter extends BaseAdapter {
         ImageUtil.with(context)
                 .from(images.get(position).path)
                 .to(holder.image)
-//                .setWidthLimit(300)
+//                .setWidthLimit(300) //可控制生成bitmap宽度，默认尝试获取控件宽度
                 .setErrorImage(R.mipmap.ic_launcher)
 //                .setBitmapConverter(new BitmapConverter() {
 //                    @Override
 //                    public Bitmap convert(Context context, Bitmap original) {
 //                        return BitmapUtil.centerRoundCorner(original);
 //                    }
-//                })
+//                }) //可设置图片加载到控件前的处理
 //                .setOnLoadListener(new ImageUtilCallBack() {
 //                    @Override
 //                    public void onStart(ImageView imageView) {
@@ -70,6 +73,7 @@ public class SimpleAdapter extends BaseAdapter {
 //
 //                    @Override
 //                    public void onLoadCach(ImageView imageView, ReadImageResult result) {
+//
 //                    }
 //
 //                    @Override
@@ -81,7 +85,7 @@ public class SimpleAdapter extends BaseAdapter {
 //                    public void onFailed(ImageView imageView, ReadImageResult result) {
 //
 //                    }
-//                })
+//                }) //可监听图片加载生命周期
                 .loadImage();
         holder.text.setText("id:" + images.get(position).id);
         return convertView;
