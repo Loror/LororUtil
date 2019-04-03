@@ -46,7 +46,7 @@ public class EfficientImageUtil {
      * 获取缓存
      */
     public static Bitmap getBitmapByPath(String path) {
-        ReadImageResult readImageResult = ImageCach.getFromCache(path + 200);
+        ReadImageResult readImageResult = ImageCach.getFromCache(path + DEFAULT_WIDTH);
         return readImageResult == null ? null : readImageResult.getBitmap();
     }
 
@@ -70,7 +70,7 @@ public class EfficientImageUtil {
      * 重载
      */
     public static void loadImage(ImageView imageView, String path, ReadImage readImage) {
-        loadImage(imageView, path, 200, readImage, null, null, true, false);
+        loadImage(imageView, path, 0, readImage, null, null, true, false);
     }
 
     /**
@@ -84,7 +84,7 @@ public class EfficientImageUtil {
      * 重载
      */
     public static void loadImage(ImageView imageView, String path, ReadImage readImage, ImageUtilCallBack callback) {
-        loadImage(imageView, path, 200, readImage, callback, null, true, false);
+        loadImage(imageView, path, 0, readImage, callback, null, true, false);
     }
 
     /**
