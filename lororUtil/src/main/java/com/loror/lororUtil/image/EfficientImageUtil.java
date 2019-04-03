@@ -12,6 +12,9 @@ import android.view.View;
 import android.widget.ImageView;
 
 public class EfficientImageUtil {
+
+    public static final int DEFAULT_WIDTH = 500;
+
     private static final int tagKey = 3 << 24;
     private static final int cachTagKey = 3 << 24 + 1;
     private static int tag = 1;
@@ -112,10 +115,13 @@ public class EfficientImageUtil {
     /**
      * 加载，参数，1，imageView，2，地址，3，宽度限制，4，读取图片接口，5，回掉，6，是否移除滑出的任务，7，是否支持多帧模式
      */
-    public static void loadImage(final ImageView imageView, final String path, final int widthLimit,
+    public static void loadImage(final ImageView imageView, final String path, int widthLimit,
                                  final ReadImage readImage, final ImageUtilCallBack callback, Bitmap defaultImage,
                                  final boolean removeOldTask, final boolean mutiCache) {
         if (!TextUtil.isEmpty(path)) {
+            if (widthLimit <= 0) {
+                widthLimit = DEFAULT_WIDTH;
+            }
             final String tag = String.valueOf(EfficientImageUtil.tag++);
             final String cachKey = path + widthLimit;
             final boolean hasImageView = imageView != null;
@@ -159,12 +165,13 @@ public class EfficientImageUtil {
                         }
                     }
                 } else {
+                    final int finalWidthLimit = widthLimit;
                     Runnable runnable = new Runnable() {
                         public void run() {
                             if (removeOldTask) {
                                 EfficientImageUtil.tasks.remove(tag);
                             }
-                            final ReadImageResult readImageResult = readImage.readImage(path, widthLimit, mutiCache);
+                            final ReadImageResult readImageResult = readImage.readImage(path, finalWidthLimit, mutiCache);
                             readImageResult.setOriginPath(path);
                             if (readImageResult.getBitmap() == null) {
                                 if (callback != null) {

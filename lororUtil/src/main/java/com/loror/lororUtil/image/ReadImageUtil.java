@@ -46,8 +46,8 @@ public class ReadImageUtil {
     private void addFirstFrame(ReadImageResult result, String path, byte[] resource, int widthLimit) {
         try {
             Bitmap bitmap = resource != null ?
-                    BitmapUtil.compessBitmap(resource, widthLimit <= 0 ? 720 : widthLimit) :
-                    BitmapUtil.compessBitmap(path, widthLimit <= 0 ? 720 : widthLimit);
+                    BitmapUtil.compessBitmap(resource, widthLimit) :
+                    BitmapUtil.compessBitmap(path, widthLimit);
             if (bitmap != null) {
                 result.setErrorCode(0);
                 result.addFrame(new Frame(bitmap, 0, widthLimit));

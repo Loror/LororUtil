@@ -20,6 +20,7 @@ import android.view.animation.Animation;
 import android.widget.ImageView;
 
 public class ImageUtil implements Cloneable {
+
     private static final int tagKey = 3 << 24;
     private static int globalDefaultImage;
     private static int globalErrorImage;
@@ -237,7 +238,7 @@ public class ImageUtil implements Cloneable {
             }
             return width;
         }
-        return 500;
+        return 0;
     }
 
     /**
