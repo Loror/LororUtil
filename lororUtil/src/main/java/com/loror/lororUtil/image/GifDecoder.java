@@ -71,7 +71,7 @@ public class GifDecoder {
 	private int frameCount;
 
 	private byte[] gifData = null;
-	private int widthLimit = 250;
+	private int widthLimit = 350;
 
 	public GifDecoder(byte[] data) {
 		gifData = data;

@@ -21,7 +21,7 @@ public class ReadImageUtil {
         if (type != null && type.contains("gif")) {
             try {
                 GifDecoder decoder = resource != null ? new GifDecoder(resource) : new GifDecoder(new FileInputStream(new File(path)));
-                decoder.setWidthLimit(widthLimit <= 0 ? 300 : widthLimit);
+                decoder.setWidthLimit(widthLimit);
                 decoder.decode();
                 if (decoder.getStatus() == GifDecoder.STATUS_FINISH) {
                     for (int i = 0; i < decoder.getFrameCount(); i++) {
