@@ -296,24 +296,18 @@ public class ImageUtil implements Cloneable {
                         }
                         if (result.getErrorCode() == 0) {
                             lock.mark = 1;//加载成功，锁耗尽
+                            ImageCach.pushToCach(path + widthLimit, result);//放入缓存
                         }
                     } else {
-                        long time = System.currentTimeMillis();
-                        //拿到锁时可能缓存还未存入，应循环等待以获取数据
-                        while (result == null) {
-                            result = ImageCach.getFromCache(path + widthLimit);//其他任务已加载该图片，从缓存中获取
-                            if (System.currentTimeMillis() - time > 3000) {
-                                result = readImage.readImage(path, widthLimit, isGif);
-                                if (result == null) {
-                                    result = new ReadImageResult();
-                                    result.setErrorCode(4);//超时无法获取，标记错误码4
-                                }
-                                break;//超过3秒无论是否获取到缓存都放弃
-                            }
-                            try {
-                                Thread.sleep(2);
-                            } catch (InterruptedException e) {
-                                e.printStackTrace();
+                        result = ImageCach.getFromCache(path + widthLimit);//其他任务已加载该图片，从缓存中获取
+                        //可能其他任务获取的宽度与本次不同，尝试重新加载
+                        if (result == null) {
+                            result = readImage.readImage(path, widthLimit, isGif);
+                            if (result == null) {
+                                result = new ReadImageResult();
+                                result.setErrorCode(4);//超时无法获取，标记错误码4
+                            } else if (result.getErrorCode() == 0) {
+                                ImageCach.pushToCach(path + widthLimit, result);//放入缓存
                             }
                         }
                     }
