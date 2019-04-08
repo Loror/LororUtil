@@ -3,7 +3,10 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/LororUtil.iml" filepath="$PROJECT_DIR$/LororUtil.iml" />
+      <module fileurl="file://$PROJECT_DIR$/LororUtil.iml" filepath="$PROJECT_DIR$/LororUtil.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/lororUtil/lororUtil.iml" filepath="$PROJECT_DIR$/lororUtil/lororUtil.iml" />
       <module fileurl="file://$PROJECT_DIR$/lororUtil/lororUtil.iml" filepath="$PROJECT_DIR$/lororUtil/lororUtil.iml" />
     </modules>
   </component>

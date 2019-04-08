@@ -215,6 +215,9 @@ public class EfficientImageUtil {
             }
         } else if (callback != null) {
             callback.onStart(imageView);
+            if (imageView != null) {
+                releseTag(imageView);
+            }
             ReadImageResult result = new ReadImageResult();
             result.setErrorCode(-1);//加载路劲为空
             callback.onFailed(imageView, result);
