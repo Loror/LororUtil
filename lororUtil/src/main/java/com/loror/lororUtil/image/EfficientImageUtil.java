@@ -118,6 +118,10 @@ public class EfficientImageUtil {
     public static void loadImage(final ImageView imageView, final String path, int widthLimit,
                                  final ReadImage readImage, final ImageUtilCallBack callback, Bitmap defaultImage,
                                  final boolean removeOldTask, final boolean mutiCache) {
+        if (defaultImage == null) {
+            defaultImage = ObjectPool.getInstance().getDefaultImage();
+        }
+
         if (!TextUtil.isEmpty(path)) {
             if (widthLimit <= 0) {
                 widthLimit = DEFAULT_WIDTH;
@@ -131,10 +135,6 @@ public class EfficientImageUtil {
             Object old = hasImageView ? imageView.getTag(tagKey) : null;
             Object oldCach = hasImageView ? imageView.getTag(cachTagKey) : null;
             if (!cachKey.equals(oldCach)) {
-                if (defaultImage == null) {
-                    defaultImage = ObjectPool.getInstance().getDefaultImage();
-                }
-
                 if (hasImageView) {
                     imageView.setTag(tagKey, tag);
                     imageView.setTag(cachTagKey, cachKey);
@@ -213,14 +213,17 @@ public class EfficientImageUtil {
                     removeableThreadPool.excute(runnable, RemoveableThreadPool.EXCUTETYPE_ORDER);
                 }
             }
-        } else if (callback != null) {
-            callback.onStart(imageView);
+        } else {
             if (imageView != null) {
                 releseTag(imageView);
+                imageView.setImageBitmap(defaultImage);
             }
-            ReadImageResult result = new ReadImageResult();
-            result.setErrorCode(-1);//加载路劲为空
-            callback.onFailed(imageView, result);
+            if (callback != null) {
+                callback.onStart(imageView);
+                ReadImageResult result = new ReadImageResult();
+                result.setErrorCode(-1);//加载路径为空
+                callback.onFailed(imageView, result);
+            }
         }
     }
 }

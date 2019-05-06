@@ -323,7 +323,6 @@ public class ImageUtil implements Cloneable {
             }
             callback = new ImageUtilCallBack() {
 
-                private WeakReference<ImageView> weakReference;
                 private String tag;
                 private int index;
 
@@ -344,53 +343,18 @@ public class ImageUtil implements Cloneable {
                     }
                 }
 
-                @Override
-                public void onLoadCach(final ImageView imageView, final ReadImageResult readImageResult) {
-                    if (imageView != null) {
-                        if (readImageResult.getBitmap() == null) {
-                            if (errorImage != 0) {
-                                imageView.setImageResource(errorImage);
-                            }
-                            return;
-                        }
-                        if (!isGif) {
-                            if (cachUseAnimation && loadAnimation != null && imageView.getVisibility() == View.VISIBLE) {
-                                imageView.startAnimation(loadAnimation);
-                            }
-                            imageView.setImageBitmap(bitmapConverter == null ? readImageResult.getBitmap() : bitmapConverter.convert(context, readImageResult.getBitmap()));
-                        } else {
-                            weakReference = new WeakReference<ImageView>(imageView);
-                            final Handler handler = ObjectPool.getInstance().getHandler();
-                            if (readImageResult.getCount() > 0) {
-                                loadGif(handler, readImageResult, true);
-                            } else {
-                                handler.post(new Runnable() {
-
-                                    @Override
-                                    public void run() {
-                                        if (cachUseAnimation && loadAnimation != null && imageView.getVisibility() == View.VISIBLE) {
-                                            imageView.startAnimation(loadAnimation);
-                                        }
-                                        imageView.setImageBitmap(bitmapConverter == null ? readImageResult.getBitmap() : bitmapConverter.convert(context, readImageResult.getBitmap()));
-                                    }
-                                });
-                            }
-                        }
-                    }
-                    if (onLoadListener != null) {
-                        onLoadListener.onLoadCach(imageView, readImageResult);
-                    }
-                }
-
-                private final void loadGif(final Handler handler, final ReadImageResult readImageResult, final boolean local) {
+                private void loadGif(final Handler handler, final ReadImageResult readImageResult, final boolean local) {
                     final int size = readImageResult.getCount();
-                    final boolean calledAnimation[] = {false};
+                    final boolean[] calledAnimation = {false};
+                    final WeakReference<Context> contextWeakReference = new WeakReference<Context>(context);
+                    final WeakReference<ImageView> weakReference = new WeakReference<ImageView>(imageView);
                     Runnable runnable = new Runnable() {
 
                         @Override
                         public void run() {
                             ImageView imageView = weakReference.get();
-                            if (imageView == null) {
+                            Context context = contextWeakReference.get();
+                            if (imageView == null || context == null) {
                                 return;
                             }
                             boolean useful = tag.equals(imageView.getTag(tagKey));
@@ -424,6 +388,43 @@ public class ImageUtil implements Cloneable {
                 }
 
                 @Override
+                public void onLoadCach(final ImageView imageView, final ReadImageResult readImageResult) {
+                    if (imageView != null) {
+                        if (readImageResult.getBitmap() == null) {
+                            if (errorImage != 0) {
+                                imageView.setImageResource(errorImage);
+                            }
+                            return;
+                        }
+                        if (!isGif) {
+                            if (cachUseAnimation && loadAnimation != null && imageView.getVisibility() == View.VISIBLE) {
+                                imageView.startAnimation(loadAnimation);
+                            }
+                            imageView.setImageBitmap(bitmapConverter == null ? readImageResult.getBitmap() : bitmapConverter.convert(context, readImageResult.getBitmap()));
+                        } else {
+                            final Handler handler = ObjectPool.getInstance().getHandler();
+                            if (readImageResult.getCount() > 0) {
+                                loadGif(handler, readImageResult, true);
+                            } else {
+                                handler.post(new Runnable() {
+
+                                    @Override
+                                    public void run() {
+                                        if (cachUseAnimation && loadAnimation != null && imageView.getVisibility() == View.VISIBLE) {
+                                            imageView.startAnimation(loadAnimation);
+                                        }
+                                        imageView.setImageBitmap(bitmapConverter == null ? readImageResult.getBitmap() : bitmapConverter.convert(context, readImageResult.getBitmap()));
+                                    }
+                                });
+                            }
+                        }
+                    }
+                    if (onLoadListener != null) {
+                        onLoadListener.onLoadCach(imageView, readImageResult);
+                    }
+                }
+
+                @Override
                 public void onFinish(final ImageView imageView, final ReadImageResult readImageResult) {
                     if (imageView != null) {
                         if (!isGif) {
@@ -432,7 +433,6 @@ public class ImageUtil implements Cloneable {
                             }
                             imageView.setImageBitmap(bitmapConverter == null ? readImageResult.getBitmap() : bitmapConverter.convert(context, readImageResult.getBitmap()));
                         } else {
-                            weakReference = new WeakReference<ImageView>(imageView);
                             final Handler handler = ObjectPool.getInstance().getHandler();
                             if (readImageResult.getCount() > 0) {
                                 loadGif(handler, readImageResult, false);
