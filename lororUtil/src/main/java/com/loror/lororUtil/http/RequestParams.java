@@ -18,6 +18,7 @@ public class RequestParams {
     private List<FileBody> files = new ArrayList<FileBody>();
     protected HashMap<String, String> head = new HashMap<String, String>();
     private RequestConverter getConverter, postConverter, bodyConverter;
+    private SplicingConverter splicingConverter;
     private static boolean useDefaultConverterInPost = false;
     private static boolean defaultNullToEmpty = true;
     private static RequestConverter defaultConverter = new RequestConverter() {
@@ -214,6 +215,20 @@ public class RequestParams {
      */
     public void setBodyConverter(RequestConverter bodyConverter) {
         this.bodyConverter = bodyConverter;
+    }
+
+    /**
+     * 设置拼接符
+     */
+    public void setSplicingConverter(SplicingConverter splicingConverter) {
+        this.splicingConverter = splicingConverter;
+    }
+
+    /**
+     * 获取拼接符
+     */
+    protected String getSplicing(String url) {
+        return splicingConverter != null ? splicingConverter.convert(url) : (url.contains("?") ? "&" : "?");
     }
 
     /**

@@ -130,11 +130,7 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
             if (params != null) {
                 String strParams = params.packetOutParams("GET");
                 if (!TextUtil.isEmpty(strParams)) {
-                    if (urlStr.indexOf("?") != -1) {
-                        urlStr += "&" + strParams;
-                    } else {
-                        urlStr += "?" + strParams;
-                    }
+                    urlStr += params.getSplicing(urlStr) + strParams;
                 }
             }
             URL url = new URL(urlStr);
@@ -165,11 +161,7 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
                 if (params != null && params.isAsJson()) {
                     String strParams = params.packetOutParams("GET");
                     if (!TextUtil.isEmpty(strParams)) {
-                        if (urlStr.indexOf("?") != -1) {
-                            urlStr += "&" + strParams;
-                        } else {
-                            urlStr += "?" + strParams;
-                        }
+                        urlStr += params.getSplicing(urlStr) + strParams;
                     }
                 }
                 URL url = new URL(urlStr);
@@ -280,11 +272,7 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
                 if (params != null && params.isAsJson()) {
                     String strParams = params.packetOutParams("GET");
                     if (!TextUtil.isEmpty(strParams)) {
-                        if (urlStr.indexOf("?") != -1) {
-                            urlStr += "&" + strParams;
-                        } else {
-                            urlStr += "?" + strParams;
-                        }
+                        urlStr += params.getSplicing(urlStr) + strParams;
                     }
                 }
                 URL url = new URL(urlStr);
@@ -394,11 +382,7 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
             if (params != null) {
                 String strParams = params.packetOutParams("GET");
                 if (!TextUtil.isEmpty(strParams)) {
-                    if (urlStr.indexOf("?") != -1) {
-                        urlStr += "&" + strParams;
-                    } else {
-                        urlStr += "?" + strParams;
-                    }
+                    urlStr += params.getSplicing(urlStr) + strParams;
                 }
             }
             URL url = new URL(urlStr);
