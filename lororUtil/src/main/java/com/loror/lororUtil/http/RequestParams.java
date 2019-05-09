@@ -15,7 +15,8 @@ public class RequestParams {
 
     private final String JSONKEY = "RequestParamsAsJson";
     private HashMap<String, String> params = new HashMap<String, String>();
-    private List<FileBody> files = new ArrayList<FileBody>();
+    private HashMap<String, Object[]> arrayParams;
+    private List<FileBody> files;
     protected HashMap<String, String> head = new HashMap<String, String>();
     private RequestConverter getConverter, postConverter, bodyConverter;
     private SplicingConverter splicingConverter;
@@ -46,7 +47,7 @@ public class RequestParams {
      * 获取所有文件
      */
     public List<FileBody> getFiles() {
-        return files;
+        return files == null ? new ArrayList<FileBody>() : files;
     }
 
     /**
@@ -130,16 +131,15 @@ public class RequestParams {
      * 添加参数
      */
     public RequestParams addParams(String key, Object[] value) {
-        StringBuilder stringBuffer = new StringBuilder();
-        stringBuffer.append("array{");
-        for (int i = 0; i < value.length; i++) {
-            stringBuffer.append(String.valueOf(value[i]));
-            if (i != value.length - 1) {
-                stringBuffer.append(",");
+        if (value != null) {
+            if (arrayParams == null) {
+                arrayParams = new HashMap<String, Object[]>();
             }
+            arrayParams.put(key, value);
+            return addParams(key, "array{@arrayParams}");
+        } else {
+            return this;
         }
-        stringBuffer.append("}");
-        return addParams(key, stringBuffer.toString());
     }
 
     /**
@@ -178,6 +178,9 @@ public class RequestParams {
      */
     public RequestParams addParams(String key, FileBody file) {
         file.setKey(key);
+        if (files == null) {
+            files = new ArrayList<FileBody>();
+        }
         files.add(file);
         return this;
     }
@@ -232,6 +235,13 @@ public class RequestParams {
     }
 
     /**
+     * 获取数组参数
+     */
+    public HashMap<String, Object[]> getArrayParams() {
+        return arrayParams == null ? new HashMap<String, Object[]>() : arrayParams;
+    }
+
+    /**
      * 打包参数
      */
     protected String packetOutParams(String method) {
@@ -245,13 +255,14 @@ public class RequestParams {
                 continue;
             }//不拼接json
             String value = params.get(o);
-            if (value != null && value.startsWith("array{")) {
-                value = value.substring(6, value.length() - 1);
-                String[] values = value.split(",");
-                if (values.length > 0) {
+            if ("array{@arrayParams}".equals(value) && arrayParams != null) {
+                Object[] values = arrayParams.get(o);
+                if (values != null) {
                     for (int i = 0; i < values.length; i++) {
-                        append(method, sb, o, values[i]);
+                        append(method, sb, o, values[i] == null ? null : String.valueOf(values[i]));
                     }
+                } else {
+                    append(method, sb, o, value);
                 }
             } else {
                 append(method, sb, o, value);
@@ -321,10 +332,28 @@ public class RequestParams {
         buffer.append("[params:");
         if (params.size() > 0) {
             for (String o : params.keySet()) {
-                buffer.append(o)
-                        .append("=")
-                        .append(params.get(o))
-                        .append(",");
+                String value = params.get(o);
+                if ("array{@arrayParams}".equals(value) && arrayParams != null) {
+                    Object[] values = arrayParams.get(o);
+                    if (values != null) {
+                        for (int i = 0; i < values.length; i++) {
+                            buffer.append(o)
+                                    .append("=")
+                                    .append(values[i] == null ? null : String.valueOf(values[i]))
+                                    .append(",");
+                        }
+                    } else {
+                        buffer.append(o)
+                                .append("=")
+                                .append(params.get(o))
+                                .append(",");
+                    }
+                } else {
+                    buffer.append(o)
+                            .append("=")
+                            .append(params.get(o))
+                            .append(",");
+                }
             }
             buffer.deleteCharAt(buffer.length() - 1);
         } else {
@@ -332,7 +361,7 @@ public class RequestParams {
         }
         buffer.append("],");
         buffer.append("[files:");
-        if (files.size() > 0) {
+        if (files != null && files.size() > 0) {
             for (FileBody fileBody : files) {
                 buffer.append(fileBody.getKey())
                         .append("=")
