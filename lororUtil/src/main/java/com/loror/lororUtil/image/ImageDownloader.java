@@ -111,6 +111,10 @@ public class ImageDownloader {
                 conn.disconnect();
                 return true;
             }
+            //适配部分机型需手动创建文件
+            if (!file.exists()) {
+                file.createNewFile();
+            }
             InputStream is = conn.getInputStream();
             FileOutputStream fos = new FileOutputStream(file);
             byte[] out = new byte[2048];
