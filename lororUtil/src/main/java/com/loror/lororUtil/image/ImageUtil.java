@@ -56,8 +56,12 @@ public class ImageUtil implements Cloneable {
 
     private final void init(Context context) {
         if (targetDirPath == null) {
-            targetDirPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/Android/data/"
-                    + context.getPackageName() + "/img";
+            try {
+                targetDirPath = context.getExternalCacheDir().getAbsolutePath();
+            } catch (Exception e) {
+                targetDirPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/Android/data/"
+                        + context.getPackageName() + "/cache";
+            }
         }
         if (targetName == null) {
             targetName = MD5Util.MD5(path);
