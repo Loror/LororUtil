@@ -26,7 +26,7 @@ allprojects {
     * 方法setErrorImage(int errorImage) 设置读取失败时占位图
     * 方法from(String path) 设置图片来源
     * 方法to(ImageView imageView) 设置加载到控件
-    * 方法setWidthLimit(int widthLimit) 设置加载图片宽度限制，默认200
+    * 方法setWidthLimit(int widthLimit) 设置加载图片宽度限制，默认获取imageView宽度，如获取不到使用默认值500
     * 方法setReadImage(ReadImage readImage) 设置自定义图片加载接口，内部已有实现接口，如您不清楚如何自定义，请谨慎使用
     * 方法setBitmapConverter(BitmapConverter bitmapConverter) 设置图片显示预处理接口
     * 方法setRemoveOldTask(boolean removeOldTask) 设置是否移除被快速滑出的任务，任务一旦开始无法移除，默认移除
@@ -121,7 +121,7 @@ HttpClient HttpsClient使用参数类
     * @Find(R.id.xx) 用于查找控件注解
     
 * 注解Click
-    * @Click(id = R.id.xx) 用于绑定控件点击事件
+    * @Click(id = R.id.xx, clickSpace = 0) 用于绑定控件点击事件，clickSpace用于限制两次点击间隔时间，默认为0
     
 * 注解LongClick
     * @LongClick(id = R.id.xx) 用于绑定控件点击事件
