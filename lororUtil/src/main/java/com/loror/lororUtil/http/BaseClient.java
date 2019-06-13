@@ -1,7 +1,6 @@
 package com.loror.lororUtil.http;
 
 import android.annotation.SuppressLint;
-import android.util.Log;
 
 import com.loror.lororUtil.text.TextUtil;
 
@@ -192,7 +191,6 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
             }
             return responce;
         } else {
-            Log.e("RESULT_","2");
             final ProgressListener progressListener = this.progressListener;
             final Actuator callbackActuator = this.callbackActuator;
             List<FileBody> files = params.getFiles();
