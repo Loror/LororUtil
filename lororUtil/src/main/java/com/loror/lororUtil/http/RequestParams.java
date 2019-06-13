@@ -32,6 +32,13 @@ public class RequestParams {
     };
 
     /**
+     * 是否使用表单提交post
+     */
+    public boolean isUserFormForPost() {
+        return defaultUserFormForPost || userFormForPost;
+    }
+
+    /**
      * 设置是否使用表单提交post
      */
     public void setUserFormForPost(boolean userFormForPost) {
