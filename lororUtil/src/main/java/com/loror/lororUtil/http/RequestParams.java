@@ -22,12 +22,28 @@ public class RequestParams {
     private SplicingConverter splicingConverter;
     private static boolean useDefaultConverterInPost = false;
     private static boolean defaultNullToEmpty = true;
+    private static boolean defaultUserFormForPost = false;
+    private boolean userFormForPost = false;
     private static RequestConverter defaultConverter = new RequestConverter() {
         @Override
         public String convert(String key, String value) {
             return value == null ? null : UrlUtf8Util.toUrlString(value);
         }
     };
+
+    /**
+     * 设置是否使用表单提交post
+     */
+    public void setUserFormForPost(boolean userFormForPost) {
+        this.userFormForPost = userFormForPost;
+    }
+
+    /**
+     * 设置是否默认使用表单提交post
+     */
+    public static void setDefaultUserFormForPost(boolean defaultUserFormForPost) {
+        RequestParams.defaultUserFormForPost = defaultUserFormForPost;
+    }
 
     /**
      * 设置是否默认对post请求参数url编码
@@ -293,10 +309,22 @@ public class RequestParams {
                         .append("&");
                 break;
             case "POST":
-                sb.append(key)
-                        .append("=")
-                        .append(postConverter == null ? (useDefaultConverterInPost ? defaultConverter.convert(key, value) : value) : postConverter.convert(key, value))
-                        .append("&");
+                if (defaultUserFormForPost || userFormForPost) {
+                    sb.append(Config.PREFIX);
+                    sb.append(Config.BOUNDARY);
+                    sb.append(Config.LINEND);
+                    sb.append("Content-Disposition: form-data; name=\"").append(key).append("\"" + Config.LINEND);
+                    sb.append("Content-Type: text/plain; charset=UTF-8" + Config.LINEND);
+                    sb.append("Content-Transfer-Encoding: 8bit" + Config.LINEND);
+                    sb.append(Config.LINEND);
+                    sb.append(postConverter == null ? (useDefaultConverterInPost ? defaultConverter.convert(key, value) : value) : postConverter.convert(key, value));
+                    sb.append(Config.LINEND);
+                } else {
+                    sb.append(key)
+                            .append("=")
+                            .append(postConverter == null ? (useDefaultConverterInPost ? defaultConverter.convert(key, value) : value) : postConverter.convert(key, value))
+                            .append("&");
+                }
                 break;
             case "POST_FORM":
                 sb.append(Config.PREFIX);
