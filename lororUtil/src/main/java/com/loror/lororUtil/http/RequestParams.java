@@ -20,10 +20,10 @@ public class RequestParams {
     protected HashMap<String, String> head = new HashMap<String, String>();
     private RequestConverter getConverter, postConverter, bodyConverter;
     private SplicingConverter splicingConverter;
-    private static boolean useDefaultConverterInPost = false;
+    private static boolean defaultUseDefaultConverterInPost = false;
     private static boolean defaultNullToEmpty = true;
     private static boolean defaultUserFormForPost = false;
-    private boolean userFormForPost = false;
+    private boolean userFormForPost = false, useDefaultConverterInPost = false;
     private static RequestConverter defaultConverter = new RequestConverter() {
         @Override
         public String convert(String key, String value) {
@@ -53,10 +53,17 @@ public class RequestParams {
     }
 
     /**
+     * 设置是否对post请求参数url编码
+     */
+    public static void setDefaultUseDefaultConverterInPost(boolean defaultUseDefaultConverterInPost) {
+        RequestParams.defaultUseDefaultConverterInPost = defaultUseDefaultConverterInPost;
+    }
+
+    /**
      * 设置是否默认对post请求参数url编码
      */
-    public static void setUseDefaultConverterInPost(boolean useDefaultConverterInPost) {
-        RequestParams.useDefaultConverterInPost = useDefaultConverterInPost;
+    public void setUseDefaultConverterInPost(boolean useDefaultConverterInPost) {
+        this.useDefaultConverterInPost = useDefaultConverterInPost;
     }
 
     /**
@@ -324,12 +331,12 @@ public class RequestParams {
                     sb.append("Content-Type: text/plain; charset=UTF-8" + Config.LINEND);
                     sb.append("Content-Transfer-Encoding: 8bit" + Config.LINEND);
                     sb.append(Config.LINEND);
-                    sb.append(postConverter == null ? (useDefaultConverterInPost ? defaultConverter.convert(key, value) : value) : postConverter.convert(key, value));
+                    sb.append(postConverter == null ? ((defaultUseDefaultConverterInPost || useDefaultConverterInPost) ? defaultConverter.convert(key, value) : value) : postConverter.convert(key, value));
                     sb.append(Config.LINEND);
                 } else {
                     sb.append(key)
                             .append("=")
-                            .append(postConverter == null ? (useDefaultConverterInPost ? defaultConverter.convert(key, value) : value) : postConverter.convert(key, value))
+                            .append(postConverter == null ? ((defaultUseDefaultConverterInPost || useDefaultConverterInPost) ? defaultConverter.convert(key, value) : value) : postConverter.convert(key, value))
                             .append("&");
                 }
                 break;
@@ -341,7 +348,7 @@ public class RequestParams {
                 sb.append("Content-Type: text/plain; charset=UTF-8" + Config.LINEND);
                 sb.append("Content-Transfer-Encoding: 8bit" + Config.LINEND);
                 sb.append(Config.LINEND);
-                sb.append(postConverter == null ? (useDefaultConverterInPost ? defaultConverter.convert(key, value) : value) : postConverter.convert(key, value));
+                sb.append(postConverter == null ? ((defaultUseDefaultConverterInPost || useDefaultConverterInPost) ? defaultConverter.convert(key, value) : value) : postConverter.convert(key, value));
                 sb.append(Config.LINEND);
                 break;
         }

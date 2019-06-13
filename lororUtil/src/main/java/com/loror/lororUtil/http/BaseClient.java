@@ -175,6 +175,11 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
                     if (!TextUtil.isEmpty(strParams)) {
                         PrintWriter pw = new PrintWriter(new OutputStreamWriter(conn.getOutputStream()));
                         pw.print(strParams);
+                        if (params.isUserFormForPost()) {
+                            // 定义最后数据分隔线，即--加上BOUNDARY再加上--，写上结尾标识
+                            String end_data = Config.PREFIX + Config.BOUNDARY + Config.PREFIX + Config.LINEND;
+                            pw.write(end_data);
+                        }
                         pw.close();
                     }
                 }
