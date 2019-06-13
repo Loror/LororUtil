@@ -56,12 +56,8 @@ public class Prepare {
         conn.setRequestProperty("Connection", "keep-alive");
         conn.setRequestProperty("Charset", "UTF-8");
 //        conn.setRequestProperty("Cache-Control", "no-cache");
-        if (parmas != null) {
-            if (parmas.isAsJson()) {
-                conn.setRequestProperty("contentType", "application/json");
-            } else if (parmas.isUserFormForPost()) {
-                conn.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + Config.BOUNDARY);
-            }
+        if (parmas != null && parmas.isAsJson()) {
+            conn.setRequestProperty("content-Type", "application/json");
         }
     }
 
@@ -127,7 +123,7 @@ public class Prepare {
         conn.setRequestProperty("Charset", "UTF-8");
 
         if (parmas != null && parmas.isAsJson()) {
-            conn.setRequestProperty("contentType", "application/json");
+            conn.setRequestProperty("content-Type", "application/json");
         }
     }
 

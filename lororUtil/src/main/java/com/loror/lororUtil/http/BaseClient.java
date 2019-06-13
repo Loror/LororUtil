@@ -1,6 +1,9 @@
 package com.loror.lororUtil.http;
 
 import android.annotation.SuppressLint;
+import android.util.Log;
+
+import com.loror.lororUtil.text.TextUtil;
 
 import java.io.DataOutputStream;
 import java.io.File;
@@ -8,14 +11,10 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-
-import com.loror.lororUtil.text.TextUtil;
 
 public abstract class BaseClient<T extends HttpURLConnection> extends Prepare implements Client {
     private int timeOut = 10000;
@@ -155,7 +154,7 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
 
     @Override
     public Responce post(String urlStr, RequestParams params) {
-        if (params == null || params.getFiles().size() == 0) {
+        if (params == null || (params.getFiles().size() == 0 && !params.isUseFormForPost())) {
             Responce responce = new Responce();
             try {
                 if (params != null && params.isAsJson()) {
@@ -173,14 +172,10 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
                 if (params != null) {
                     String strParams = params.packetOutParams("POST");
                     if (!TextUtil.isEmpty(strParams)) {
-                        PrintWriter pw = new PrintWriter(new OutputStreamWriter(conn.getOutputStream()));
-                        pw.print(strParams);
-                        if (params.isUserFormForPost()) {
-                            // 定义最后数据分隔线，即--加上BOUNDARY再加上--，写上结尾标识
-                            String end_data = Config.PREFIX + Config.BOUNDARY + Config.PREFIX + Config.LINEND;
-                            pw.write(end_data);
-                        }
-                        pw.close();
+                        OutputStream out = conn.getOutputStream();
+                        out.write(strParams.getBytes());
+                        out.flush();
+                        out.close();
                     }
                 }
                 responce.url = conn.getURL();
@@ -197,6 +192,7 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
             }
             return responce;
         } else {
+            Log.e("RESULT_","2");
             final ProgressListener progressListener = this.progressListener;
             final Actuator callbackActuator = this.callbackActuator;
             List<FileBody> files = params.getFiles();
@@ -271,7 +267,7 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
 
     @Override
     public Responce put(String urlStr, RequestParams params) {
-        if (params == null || params.getFiles().size() == 0) {
+        if (params == null || (params.getFiles().size() == 0 && !params.isUseFormForPost())) {
             Responce responce = new Responce();
             try {
                 if (params != null && params.isAsJson()) {
@@ -289,9 +285,10 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
                 if (params != null) {
                     String strParams = params.packetOutParams("POST");
                     if (!TextUtil.isEmpty(strParams)) {
-                        PrintWriter pw = new PrintWriter(new OutputStreamWriter(conn.getOutputStream()));
-                        pw.print(strParams);
-                        pw.close();
+                        OutputStream out = conn.getOutputStream();
+                        out.write(strParams.getBytes());
+                        out.flush();
+                        out.close();
                     }
                 }
                 responce.url = conn.getURL();
