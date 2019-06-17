@@ -24,14 +24,16 @@ public class Prepare {
         conn.setDoOutput(true);// 发送POST请求必须设置如下两行
         conn.setDoInput(true);
         conn.setUseCaches(false);
+
+        conn.setRequestProperty("connection", "keep-alive");// 设置请求头参数
+        conn.setRequestProperty("Charset", "UTF-8");
+        conn.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + Config.BOUNDARY);
+
         if (parmas != null && parmas.head.size() > 0) {
             for (String name : parmas.head.keySet()) {
                 conn.setRequestProperty(name, parmas.head.get(name));
             }
         }
-        conn.setRequestProperty("connection", "keep-alive");// 设置请求头参数
-        conn.setRequestProperty("Charset", "UTF-8");
-        conn.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + Config.BOUNDARY);
     }
 
     /**
@@ -47,17 +49,18 @@ public class Prepare {
         conn.setDoOutput(true);
         conn.setDoInput(true);
         conn.setUseCaches(false);
-        if (parmas != null && parmas.head.size() > 0) {
-            for (String name : parmas.head.keySet()) {
-                conn.setRequestProperty(name, parmas.head.get(name));
-            }
-        }
+
         conn.setRequestProperty("Content-Language", "zh-cn");
         conn.setRequestProperty("Connection", "keep-alive");
         conn.setRequestProperty("Charset", "UTF-8");
 //        conn.setRequestProperty("Cache-Control", "no-cache");
         if (parmas != null && parmas.isAsJson()) {
-            conn.setRequestProperty("content-Type", "application/json");
+            conn.setRequestProperty("Content-Type", "application/json");
+        }
+        if (parmas != null && parmas.head.size() > 0) {
+            for (String name : parmas.head.keySet()) {
+                conn.setRequestProperty(name, parmas.head.get(name));
+            }
         }
     }
 
@@ -91,14 +94,15 @@ public class Prepare {
         }
         conn.setDoOutput(true);// 发送POST请求必须设置如下两行
         conn.setDoInput(true);
+
+        conn.setRequestProperty("connection", "keep-alive");// 设置请求头参数
+        conn.setRequestProperty("Charset", "UTF-8");
+        conn.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + Config.BOUNDARY);
         if (parmas != null && parmas.head.size() > 0) {
             for (String name : parmas.head.keySet()) {
                 conn.setRequestProperty(name, parmas.head.get(name));
             }
         }
-        conn.setRequestProperty("connection", "keep-alive");// 设置请求头参数
-        conn.setRequestProperty("Charset", "UTF-8");
-        conn.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + Config.BOUNDARY);
     }
 
     /**
@@ -113,17 +117,18 @@ public class Prepare {
         }
         conn.setDoOutput(true);
         conn.setDoInput(true);
-        if (parmas != null && parmas.head.size() > 0) {
-            for (String name : parmas.head.keySet()) {
-                conn.setRequestProperty(name, parmas.head.get(name));
-            }
-        }
+
         conn.setRequestProperty("Content-Language", "zh-cn");
         conn.setRequestProperty("Connection", "keep-alive");
         conn.setRequestProperty("Charset", "UTF-8");
 
         if (parmas != null && parmas.isAsJson()) {
-            conn.setRequestProperty("content-Type", "application/json");
+            conn.setRequestProperty("Content-Type", "application/json");
+        }
+        if (parmas != null && parmas.head.size() > 0) {
+            for (String name : parmas.head.keySet()) {
+                conn.setRequestProperty(name, parmas.head.get(name));
+            }
         }
     }
 
