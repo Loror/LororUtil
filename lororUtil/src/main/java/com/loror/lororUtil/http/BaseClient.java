@@ -570,7 +570,7 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
     /**
      * 下载文件
      */
-    public Responce download(String urlStr, String path, boolean cover) {
+    public Responce download(String urlStr, RequestParams params, String path, boolean cover) {
         final Responce responce = new Responce();
         final ProgressListener progressListener = this.progressListener;
         final Actuator callbackActuator = this.callbackActuator;
@@ -578,12 +578,18 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
             if (!checkState()) {
                 throw new IllegalArgumentException("no permission to visit file");
             }
+            if (params != null) {
+                String strParams = params.packetOutParams("GET");
+                if (!TextUtil.isEmpty(strParams)) {
+                    urlStr += params.getSplicing(urlStr) + strParams;
+                }
+            }
             URL url = new URL(urlStr);
             conn = (T) url.openConnection();
             if (followRedirects) {
                 conn.setInstanceFollowRedirects(true);
             }
-            prepareGet(conn, timeOut, readTimeOut, null);
+            prepareGet(conn, timeOut, readTimeOut, params);
             conn.setRequestProperty("Accept-Encoding", "identity");
             long length = length(conn);
             File file = getFile(conn, path, urlStr);

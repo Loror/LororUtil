@@ -68,10 +68,45 @@ public class ConditionBuilder {
      * 增加条件
      */
     public ConditionBuilder addCondition(String key, String operator, Object column) {
+        return addCondition(key, operator, column, true);
+    }
+
+    /**
+     * 增加in条件
+     */
+    public ConditionBuilder addInCondition(String key, String operator, List columns) {
+        if (columns == null) {
+            return this;
+        }
+        if (columns.size() == 1) {
+            return addCondition(key, operator, columns.get(0), true);
+        } else {
+            StringBuilder builder = new StringBuilder();
+            builder.append("(");
+            for (int i = 0; i < columns.size(); i++) {
+                Object column = columns.get(i);
+                if (column != null) {
+                    builder.append("'")
+                            .append(String.valueOf(columns.get(i)).replace("'", "''"))
+                            .append("'");
+                    if (i != columns.size() - 1) {
+                        builder.append(",");
+                    }
+                }
+            }
+            builder.append(")");
+            return addCondition(key, operator, builder.toString(), false);
+        }
+    }
+
+    /**
+     * 增加条件
+     */
+    public ConditionBuilder addCondition(String key, String operator, Object column, boolean quotation) {
         if (column == null) {
             hasNull = true;
         }
-        conditions.add(new Condition(key, operator, column == null ? null : String.valueOf(column)));
+        conditions.add(new Condition(key, operator, column == null ? null : String.valueOf(column), 0, quotation));
         return this;
     }
 
@@ -86,10 +121,45 @@ public class ConditionBuilder {
      * 增加条件
      */
     public ConditionBuilder addOrCondition(String key, String operator, Object column) {
+        return addOrCondition(key, operator, column, true);
+    }
+
+    /**
+     * 增加in条件
+     */
+    public ConditionBuilder addOrInCondition(String key, String operator, List columns) {
+        if (columns == null) {
+            return this;
+        }
+        if (columns.size() == 1) {
+            return addOrCondition(key, operator, columns.get(0), true);
+        } else {
+            StringBuilder builder = new StringBuilder();
+            builder.append("(");
+            for (int i = 0; i < columns.size(); i++) {
+                Object column = columns.get(i);
+                if (column != null) {
+                    builder.append("'")
+                            .append(String.valueOf(columns.get(i)).replace("'", "''"))
+                            .append("'");
+                    if (i != columns.size() - 1) {
+                        builder.append(",");
+                    }
+                }
+            }
+            builder.append(")");
+            return addOrCondition(key, operator, builder.toString(), false);
+        }
+    }
+
+    /**
+     * 增加条件
+     */
+    public ConditionBuilder addOrCondition(String key, String operator, Object column, boolean quotation) {
         if (column == null) {
             hasNull = true;
         }
-        conditions.add(new Condition(key, operator, column == null ? null : String.valueOf(column), 1));
+        conditions.add(new Condition(key, operator, column == null ? null : String.valueOf(column), 1, quotation));
         return this;
     }
 
@@ -104,12 +174,47 @@ public class ConditionBuilder {
      * 追加条件
      */
     public ConditionBuilder withCondition(String key, String operator, Object column) {
+        return withCondition(key, operator, column, true);
+    }
+
+    /**
+     * 追加增加in条件
+     */
+    public ConditionBuilder withInCondition(String key, String operator, List columns) {
+        if (columns == null) {
+            return this;
+        }
+        if (columns.size() == 1) {
+            return withCondition(key, operator, columns.get(0), true);
+        } else {
+            StringBuilder builder = new StringBuilder();
+            builder.append("(");
+            for (int i = 0; i < columns.size(); i++) {
+                Object column = columns.get(i);
+                if (column != null) {
+                    builder.append("'")
+                            .append(String.valueOf(columns.get(i)).replace("'", "''"))
+                            .append("'");
+                    if (i != columns.size() - 1) {
+                        builder.append(",");
+                    }
+                }
+            }
+            builder.append(")");
+            return withCondition(key, operator, builder.toString(), false);
+        }
+    }
+
+    /**
+     * 追加条件
+     */
+    public ConditionBuilder withCondition(String key, String operator, Object column, boolean quotation) {
         if (conditions.size() > 0) {
             if (column == null) {
                 hasNull = true;
             }
             Condition condition = conditions.get(conditions.size() - 1);
-            condition.addCondition(new Condition(key, operator, column == null ? null : String.valueOf(column)));
+            condition.addCondition(new Condition(key, operator, column == null ? null : String.valueOf(column), 0, quotation));
         }
         return this;
     }
@@ -125,12 +230,47 @@ public class ConditionBuilder {
      * 追加条件
      */
     public ConditionBuilder withOrCondition(String key, String operator, Object column) {
+        return withOrCondition(key, operator, column, true);
+    }
+
+    /**
+     * 追加增加in条件
+     */
+    public ConditionBuilder withOrInCondition(String key, String operator, List columns) {
+        if (columns == null) {
+            return this;
+        }
+        if (columns.size() == 1) {
+            return withOrCondition(key, operator, columns.get(0), true);
+        } else {
+            StringBuilder builder = new StringBuilder();
+            builder.append("(");
+            for (int i = 0; i < columns.size(); i++) {
+                Object column = columns.get(i);
+                if (column != null) {
+                    builder.append("'")
+                            .append(String.valueOf(columns.get(i)).replace("'", "''"))
+                            .append("'");
+                    if (i != columns.size() - 1) {
+                        builder.append(",");
+                    }
+                }
+            }
+            builder.append(")");
+            return withOrCondition(key, operator, builder.toString(), false);
+        }
+    }
+
+    /**
+     * 追加条件
+     */
+    public ConditionBuilder withOrCondition(String key, String operator, Object column, boolean quotation) {
         if (conditions.size() > 0) {
             if (column == null) {
                 hasNull = true;
             }
             Condition condition = conditions.get(conditions.size() - 1);
-            condition.addCondition(new Condition(key, operator, column == null ? null : String.valueOf(column), 1));
+            condition.addCondition(new Condition(key, operator, column == null ? null : String.valueOf(column), 1, quotation));
         }
         return this;
     }

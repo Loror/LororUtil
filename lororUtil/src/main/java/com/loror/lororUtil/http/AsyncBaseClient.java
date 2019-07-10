@@ -92,14 +92,14 @@ public class AsyncBaseClient<T extends HttpURLConnection> extends BaseClient<T> 
         });
     }
 
-    public void asyncDownload(final String urlStr, final String path, final boolean cover,
+    public void asyncDownload(final String urlStr, final RequestParams parmas, final String path, final boolean cover,
                               final AsyncClient<Responce> asyncClient) {
         initCallbackActuator();
         asyncClient.runBack(new Runnable() {
 
             @Override
             public void run() {
-                final Responce responce = download(urlStr, path, cover);
+                final Responce responce = download(urlStr, parmas, path, cover);
                 callbackActuator.run(new Runnable() {
 
                     @Override

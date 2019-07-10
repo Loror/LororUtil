@@ -9,6 +9,7 @@ public class Condition {
     private String operator;
     private String column;
     private int type;//0,and.1,or
+    private boolean quotation;
     private Condition condition;
 
     public Condition(String key, String operator, String column) {
@@ -16,10 +17,15 @@ public class Condition {
     }
 
     public Condition(String key, String operator, String column, int type) {
+        this(key, operator, column, type, true);
+    }
+
+    public Condition(String key, String operator, String column, int type, boolean quotation) {
         this.key = key;
         this.operator = operator;
         this.column = column == null ? null : column.replace("'", "''");
         this.type = type;
+        this.quotation = quotation;
     }
 
     public String getKey() {
@@ -79,9 +85,15 @@ public class Condition {
         if (column == null) {
             builder.append(" null");
         } else {
-            builder.append(" '");
+            if (quotation) {
+                builder.append(" '");
+            } else {
+                builder.append(" ");
+            }
             builder.append(column);
-            builder.append("'");
+            if (quotation) {
+                builder.append("'");
+            }
         }
         if (that != null) {
             do {
@@ -92,9 +104,15 @@ public class Condition {
                 if (that.getColumn() == null) {
                     builder.append(" null");
                 } else {
-                    builder.append(" '");
+                    if (quotation) {
+                        builder.append(" '");
+                    } else {
+                        builder.append(" ");
+                    }
                     builder.append(that.getColumn());
-                    builder.append("'");
+                    if (quotation) {
+                        builder.append("'");
+                    }
                 }
             } while ((that = that.getCondition()) != null);
             builder.append(")");
