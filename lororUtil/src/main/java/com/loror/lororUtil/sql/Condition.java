@@ -23,7 +23,11 @@ public class Condition {
     public Condition(String key, String operator, String column, int type, boolean quotation) {
         this.key = key;
         this.operator = operator;
-        this.column = column == null ? null : column.replace("'", "''");
+        if (quotation) {
+            this.column = column == null ? null : column.replace("'", "''");
+        } else {
+            this.column = column;
+        }
         this.type = type;
         this.quotation = quotation;
     }

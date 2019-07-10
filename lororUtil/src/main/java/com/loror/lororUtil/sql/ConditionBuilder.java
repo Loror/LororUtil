@@ -75,8 +75,8 @@ public class ConditionBuilder {
      * 增加in条件
      */
     public ConditionBuilder addInCondition(String key, String operator, List columns) {
-        if (columns == null) {
-            return this;
+        if (columns == null || columns.size() == 0) {
+            throw new IllegalArgumentException("columns不能为空");
         }
         if (columns.size() == 1) {
             return addCondition(key, operator, columns.get(0), true);
@@ -128,8 +128,8 @@ public class ConditionBuilder {
      * 增加in条件
      */
     public ConditionBuilder addOrInCondition(String key, String operator, List columns) {
-        if (columns == null) {
-            return this;
+        if (columns == null || columns.size() == 0) {
+            throw new IllegalArgumentException("columns不能为空");
         }
         if (columns.size() == 1) {
             return addOrCondition(key, operator, columns.get(0), true);
@@ -181,8 +181,8 @@ public class ConditionBuilder {
      * 追加增加in条件
      */
     public ConditionBuilder withInCondition(String key, String operator, List columns) {
-        if (columns == null) {
-            return this;
+        if (columns == null || columns.size() == 0) {
+            throw new IllegalArgumentException("columns不能为空");
         }
         if (columns.size() == 1) {
             return withCondition(key, operator, columns.get(0), true);
@@ -237,8 +237,8 @@ public class ConditionBuilder {
      * 追加增加in条件
      */
     public ConditionBuilder withOrInCondition(String key, String operator, List columns) {
-        if (columns == null) {
-            return this;
+        if (columns == null || columns.size() == 0) {
+            throw new IllegalArgumentException("columns不能为空");
         }
         if (columns.size() == 1) {
             return withOrCondition(key, operator, columns.get(0), true);
