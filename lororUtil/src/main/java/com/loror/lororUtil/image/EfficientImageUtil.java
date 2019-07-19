@@ -19,7 +19,7 @@ public class EfficientImageUtil {
     private static final int cachTagKey = 3 << 24 + 1;
     private static int tag = 1;
     private static Handler handler = ObjectPool.getInstance().getHandler();
-    private static RemoveableThreadPool removeableThreadPool = ObjectPool.getInstance().getTheadPool();
+    private static RemoveableThreadPool removeableThreadPool = ObjectPool.getInstance().getThreadPool();
     private static Hashtable<String, Runnable> tasks = new Hashtable<>();
 
     private EfficientImageUtil() {

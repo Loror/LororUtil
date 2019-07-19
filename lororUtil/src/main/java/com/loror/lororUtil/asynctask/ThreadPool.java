@@ -1,5 +1,6 @@
 package com.loror.lororUtil.asynctask;
 
+import java.util.List;
 import java.util.Vector;
 
 public class ThreadPool implements RemoveableThreadPool {
@@ -7,7 +8,7 @@ public class ThreadPool implements RemoveableThreadPool {
     private int excuteType;// 执行模式
     private Thread[] threads;// 线程组
     private boolean[] alive;// 线程活动状态
-    private Vector<Runnable> tasks;// 任务池
+    private List<Runnable> tasks;// 任务池
 
     private int delay = 50;
 
@@ -24,7 +25,7 @@ public class ThreadPool implements RemoveableThreadPool {
      * 初始化线程
      */
     private Thread initThread(final int index) {
-        Thread thread = new Thread() {
+        return new Thread() {
             @Override
             public void run() {
                 for (; ; ) {
@@ -72,7 +73,6 @@ public class ThreadPool implements RemoveableThreadPool {
                 }
             }
         };
-        return thread;
     }
 
     /**
@@ -115,7 +115,7 @@ public class ThreadPool implements RemoveableThreadPool {
     /**
      * 添加任务
      */
-    public synchronized void excute(Runnable task, int excuteType) throws IllegalStateException {
+    public synchronized void excute(Runnable task, int excuteType) {
         this.excuteType = excuteType;
         tasks.add(task);
         awakeThreads(tasks.size());
@@ -131,8 +131,7 @@ public class ThreadPool implements RemoveableThreadPool {
     /**
      * 释放资源
      */
-    @Override
-    public void finalize() throws Throwable {
-
+    public void release() {
+        tasks.clear();
     }
 }

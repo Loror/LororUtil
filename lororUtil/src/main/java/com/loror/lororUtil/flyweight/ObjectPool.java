@@ -1,5 +1,6 @@
 package com.loror.lororUtil.flyweight;
 
+import com.loror.lororUtil.asynctask.RemoveableThreadPool;
 import com.loror.lororUtil.asynctask.ThreadPool;
 
 import android.graphics.Bitmap;
@@ -10,31 +11,30 @@ import android.os.Handler;
 import android.os.Looper;
 
 public class ObjectPool {
-    private static ObjectPool instance;
 
-    public interface SDCardCallBack {
-        void scanOne(int find, int scaned);
+    //禁止实例化
+    private ObjectPool() {
+
     }
 
-    private ObjectPool() {
-        // TODO Auto-generated constructor stub
+    //单例工厂
+    private static class SingleFactory {
+        private static ObjectPool instance = new ObjectPool();
     }
 
     public static ObjectPool getInstance() {
-        if (instance == null)
-            instance = new ObjectPool();
-        return instance;
+        return SingleFactory.instance;
     }
 
     private Handler handler;
     private Bitmap defaultImage;
-    private ThreadPool theadPool;
+    private ThreadPool threadPool;
 
-    public synchronized ThreadPool getTheadPool() {
-        if (theadPool == null) {
-            theadPool = new ThreadPool(7);
+    public synchronized RemoveableThreadPool getThreadPool() {
+        if (threadPool == null) {
+            threadPool = new ThreadPool(7);
         }
-        return theadPool;
+        return threadPool;
     }
 
     public synchronized Bitmap getDefaultImage() {
@@ -58,13 +58,15 @@ public class ObjectPool {
     /**
      * 释放资源
      */
-    public void relese() {
-        if (theadPool != null)
+    public void release() {
+        if (threadPool != null) {
             try {
-                theadPool.finalize();
+                threadPool.release();
             } catch (Throwable e) {
                 e.printStackTrace();
             }
-        theadPool = null;
+        }
+        threadPool = null;
+        defaultImage = null;
     }
 }

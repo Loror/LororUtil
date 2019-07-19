@@ -1,18 +1,17 @@
 package com.loror.lororUtil.example;
 
 import android.content.pm.PackageManager;
+import android.os.Bundle;
 import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.GridView;
 import android.widget.Toast;
 
-import com.loror.lororUtil.flyweight.ObjectPool;
 import com.loror.lororUtil.http.DefaultAsyncClient;
 import com.loror.lororUtil.http.HttpClient;
 import com.loror.lororUtil.http.Responce;
@@ -83,7 +82,6 @@ public class MainActivity extends AppCompatActivity {
 
     @ItemClick(id = R.id.list)
     public void itemClick(View v, int position) {
-        Log.e("TAG_", ObjectPool.getInstance().getTheadPool().getAliveThread() + " == alive");
         Toast.makeText(this, "itemClick:position(" + position + ")点击", Toast.LENGTH_SHORT).show();
     }
 
