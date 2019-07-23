@@ -178,6 +178,13 @@ public class RequestParams {
     }
 
     /**
+     * 提交的json数据
+     */
+    public String getJson() {
+        return json;
+    }
+
+    /**
      * 添加参数
      */
     public RequestParams addParams(String key, Object[] value) {

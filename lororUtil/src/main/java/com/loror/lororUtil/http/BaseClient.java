@@ -156,7 +156,7 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
         if (params == null || (params.getFiles().size() == 0 && !params.isUseFormForPost())) {
             Responce responce = new Responce();
             try {
-                if (params != null && params.isAsJson()) {
+                if (params != null && params.isAsJson() && params.getJson() != null) {
                     String strParams = params.packetOutParams("GET");
                     if (!TextUtil.isEmpty(strParams)) {
                         urlStr += params.getSplicing(urlStr) + strParams;
@@ -268,7 +268,7 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
         if (params == null || (params.getFiles().size() == 0 && !params.isUseFormForPost())) {
             Responce responce = new Responce();
             try {
-                if (params != null && params.isAsJson()) {
+                if (params != null && params.isAsJson() && params.getJson() != null) {
                     String strParams = params.packetOutParams("GET");
                     if (!TextUtil.isEmpty(strParams)) {
                         urlStr += params.getSplicing(urlStr) + strParams;
