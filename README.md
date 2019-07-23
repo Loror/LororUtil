@@ -87,7 +87,7 @@ HttpsClient监听器
 
 * 类RequestParmas HttpClient 
 HttpsClient使用参数类
-    * 方法setJson(String json) 以json形式上传json，param中参数将忽略，仅对post请求生效
+    * 方法setJson(String json) 以json形式上传json，param中参数将自动追加为url中参数，仅对post请求生效
     * 方法setAsJson(boolean asJson) 以json形式上传param中参数，仅对post请求生效
     * 方法fromObject(Object object) 添加参数
     * 方法fromKeyValue(String params) 添加参数
