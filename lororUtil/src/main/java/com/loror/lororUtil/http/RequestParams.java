@@ -13,17 +13,19 @@ import java.util.List;
  */
 public class RequestParams {
 
-    private final String JSONKEY = "RequestParamsAsJson";
-    private HashMap<String, String> params = new HashMap<String, String>();
-    private HashMap<String, Object[]> arrayParams;
+    private HashMap<String, String> headers = new HashMap<String, String>();
+    private HashMap<String, Object> params = new HashMap<String, Object>();
     private List<FileBody> files;
-    protected HashMap<String, String> head = new HashMap<String, String>();
-    private RequestConverter getConverter, postConverter, bodyConverter;
-    private SplicingConverter splicingConverter;
+    private String json;
+    private RequestConverter getConverter, postConverter;
+    private PacketConverter packetConverter;
+    private BodyConverter bodyConverter;
+    private SpliceConverter spliceConverter;
     private static boolean defaultUseDefaultConverterInPost = false;
     private static boolean defaultNullToEmpty = true;
     private static boolean defaultUseFormForPost = false;
     private boolean userFormForPost = false, useDefaultConverterInPost = false;
+    private boolean asJson;
     private static RequestConverter defaultConverter = new RequestConverter() {
         @Override
         public String convert(String key, String value) {
@@ -43,6 +45,20 @@ public class RequestParams {
      */
     public void setUserFormForPost(boolean userFormForPost) {
         this.userFormForPost = userFormForPost;
+    }
+
+    /**
+     * 设置提交方式为json
+     */
+    public void setAsJson(boolean asJson) {
+        this.asJson = asJson;
+    }
+
+    /**
+     * 是否已设置提交方式为json
+     */
+    public boolean isAsJson() {
+        return asJson;
     }
 
     /**
@@ -84,29 +100,22 @@ public class RequestParams {
      * 添加请求头
      */
     public RequestParams addHeader(String name, String value) {
-        head.put(name, value);
+        headers.put(name, value);
         return this;
+    }
+
+    /**
+     * 获取header
+     */
+    public String getHeader(String key) {
+        return headers.get(key);
     }
 
     /**
      * 获取所有header
      */
-    public HashMap<String, String> getHeader() {
-        return head;
-    }
-
-    /**
-     * 添加参数
-     */
-    public void asJson(String json) {
-        params.put(JSONKEY, json);
-    }
-
-    /**
-     * 是否已设置提交方式为json
-     */
-    public boolean isAsJson() {
-        return params.containsKey(JSONKEY);
+    public HashMap<String, String> getHeaders() {
+        return headers;
     }
 
     /**
@@ -134,7 +143,7 @@ public class RequestParams {
         for (int i = 0; i < fields.length; i++) {
             Field field = fields[i];
             field.setAccessible(true);
-            //transient|static修饰(10001000)，放弃
+            //transient|static修饰(10001000)字段，放弃
             if ((field.getModifiers() & 136) != 0) {
                 continue;
             }
@@ -146,10 +155,13 @@ public class RequestParams {
                     addParams(key, value == null ? new FileBody(null, key) : new FileBody(((File) object).getAbsolutePath(), ((File) object).getName()));
                 } else if (type == FileBody.class) {
                     addParams(key, value == null ? new FileBody(null, key) : (FileBody) value);
+                } else if (type == Integer.class || type == Integer.TYPE || type == Long.class || type == Long.TYPE
+                        || type == Float.class || type == Float.TYPE || type == Double.class || type == Double.TYPE
+                        || type == Boolean.class || type == Boolean.TYPE || type == String.class) {
+                    params.put(key, value);
                 } else {
-                    addParams(key, value == null ? "" : String.valueOf(value));
+                    params.put(key, value == null ? null : String.valueOf(value));
                 }
-
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
             }
@@ -158,39 +170,71 @@ public class RequestParams {
     }
 
     /**
+     * 设置提交json数据，设置后将使用json方式提交该json，param参数将失效
+     */
+    public void setJson(String json) {
+        this.json = json;
+        asJson = json != null;
+    }
+
+    /**
      * 添加参数
      */
     public RequestParams addParams(String key, Object[] value) {
-        if (value != null) {
-            if (arrayParams == null) {
-                arrayParams = new HashMap<String, Object[]>();
-            }
-            arrayParams.put(key, value);
-            return addParams(key, "array{@arrayParams}");
-        } else {
-            return this;
+        if (key != null) {
+            params.put(key, value);
         }
+        return this;
     }
 
     /**
      * 添加参数
      */
     public RequestParams addParams(String key, boolean value) {
-        return addParams(key, String.valueOf(value));
+        if (key != null) {
+            params.put(key, value);
+        }
+        return this;
+    }
+
+    /**
+     * 添加参数
+     */
+    public RequestParams addParams(String key, int value) {
+        if (key != null) {
+            params.put(key, value);
+        }
+        return this;
     }
 
     /**
      * 添加参数
      */
     public RequestParams addParams(String key, long value) {
-        return addParams(key, String.valueOf(value));
+        if (key != null) {
+            params.put(key, value);
+        }
+        return this;
+    }
+
+    /**
+     * 添加参数
+     */
+    public RequestParams addParams(String key, float value) {
+        if (key != null) {
+            params.put(key, value);
+        }
+        return this;
     }
 
     /**
      * 添加参数
      */
     public RequestParams addParams(String key, double value) {
-        return addParams(key, String.valueOf(value));
+        if (key != null) {
+            params.put(key, value);
+        }
+        return this;
     }
 
     /**
@@ -216,17 +260,31 @@ public class RequestParams {
     }
 
     /**
+     * 移除参数
+     */
+    public void removeParam(String key) {
+        params.remove(key);
+    }
+
+    /**
      * 获取参数
      */
-    public String getParam(String key) {
+    public Object getParam(String key) {
         return params.get(key);
     }
 
     /**
      * 获取所有参数
      */
-    public HashMap<String, String> getParams() {
+    public HashMap<String, Object> getParams() {
         return params;
+    }
+
+    /**
+     * 设置打包转换器，设置后get/post转换器将失效
+     */
+    public void setPacketConverter(PacketConverter packetConverter) {
+        this.packetConverter = packetConverter;
     }
 
     /**
@@ -246,72 +304,122 @@ public class RequestParams {
     /**
      * 全局转换
      */
-    public void setBodyConverter(RequestConverter bodyConverter) {
+    public void setBodyConverter(BodyConverter bodyConverter) {
         this.bodyConverter = bodyConverter;
     }
 
     /**
      * 设置拼接符
      */
-    public void setSplicingConverter(SplicingConverter splicingConverter) {
-        this.splicingConverter = splicingConverter;
+    public void setSpliceConverter(SpliceConverter spliceConverter) {
+        this.spliceConverter = spliceConverter;
     }
 
     /**
      * 获取拼接符
      */
     protected String getSplicing(String url) {
-        return splicingConverter != null ? splicingConverter.convert(url) : (url.contains("?") ? "&" : "?");
-    }
-
-    /**
-     * 获取数组参数
-     */
-    public HashMap<String, Object[]> getArrayParams() {
-        return arrayParams == null ? new HashMap<String, Object[]>() : arrayParams;
+        return spliceConverter != null ? spliceConverter.convert(url) : (url.contains("?") ? "&" : "?");
     }
 
     /**
      * 打包参数
      */
     protected String packetOutParams(String method) {
-        if ("POST".equals(method) && params.containsKey(JSONKEY)) {
-            return params.get(JSONKEY);
-        }
         String str = "";
-        StringBuilder sb = new StringBuilder();
-        for (String o : params.keySet()) {
-            if (JSONKEY.equals(o)) {
-                continue;
-            }//不拼接json
-            String value = params.get(o);
-            if ("array{@arrayParams}".equals(value) && arrayParams != null) {
-                Object[] values = arrayParams.get(o);
-                if (values != null) {
-                    for (int i = 0; i < values.length; i++) {
-                        append(method, sb, o, values[i] == null ? null : String.valueOf(values[i]));
-                    }
-                } else {
-                    append(method, sb, o, value);
-                }
+        //以json形式提交
+        if ("POST".equals(method) && asJson) {
+            if (json != null) {
+                str = json;
             } else {
-                append(method, sb, o, value);
+                str = packetConverter != null ? packetConverter.convert(method, params) : getJson(params);
             }
-        }
-        if (sb.length() > 0) {
-            if (!"POST_FORM".equals(method)) {
-                str = sb.deleteCharAt(sb.length() - 1).toString();
+        } else {
+            //使用外部打包器
+            if (packetConverter != null) {
+                str = packetConverter.convert(method, params);
             } else {
-                str = sb.toString();
+                StringBuilder builder = new StringBuilder();
+                for (String key : params.keySet()) {
+                    Object value = params.get(key);
+                    if (value != null && value.getClass().isArray()) {
+                        Object[] values = (Object[]) value;
+                        for (int i = 0; i < values.length; i++) {
+                            appendValue(method, builder, key, values[i] == null ? null : String.valueOf(values[i]));
+                        }
+                    } else {
+                        appendValue(method, builder, key, value == null ? null : String.valueOf(value));
+                    }
+                }
+                if (builder.length() > 0) {
+                    if (!"POST_FORM".equals(method)) {
+                        str = builder.deleteCharAt(builder.length() - 1).toString();
+                    } else {
+                        str = builder.toString();
+                    }
+                }
             }
         }
         return bodyConverter == null ? str : bodyConverter.convert(method, str);
     }
 
     /**
+     * 创建json
+     */
+    private final String getJson(HashMap<String, Object> params) {
+        StringBuilder builder = new StringBuilder("{");
+        for (String key : params.keySet()) {
+            Object value = params.get(key);
+            if (value == null) {
+                builder.append("\"")
+                        .append(key)
+                        .append("\":null");
+            } else if (value instanceof Integer || value instanceof Long
+                    || value instanceof Float || value instanceof Double
+                    || value instanceof Boolean) {
+                builder.append("\"")
+                        .append(key)
+                        .append("\":")
+                        .append(value);
+            } else if (value.getClass().isArray()) {
+                Object[] values = (Object[]) value;
+                builder.append("\"")
+                        .append(key)
+                        .append("\":[");
+                for (int i = 0; i < values.length; i++) {
+                    Object val = values[i];
+                    if (val == null) {
+                        builder.append("null");
+                    } else {
+                        builder.append("\"")
+                                .append(val)
+                                .append("\"");
+                    }
+                    if (i != values.length - 1) {
+                        builder.append(",");
+                    }
+                }
+                builder.append("]");
+            } else {
+                builder.append("\"")
+                        .append(key)
+                        .append("\":\"")
+                        .append(value)
+                        .append("\"");
+            }
+            builder.append(",");
+        }
+        if (builder.length() > 1) {
+            builder.deleteCharAt(builder.length() - 1);
+        }
+        builder.append("}");
+        return builder.toString();
+    }
+
+    /**
      * 最终拼接
      */
-    private final void append(String method, StringBuilder sb, String key, String value) {
+    private final void appendValue(String method, StringBuilder sb, String key, String value) {
         if (defaultNullToEmpty && value == null) {
             value = "";
         }
@@ -347,11 +455,11 @@ public class RequestParams {
         StringBuilder buffer = new StringBuilder();
         buffer.append("{");
         buffer.append("[headers:");
-        if (head.size() > 0) {
-            for (String o : head.keySet()) {
+        if (headers.size() > 0) {
+            for (String o : headers.keySet()) {
                 buffer.append(o)
                         .append("=")
-                        .append(head.get(o))
+                        .append(headers.get(o))
                         .append(",");
             }
             buffer.deleteCharAt(buffer.length() - 1);
@@ -362,20 +470,13 @@ public class RequestParams {
         buffer.append("[params:");
         if (params.size() > 0) {
             for (String o : params.keySet()) {
-                String value = params.get(o);
-                if ("array{@arrayParams}".equals(value) && arrayParams != null) {
-                    Object[] values = arrayParams.get(o);
-                    if (values != null) {
-                        for (int i = 0; i < values.length; i++) {
-                            buffer.append(o)
-                                    .append("=")
-                                    .append(values[i] == null ? null : String.valueOf(values[i]))
-                                    .append(",");
-                        }
-                    } else {
+                Object value = params.get(o);
+                if (value != null && value.getClass().isArray()) {
+                    Object[] values = (Object[]) value;
+                    for (int i = 0; i < values.length; i++) {
                         buffer.append(o)
                                 .append("=")
-                                .append(params.get(o))
+                                .append(values[i] == null ? null : String.valueOf(values[i]))
                                 .append(",");
                     }
                 } else {

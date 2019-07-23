@@ -29,9 +29,9 @@ public class Prepare {
         conn.setRequestProperty("Charset", "UTF-8");
         conn.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + Config.BOUNDARY);
 
-        if (parmas != null && parmas.head.size() > 0) {
-            for (String name : parmas.head.keySet()) {
-                conn.setRequestProperty(name, parmas.head.get(name));
+        if (parmas != null && parmas.getHeaders().size() > 0) {
+            for (String name : parmas.getHeaders().keySet()) {
+                conn.setRequestProperty(name, parmas.getHeader(name));
             }
         }
     }
@@ -57,9 +57,9 @@ public class Prepare {
         if (parmas != null && parmas.isAsJson()) {
             conn.setRequestProperty("Content-Type", "application/json");
         }
-        if (parmas != null && parmas.head.size() > 0) {
-            for (String name : parmas.head.keySet()) {
-                conn.setRequestProperty(name, parmas.head.get(name));
+        if (parmas != null && parmas.getHeaders().size() > 0) {
+            for (String name : parmas.getHeaders().keySet()) {
+                conn.setRequestProperty(name, parmas.getHeader(name));
             }
         }
     }
@@ -74,9 +74,9 @@ public class Prepare {
         if (readTimeOut != 0) {
             conn.setReadTimeout(readTimeOut);
         }
-        if (parmas != null && parmas.head.size() > 0) {
-            for (String name : parmas.head.keySet()) {
-                conn.setRequestProperty(name, parmas.head.get(name));
+        if (parmas != null && parmas.getHeaders().size() > 0) {
+            for (String name : parmas.getHeaders().keySet()) {
+                conn.setRequestProperty(name, parmas.getHeader(name));
             }
         }
         conn.setDoInput(true);
@@ -98,9 +98,9 @@ public class Prepare {
         conn.setRequestProperty("connection", "keep-alive");// 设置请求头参数
         conn.setRequestProperty("Charset", "UTF-8");
         conn.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + Config.BOUNDARY);
-        if (parmas != null && parmas.head.size() > 0) {
-            for (String name : parmas.head.keySet()) {
-                conn.setRequestProperty(name, parmas.head.get(name));
+        if (parmas != null && parmas.getHeaders().size() > 0) {
+            for (String name : parmas.getHeaders().keySet()) {
+                conn.setRequestProperty(name, parmas.getHeader(name));
             }
         }
     }
@@ -125,9 +125,9 @@ public class Prepare {
         if (parmas != null && parmas.isAsJson()) {
             conn.setRequestProperty("Content-Type", "application/json");
         }
-        if (parmas != null && parmas.head.size() > 0) {
-            for (String name : parmas.head.keySet()) {
-                conn.setRequestProperty(name, parmas.head.get(name));
+        if (parmas != null && parmas.getHeaders().size() > 0) {
+            for (String name : parmas.getHeaders().keySet()) {
+                conn.setRequestProperty(name, parmas.getHeader(name));
             }
         }
     }
@@ -142,9 +142,9 @@ public class Prepare {
         if (readTimeOut != 0) {
             conn.setReadTimeout(readTimeOut);
         }
-        if (parmas != null && parmas.head.size() > 0) {
-            for (String name : parmas.head.keySet()) {
-                conn.setRequestProperty(name, parmas.head.get(name));
+        if (parmas != null && parmas.getHeaders().size() > 0) {
+            for (String name : parmas.getHeaders().keySet()) {
+                conn.setRequestProperty(name, parmas.getHeader(name));
             }
         }
         conn.setDoInput(true);

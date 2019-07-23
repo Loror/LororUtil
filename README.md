@@ -6,7 +6,7 @@
 
 ```
 dependencies {
-    compile 'com.github.Loror:LororUtil:1.6.21'
+    compile 'com.github.Loror:LororUtil:1.6.22'
 }
 
 allprojects {
@@ -87,7 +87,8 @@ HttpsClient监听器
 
 * 类RequestParmas HttpClient 
 HttpsClient使用参数类
-    * 方法asJson(String json) 以json形式上传参数，仅对post请求生效
+    * 方法setJson(String json) 以json形式上传json，param中参数将忽略，仅对post请求生效
+    * 方法setAsJson(boolean asJson) 以json形式上传param中参数，仅对post请求生效
     * 方法fromObject(Object object) 添加参数
     * 方法fromKeyValue(String params) 添加参数
     * 方法addParmas(String key, String value) 添加参数

@@ -1,5 +1,5 @@
 package com.loror.lororUtil.http;
 
-public interface SplicingConverter {
+public interface SpliceConverter {
     String convert(String url);
 }

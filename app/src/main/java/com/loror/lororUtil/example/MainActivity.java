@@ -14,6 +14,7 @@ import android.widget.Toast;
 
 import com.loror.lororUtil.http.DefaultAsyncClient;
 import com.loror.lororUtil.http.HttpClient;
+import com.loror.lororUtil.http.RequestParams;
 import com.loror.lororUtil.http.Responce;
 import com.loror.lororUtil.sql.SQLiteUtil;
 import com.loror.lororUtil.view.Click;
@@ -40,16 +41,21 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         initView();
         requestPermission("android.permission.WRITE_EXTERNAL_STORAGE", 0);
-        connectNet();
+//        connectNet();
     }
 
     private void connectNet() {
         HttpClient client = new HttpClient();
-        client.asyncGet("https://www.baidu.com", null, new DefaultAsyncClient() {
+        RequestParams params = new RequestParams();
+        params.addParams("name", "xiaoming");
+        params.addParams("age", 10);
+        params.addParams("young", true);
+        params.setAsJson(true);
+        client.asyncPost("http://192.168.1.142:8888/test", params, new DefaultAsyncClient() {
             @Override
             public void callBack(Responce responce) {
                 Log.e("RESULT_", (Looper.getMainLooper().getThread() == Thread.currentThread() ? "主线程" : "子线程") + " = " +
-                        responce.getCode() + " = " + responce);
+                        responce.getCode() + " = " + responce, responce.getThrowable());
             }
         });
     }
