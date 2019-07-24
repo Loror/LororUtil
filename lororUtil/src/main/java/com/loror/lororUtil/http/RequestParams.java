@@ -397,6 +397,10 @@ public class RequestParams {
                     Object val = values[i];
                     if (val == null) {
                         builder.append("null");
+                    } else if (val instanceof Integer || val instanceof Long
+                            || val instanceof Float || val instanceof Double
+                            || val instanceof Boolean) {
+                        builder.append(val);
                     } else {
                         builder.append("\"")
                                 .append(val)
