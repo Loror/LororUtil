@@ -72,30 +72,40 @@ public class ConditionBuilder {
     }
 
     /**
+     * list条件拼接
+     */
+    private String getListCondition(List columns) {
+        StringBuilder builder = new StringBuilder();
+        builder.append("(");
+        for (int i = 0; i < columns.size(); i++) {
+            Object column = columns.get(i);
+            if (column != null) {
+                builder.append("'")
+                        .append(String.valueOf(columns.get(i)).replace("'", "''"))
+                        .append("'");
+                if (i != columns.size() - 1) {
+                    builder.append(",");
+                }
+            }
+        }
+        builder.append(")");
+        return builder.toString();
+    }
+
+    /**
      * 增加in条件
      */
     public ConditionBuilder addInCondition(String key, String operator, List columns) {
+//        if (!"in".equalsIgnoreCase(operator) && !"not in".equals(operator)) {
+//            throw new IllegalArgumentException("operator只支持in/not in");
+//        }
         if (columns == null || columns.size() == 0) {
             throw new IllegalArgumentException("columns不能为空");
         }
         if (columns.size() == 1) {
             return addCondition(key, operator, columns.get(0), true);
         } else {
-            StringBuilder builder = new StringBuilder();
-            builder.append("(");
-            for (int i = 0; i < columns.size(); i++) {
-                Object column = columns.get(i);
-                if (column != null) {
-                    builder.append("'")
-                            .append(String.valueOf(columns.get(i)).replace("'", "''"))
-                            .append("'");
-                    if (i != columns.size() - 1) {
-                        builder.append(",");
-                    }
-                }
-            }
-            builder.append(")");
-            return addCondition(key, operator, builder.toString(), false);
+            return addCondition(key, operator, getListCondition(columns), false);
         }
     }
 
@@ -134,21 +144,7 @@ public class ConditionBuilder {
         if (columns.size() == 1) {
             return addOrCondition(key, operator, columns.get(0), true);
         } else {
-            StringBuilder builder = new StringBuilder();
-            builder.append("(");
-            for (int i = 0; i < columns.size(); i++) {
-                Object column = columns.get(i);
-                if (column != null) {
-                    builder.append("'")
-                            .append(String.valueOf(columns.get(i)).replace("'", "''"))
-                            .append("'");
-                    if (i != columns.size() - 1) {
-                        builder.append(",");
-                    }
-                }
-            }
-            builder.append(")");
-            return addOrCondition(key, operator, builder.toString(), false);
+            return addOrCondition(key, operator, getListCondition(columns), false);
         }
     }
 
@@ -187,21 +183,7 @@ public class ConditionBuilder {
         if (columns.size() == 1) {
             return withCondition(key, operator, columns.get(0), true);
         } else {
-            StringBuilder builder = new StringBuilder();
-            builder.append("(");
-            for (int i = 0; i < columns.size(); i++) {
-                Object column = columns.get(i);
-                if (column != null) {
-                    builder.append("'")
-                            .append(String.valueOf(columns.get(i)).replace("'", "''"))
-                            .append("'");
-                    if (i != columns.size() - 1) {
-                        builder.append(",");
-                    }
-                }
-            }
-            builder.append(")");
-            return withCondition(key, operator, builder.toString(), false);
+            return withCondition(key, operator, getListCondition(columns), false);
         }
     }
 
@@ -243,21 +225,7 @@ public class ConditionBuilder {
         if (columns.size() == 1) {
             return withOrCondition(key, operator, columns.get(0), true);
         } else {
-            StringBuilder builder = new StringBuilder();
-            builder.append("(");
-            for (int i = 0; i < columns.size(); i++) {
-                Object column = columns.get(i);
-                if (column != null) {
-                    builder.append("'")
-                            .append(String.valueOf(columns.get(i)).replace("'", "''"))
-                            .append("'");
-                    if (i != columns.size() - 1) {
-                        builder.append(",");
-                    }
-                }
-            }
-            builder.append(")");
-            return withOrCondition(key, operator, builder.toString(), false);
+            return withOrCondition(key, operator, getListCondition(columns), false);
         }
     }
 
