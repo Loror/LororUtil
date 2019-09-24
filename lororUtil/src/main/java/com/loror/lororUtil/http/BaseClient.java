@@ -98,8 +98,8 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
     /**
      * 获取返回数据
      */
-    protected byte[] getResponce(T conn) throws Exception {
-        InputStream inputStream = conn.getInputStream();
+    protected byte[] getResponce(HttpURLConnection conn, int code) throws Exception {
+        InputStream inputStream = code / 100 > 3 ? conn.getErrorStream() : conn.getInputStream();
         List<byte[]> bytesList = new ArrayList<>();
         byte[] bytes = new byte[1024];
         int total = 0;
@@ -142,7 +142,7 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
                 initHeaders(conn, responce);
             }
             responce.url = conn.getURL();
-            responce.result = getResponce(conn);
+            responce.result = getResponce(conn, responce.code);
             conn.disconnect();
         } catch (Throwable e) {
             responce.setThrowable(e);
@@ -182,7 +182,7 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
                 if (responce.code == HttpURLConnection.HTTP_OK) {
                     initHeaders(conn, responce);
                 }
-                responce.result = getResponce(conn);
+                responce.result = getResponce(conn, responce.code);
                 conn.disconnect();
             } catch (Throwable e) {
                 responce.setThrowable(e);
@@ -223,7 +223,7 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
                 if (responce.code == HttpURLConnection.HTTP_OK) {
                     initHeaders(conn, responce);
                 }
-                responce.result = getResponce(conn);
+                responce.result = getResponce(conn, responce.code);
                 conn.disconnect();
             } catch (Throwable e) {
                 responce.setThrowable(e);
@@ -294,7 +294,7 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
                 if (responce.code == HttpURLConnection.HTTP_OK) {
                     initHeaders(conn, responce);
                 }
-                responce.result = getResponce(conn);
+                responce.result = getResponce(conn, responce.code);
                 conn.disconnect();
             } catch (Throwable e) {
                 responce.setThrowable(e);
@@ -335,7 +335,7 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
                 if (responce.code == HttpURLConnection.HTTP_OK) {
                     initHeaders(conn, responce);
                 }
-                responce.result = getResponce(conn);
+                responce.result = getResponce(conn, responce.code);
                 conn.disconnect();
             } catch (Throwable e) {
                 responce.setThrowable(e);
@@ -396,7 +396,7 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
                 initHeaders(conn, responce);
             }
             responce.url = conn.getURL();
-            responce.result = getResponce(conn);
+            responce.result = getResponce(conn, responce.code);
             conn.disconnect();
         } catch (Throwable e) {
             responce.setThrowable(e);
