@@ -1,6 +1,7 @@
 package com.loror.lororUtil.http;
 
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -65,12 +66,19 @@ public class Responce {
 
     @Override
     public String toString() {
-        StringBuffer buffer = new StringBuffer();
         if (this.throwable != null) {
-            buffer.append("an exception happen : " + this.throwable.getClass().getName());
+            return "an exception happen : " + this.throwable.getClass().getName();
         } else {
-            buffer.append(new String(this.result));
+            return new String(this.result);
         }
-        return buffer.toString();
+    }
+
+    //带编码
+    public String toString(Charset charset) {
+        if (this.result != null) {
+            return new String(this.result, charset);
+        } else {
+            return null;
+        }
     }
 }
