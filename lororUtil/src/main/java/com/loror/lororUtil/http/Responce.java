@@ -66,19 +66,16 @@ public class Responce {
 
     @Override
     public String toString() {
-        if (this.throwable != null) {
-            return "an exception happen : " + this.throwable.getClass().getName();
-        } else {
-            return new String(this.result);
-        }
+        return toString(null);
     }
 
     //带编码
     public String toString(Charset charset) {
-        if (this.result != null) {
-            return new String(this.result, charset);
-        } else {
-            return null;
+        if (this.throwable != null) {
+            return "an exception happen : " + this.throwable.getClass().getName();
+        } else if (this.result != null) {
+            return charset == null ? new String(this.result) : new String(this.result, charset);
         }
+        return null;
     }
 }
