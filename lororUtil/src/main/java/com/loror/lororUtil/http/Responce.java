@@ -46,7 +46,7 @@ public class Responce {
     /**
      * 获取cookie列表
      */
-    public List<String> getCookielist() {
+    public List<String> getCookieList() {
         return cookielist;
     }
 
