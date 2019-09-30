@@ -1,10 +1,10 @@
 package com.loror.lororUtil.image;
 
-public class ImageCach {
+public class ImageCache {
     /**
      * 图片缓存
      */
-    private static Cache<ReadImageResult> cach = new Cache<ReadImageResult>() {
+    private static Cache<ReadImageResult> cache = new Cache<ReadImageResult>() {
 
         @Override
         protected int sizeOf(ReadImageResult value) {
@@ -25,22 +25,22 @@ public class ImageCach {
      * 获取缓存
      */
     public static ReadImageResult getFromCache(String key) {
-        return cach.getFromCache(key);
+        return cache.getFromCache(key);
     }
 
     /**
      * 加入缓存
      */
-    public static void pushToCach(String key, ReadImageResult value) {
+    public static void pushToCache(String key, ReadImageResult value) {
         if (key != null && value != null) {
-            cach.pushToCach(key, value);
+            cache.pushToCache(key, value);
         }
     }
 
     /**
      * 清空缓存
      */
-    public static void clearCach() {
-        cach.clearCach();
+    public static void clearCache() {
+        cache.clearCache();
     }
 }

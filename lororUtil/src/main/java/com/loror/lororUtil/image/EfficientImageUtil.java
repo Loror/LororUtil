@@ -37,7 +37,7 @@ public class EfficientImageUtil {
     /**
      * 清除tag
      */
-    public static void releseTag(View view) {
+    public static void releaseTag(View view) {
         view.setTag(tagKey, "");
         view.setTag(cachTagKey, "");
     }
@@ -46,7 +46,7 @@ public class EfficientImageUtil {
      * 获取缓存
      */
     public static Bitmap getBitmapByPath(String path) {
-        ReadImageResult readImageResult = ImageCach.getFromCache(path + DEFAULT_WIDTH);
+        ReadImageResult readImageResult = ImageCache.getFromCache(path + DEFAULT_WIDTH);
         return readImageResult == null ? null : readImageResult.getBitmap();
     }
 
@@ -54,15 +54,15 @@ public class EfficientImageUtil {
      * 获取缓存
      */
     public static Bitmap getBitmapByPath(String path, int widthLimit) {
-        ReadImageResult readImageResult = ImageCach.getFromCache(path + widthLimit);
+        ReadImageResult readImageResult = ImageCache.getFromCache(path + widthLimit);
         return readImageResult == null ? null : readImageResult.getBitmap();
     }
 
     /**
      * 清除缓存
      */
-    public static void clearCachs() {
-        ImageCach.clearCach();
+    public static void clearCaches() {
+        ImageCache.clearCache();
         tasks.clear();
     }
 
@@ -152,7 +152,7 @@ public class EfficientImageUtil {
                     callback.onStart(imageView);
                 }
 
-                ReadImageResult result = ImageCach.getFromCache(cachKey);
+                ReadImageResult result = ImageCache.getFromCache(cachKey);
                 if (result != null) {
                     boolean useful = !hasImageView || tag.equals(imageView.getTag(tagKey));
                     if (useful) {
@@ -187,7 +187,7 @@ public class EfficientImageUtil {
                                 }
                             } else {
                                 if (readImageResult.getErrorCode() == 0) {
-                                    ImageCach.pushToCach(cachKey, readImageResult);
+                                    ImageCache.pushToCache(cachKey, readImageResult);
                                 }
                                 handler.post(new Runnable() {
                                     public void run() {
@@ -215,7 +215,7 @@ public class EfficientImageUtil {
             }
         } else {
             if (imageView != null) {
-                releseTag(imageView);
+                releaseTag(imageView);
                 imageView.setImageBitmap(defaultImage);
             }
             if (callback != null) {

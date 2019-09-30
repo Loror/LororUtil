@@ -112,21 +112,33 @@ public class ImageUtil implements Cloneable {
         return new ImageUtil(context);
     }
 
+    /**
+     * 设置加载时占位图
+     */
     public ImageUtil setDefaultImage(int defaultImage) {
         this.defaultImage = defaultImage;
         return this;
     }
 
+    /**
+     * 设置加载错误时占位图
+     */
     public ImageUtil setErrorImage(int errorImage) {
         this.errorImage = errorImage;
         return this;
     }
 
+    /**
+     * 设置加载图片时限定宽度
+     */
     public ImageUtil setWidthLimit(int widthLimit) {
         this.widthLimit = widthLimit;
         return this;
     }
 
+    /**
+     * 设置是否缓存网路图片到本地
+     */
     public ImageUtil setNoSdCache(boolean noSdCache) {
         this.noSdCache = noSdCache;
         return this;
@@ -140,21 +152,33 @@ public class ImageUtil implements Cloneable {
         return this;
     }
 
+    /**
+     * 设置加载成功后图片预处理
+     */
     public ImageUtil setBitmapConverter(BitmapConverter bitmapConverter) {
         this.bitmapConverter = bitmapConverter;
         return this;
     }
 
+    /**
+     * 设置是否移除快速滑动时离开界面的任务，默认移除
+     */
     public ImageUtil setRemoveOldTask(boolean removeOldTask) {
         this.removeOldTask = removeOldTask;
         return this;
     }
 
-    public ImageUtil setCachUseAnimation(boolean cachUseAnimation) {
+    /**
+     * 设置是否为已缓存图片启用加载动画，默认不启用
+     */
+    public ImageUtil setCacheUseAnimation(boolean cachUseAnimation) {
         this.cachUseAnimation = cachUseAnimation;
         return this;
     }
 
+    /**
+     * 设置是否以gif方式加载图片
+     */
     public ImageUtil setIsGif(boolean isGif) {
         this.isGif = isGif;
         return this;
@@ -166,11 +190,17 @@ public class ImageUtil implements Cloneable {
         return this;
     }
 
+    /**
+     * 设置加载过程监听
+     */
     public ImageUtil setOnLoadListener(ImageUtilCallBack onLoadListener) {
         this.onLoadListener = onLoadListener;
         return this;
     }
 
+    /**
+     * 设置缓存目录
+     */
     public ImageUtil setTargetDir(String targetDir) {
         if (targetDir != null) {
             this.targetDirPath = targetDir;
@@ -178,11 +208,17 @@ public class ImageUtil implements Cloneable {
         return this;
     }
 
+    /**
+     * 设置缓存文件名
+     */
     public ImageUtil setTargetName(String targetName) {
         this.targetName = targetName;
         return this;
     }
 
+    /**
+     * 设置缓存地址
+     */
     public ImageUtil setTargetFile(File targetFile) {
         if (targetFile != null) {
             this.targetDirPath = targetFile.getParentFile().getAbsolutePath();
@@ -191,26 +227,41 @@ public class ImageUtil implements Cloneable {
         return this;
     }
 
+    /**
+     * 获取缓存目录
+     */
     public String getTargetDirPath() {
         init(this.context);
         return this.targetDirPath;
     }
 
+    /**
+     * 获取缓存地址
+     */
     public String getTargetFile() {
         init(this.context);
         return (this.targetDirPath.endsWith("/") ? this.targetDirPath : (this.targetDirPath + "/")) + this.targetName;
     }
 
+    /**
+     * 设置加载动画
+     */
     public ImageUtil setLoadAnimation(Animation loadAnimation) {
         this.loadAnimation = loadAnimation;
         return this;
     }
 
+    /**
+     * 设置源
+     */
     public ImageUtil from(String path) {
         this.path = path;
         return this;
     }
 
+    /**
+     * 设置加载目标imageView
+     */
     public ImageUtil to(ImageView imageView) {
         this.imageView = imageView;
         if (this.loadAnimation == null) {
@@ -218,6 +269,13 @@ public class ImageUtil implements Cloneable {
             this.loadAnimation.setDuration(300);
         }
         return this;
+    }
+
+    /**
+     * 设置加载目标imageView并开始加载
+     */
+    public void loadTo(ImageView imageView) {
+        to(imageView).loadImage();
     }
 
     /**
@@ -246,7 +304,7 @@ public class ImageUtil implements Cloneable {
     }
 
     /**
-     * 执行
+     * 开始加载
      */
     public void loadImage() {
         final Context context = this.context;
@@ -300,10 +358,10 @@ public class ImageUtil implements Cloneable {
                         }
                         if (result.getErrorCode() == 0) {
                             lock.mark = 1;//加载成功，锁耗尽
-                            ImageCach.pushToCach(path + widthLimit, result);//放入缓存
+                            ImageCache.pushToCache(path + widthLimit, result);//放入缓存
                         }
                     } else {
-                        result = ImageCach.getFromCache(path + widthLimit);//其他任务已加载该图片，从缓存中获取
+                        result = ImageCache.getFromCache(path + widthLimit);//其他任务已加载该图片，从缓存中获取
                         //可能其他任务获取的宽度与本次不同，尝试重新加载
                         if (result == null) {
                             result = readImage.readImage(path, widthLimit, isGif);
@@ -311,7 +369,7 @@ public class ImageUtil implements Cloneable {
                                 result = new ReadImageResult();
                                 result.setErrorCode(4);//超时无法获取，标记错误码4
                             } else if (result.getErrorCode() == 0) {
-                                ImageCach.pushToCach(path + widthLimit, result);//放入缓存
+                                ImageCache.pushToCache(path + widthLimit, result);//放入缓存
                             }
                         }
                     }
@@ -474,8 +532,16 @@ public class ImageUtil implements Cloneable {
         EfficientImageUtil.loadImage(imageView, path, widthLimit, readImage, callback, null, removeOldTask, isGif);
     }
 
+    @Deprecated
     public static void releseTag(View view) {
-        EfficientImageUtil.releseTag(view);
+        releaseTag(view);
+    }
+
+    /**
+     * 清除tag
+     */
+    public static void releaseTag(View view) {
+        EfficientImageUtil.releaseTag(view);
     }
 
     /**
@@ -495,7 +561,7 @@ public class ImageUtil implements Cloneable {
     /**
      * 清除缓存
      */
-    public static void clearCachs() {
-        EfficientImageUtil.clearCachs();
+    public static void clearCaches() {
+        EfficientImageUtil.clearCaches();
     }
 }

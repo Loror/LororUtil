@@ -13,7 +13,7 @@ public abstract class Cache<T> {
     /**
      * 建立线程安全,支持高并发的容器
      */
-    private ConcurrentHashMap<String, SoftReference<T>> softCach = new ConcurrentHashMap<String, SoftReference<T>>();
+    private ConcurrentHashMap<String, SoftReference<T>> softCache = new ConcurrentHashMap<String, SoftReference<T>>();
     /**
      * 图片缓存
      */
@@ -27,7 +27,7 @@ public abstract class Cache<T> {
             moveToWeak(key, oldValue);
             if (oldValue != null) {
                 // 当硬引用缓存容量已满时，会使用LRU算法将最近没有被使用的图片转入软引用缓存
-                softCach.put(key, new SoftReference<T>(oldValue));
+                softCache.put(key, new SoftReference<T>(oldValue));
             }
         }
     };
@@ -43,8 +43,8 @@ public abstract class Cache<T> {
      */
     public T getFromCache(String key) {
         T bitmap = null;
-        if (softCach.get(key) != null) {
-            bitmap = softCach.get(key).get();
+        if (softCache.get(key) != null) {
+            bitmap = softCache.get(key).get();
         }
         return bitmap == null ? cache.get(key) : bitmap;
 
@@ -53,7 +53,7 @@ public abstract class Cache<T> {
     /**
      * 加入缓存
      */
-    public void pushToCach(String key, T value) {
+    public void pushToCache(String key, T value) {
         if (key != null && value != null) {
             cache.put(key, value);
         }
@@ -62,8 +62,8 @@ public abstract class Cache<T> {
     /**
      * 清空缓存
      */
-    public void clearCach() {
+    public void clearCache() {
         cache.evictAll();
-        softCach.clear();
+        softCache.clear();
     }
 }
