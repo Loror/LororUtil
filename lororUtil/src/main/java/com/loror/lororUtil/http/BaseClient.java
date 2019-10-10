@@ -482,7 +482,7 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
         FileInputStream fis = new FileInputStream(file);
         final long length = file.length();
         long lastTime = System.currentTimeMillis(), transed = 0;
-        byte[] temp = new byte[1024 * 1024];
+        byte[] temp = new byte[1024 * 100];
         int total = 0;
         int speed = 0;
         while ((total = fis.read(temp)) != -1) {
