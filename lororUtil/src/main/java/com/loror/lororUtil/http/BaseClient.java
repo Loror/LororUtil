@@ -211,6 +211,7 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
                 }
                 if (progressListener != null) {
                     conn.setUseCaches(false);
+                    conn.setFixedLengthStreamingMode(1024 * 100);
                 }
                 preparePostFile(conn, timeOut, readTimeOut, params);
                 OutputStream out = conn.getOutputStream();
@@ -334,6 +335,7 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
                 }
                 if (progressListener != null) {
                     conn.setUseCaches(false);
+                    conn.setFixedLengthStreamingMode(1024 * 100);
                 }
                 preparePutFile(conn, timeOut, readTimeOut, params);
                 OutputStream out = conn.getOutputStream();
