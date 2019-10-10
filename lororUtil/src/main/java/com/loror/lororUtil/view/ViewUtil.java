@@ -293,6 +293,13 @@ public class ViewUtil {
         boolean injected = false;
         for (int i = 0; i < methods.length; i++) {
             final Method method = methods[i];
+            int count = 0;
+            try {
+                count = method.getParameterTypes().length;
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            final int paramCount = count;
             Click click = (Click) method.getAnnotation(Click.class);
             LongClick longClick = (LongClick) method.getAnnotation(LongClick.class);
             ItemClick itemClick = (ItemClick) method.getAnnotation(ItemClick.class);
@@ -312,7 +319,11 @@ public class ViewUtil {
                                 if (System.currentTimeMillis() - clickTime > clickSpace) {
                                     clickTime = System.currentTimeMillis();
                                     try {
-                                        method.invoke(holder, v);
+                                        if (paramCount == 0) {
+                                            method.invoke(holder);
+                                        } else {
+                                            method.invoke(holder, v);
+                                        }
                                     } catch (IllegalAccessException e) {
                                         e.printStackTrace();
                                     } catch (InvocationTargetException e) {
@@ -335,7 +346,11 @@ public class ViewUtil {
                             @Override
                             public boolean onLongClick(View v) {
                                 try {
-                                    method.invoke(holder, v);
+                                    if (paramCount == 0) {
+                                        method.invoke(holder);
+                                    } else {
+                                        method.invoke(holder, v);
+                                    }
                                 } catch (IllegalAccessException e) {
                                     e.printStackTrace();
                                 } catch (InvocationTargetException e) {
@@ -401,7 +416,11 @@ public class ViewUtil {
                             if (System.currentTimeMillis() - clickTime > clickSpace) {
                                 clickTime = System.currentTimeMillis();
                                 try {
-                                    method.invoke(holder, v);
+                                    if (paramCount == 0) {
+                                        method.invoke(holder);
+                                    } else {
+                                        method.invoke(holder, v);
+                                    }
                                 } catch (IllegalAccessException e) {
                                     e.printStackTrace();
                                 } catch (InvocationTargetException e) {
@@ -453,7 +472,11 @@ public class ViewUtil {
                         @Override
                         public boolean onLongClick(View v) {
                             try {
-                                method.invoke(holder, v);
+                                if (paramCount == 0) {
+                                    method.invoke(holder);
+                                } else {
+                                    method.invoke(holder, v);
+                                }
                             } catch (IllegalAccessException e) {
                                 e.printStackTrace();
                             } catch (InvocationTargetException e) {
