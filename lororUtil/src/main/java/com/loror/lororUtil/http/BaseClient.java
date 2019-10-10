@@ -17,9 +17,11 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 public abstract class BaseClient<T extends HttpURLConnection> extends Prepare implements Client {
+
     private int timeOut = 10000;
     private int readTimeOut;
     private boolean followRedirects = true;
+    private int fileReadLength = 1024 * 100;
     private T conn;
     private ProgressListener progressListener;
     protected Actuator callbackActuator;
@@ -59,6 +61,13 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
      */
     public void setFollowRedirects(boolean followRedirects) {
         this.followRedirects = followRedirects;
+    }
+
+    /**
+     * 设置上传文件时每次读入大小
+     */
+    public void setFileReadLength(int fileReadLength) {
+        this.fileReadLength = fileReadLength;
     }
 
     /**
@@ -211,7 +220,7 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
                 }
                 if (progressListener != null) {
                     conn.setUseCaches(false);
-                    conn.setFixedLengthStreamingMode(1024 * 100);
+                    conn.setChunkedStreamingMode(fileReadLength);
                 }
                 preparePostFile(conn, timeOut, readTimeOut, params);
                 OutputStream out = conn.getOutputStream();
@@ -335,7 +344,7 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
                 }
                 if (progressListener != null) {
                     conn.setUseCaches(false);
-                    conn.setFixedLengthStreamingMode(1024 * 100);
+                    conn.setChunkedStreamingMode(fileReadLength);
                 }
                 preparePutFile(conn, timeOut, readTimeOut, params);
                 OutputStream out = conn.getOutputStream();
@@ -490,7 +499,7 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
         FileInputStream fis = new FileInputStream(file);
         final long length = file.length();
         long lastTime = System.currentTimeMillis(), transed = 0;
-        byte[] temp = new byte[1024 * 100];
+        byte[] temp = new byte[fileReadLength > 0 ? fileReadLength : (1024 * 100)];
         int total = 0;
         int speed = 0;
         while ((total = fis.read(temp)) != -1) {
