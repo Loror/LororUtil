@@ -209,6 +209,9 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
                 if (followRedirects) {
                     conn.setInstanceFollowRedirects(true);
                 }
+                if (progressListener != null) {
+                    conn.setUseCaches(false);
+                }
                 preparePostFile(conn, timeOut, readTimeOut, params);
                 OutputStream out = conn.getOutputStream();
                 if (params.isGzip()) {
@@ -328,6 +331,9 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
                 conn = (T) url.openConnection();
                 if (followRedirects) {
                     conn.setInstanceFollowRedirects(true);
+                }
+                if (progressListener != null) {
+                    conn.setUseCaches(false);
                 }
                 preparePutFile(conn, timeOut, readTimeOut, params);
                 OutputStream out = conn.getOutputStream();
