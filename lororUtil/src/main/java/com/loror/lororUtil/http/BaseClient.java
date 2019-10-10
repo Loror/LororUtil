@@ -4,7 +4,6 @@ import android.annotation.SuppressLint;
 
 import com.loror.lororUtil.text.TextUtil;
 
-import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -14,6 +13,8 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 public abstract class BaseClient<T extends HttpURLConnection> extends Prepare implements Client {
     private int timeOut = 10000;
@@ -98,8 +99,11 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
     /**
      * 获取返回数据
      */
-    protected byte[] getResponce(HttpURLConnection conn, int code) throws Exception {
-        InputStream inputStream = code / 100 > 3 ? conn.getErrorStream() : conn.getInputStream();
+    protected void readResponce(HttpURLConnection conn, Responce responce) throws Exception {
+        InputStream inputStream = responce.getCode() / 100 > 3 ? conn.getErrorStream() : conn.getInputStream();
+        if ("gzip".equals(responce.getContentEncoding())) {
+            inputStream = new GZIPInputStream(inputStream);
+        }
         List<byte[]> bytesList = new ArrayList<>();
         byte[] bytes = new byte[1024];
         int total = 0;
@@ -117,8 +121,7 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
             System.arraycopy(temp, 0, result, position, temp.length);
             position += temp.length;
         }
-        return result;
-
+        responce.result = result;
     }
 
     @Override
@@ -138,11 +141,12 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
             }
             prepareGet(conn, timeOut, readTimeOut, params);
             responce.code = conn.getResponseCode();
+            responce.contentEncoding = conn.getContentEncoding();
             if (responce.code == HttpURLConnection.HTTP_OK) {
                 initHeaders(conn, responce);
             }
             responce.url = conn.getURL();
-            responce.result = getResponce(conn, responce.code);
+            readResponce(conn, responce);
             conn.disconnect();
         } catch (Throwable e) {
             responce.setThrowable(e);
@@ -172,6 +176,9 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
                     String strParams = params.packetOutParams("POST");
                     if (!TextUtil.isEmpty(strParams)) {
                         OutputStream out = conn.getOutputStream();
+                        if (params.isGzip()) {
+                            out = new GZIPOutputStream(out);
+                        }
                         out.write(strParams.getBytes());
                         out.flush();
                         out.close();
@@ -179,10 +186,11 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
                 }
                 responce.url = conn.getURL();
                 responce.code = conn.getResponseCode();
+                responce.contentEncoding = conn.getContentEncoding();
                 if (responce.code == HttpURLConnection.HTTP_OK) {
                     initHeaders(conn, responce);
                 }
-                responce.result = getResponce(conn, responce.code);
+                readResponce(conn, responce);
                 conn.disconnect();
             } catch (Throwable e) {
                 responce.setThrowable(e);
@@ -202,7 +210,10 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
                     conn.setInstanceFollowRedirects(true);
                 }
                 preparePostFile(conn, timeOut, readTimeOut, params);
-                OutputStream out = new DataOutputStream(conn.getOutputStream());
+                OutputStream out = conn.getOutputStream();
+                if (params.isGzip()) {
+                    out = new GZIPOutputStream(out);
+                }
                 String StrParmas = params.packetOutParams("POST_FORM");
                 if (!TextUtil.isEmpty(StrParmas)) {
                     out.write(StrParmas.getBytes());
@@ -220,10 +231,11 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
                 out.close();
                 responce.url = conn.getURL();
                 responce.code = conn.getResponseCode();
+                responce.contentEncoding = conn.getContentEncoding();
                 if (responce.code == HttpURLConnection.HTTP_OK) {
                     initHeaders(conn, responce);
                 }
-                responce.result = getResponce(conn, responce.code);
+                readResponce(conn, responce);
                 conn.disconnect();
             } catch (Throwable e) {
                 responce.setThrowable(e);
@@ -284,6 +296,9 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
                     String strParams = params.packetOutParams("POST");
                     if (!TextUtil.isEmpty(strParams)) {
                         OutputStream out = conn.getOutputStream();
+                        if (params.isGzip()) {
+                            out = new GZIPOutputStream(out);
+                        }
                         out.write(strParams.getBytes());
                         out.flush();
                         out.close();
@@ -291,10 +306,11 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
                 }
                 responce.url = conn.getURL();
                 responce.code = conn.getResponseCode();
+                responce.contentEncoding = conn.getContentEncoding();
                 if (responce.code == HttpURLConnection.HTTP_OK) {
                     initHeaders(conn, responce);
                 }
-                responce.result = getResponce(conn, responce.code);
+                readResponce(conn, responce);
                 conn.disconnect();
             } catch (Throwable e) {
                 responce.setThrowable(e);
@@ -314,7 +330,10 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
                     conn.setInstanceFollowRedirects(true);
                 }
                 preparePutFile(conn, timeOut, readTimeOut, params);
-                OutputStream out = new DataOutputStream(conn.getOutputStream());
+                OutputStream out = conn.getOutputStream();
+                if (params.isGzip()) {
+                    out = new GZIPOutputStream(out);
+                }
                 String strParams = params.packetOutParams("POST_FORM");
                 if (!TextUtil.isEmpty(strParams)) {
                     out.write(strParams.getBytes());
@@ -332,10 +351,11 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
                 out.close();
                 responce.url = conn.getURL();
                 responce.code = conn.getResponseCode();
+                responce.contentEncoding = conn.getContentEncoding();
                 if (responce.code == HttpURLConnection.HTTP_OK) {
                     initHeaders(conn, responce);
                 }
-                responce.result = getResponce(conn, responce.code);
+                readResponce(conn, responce);
                 conn.disconnect();
             } catch (Throwable e) {
                 responce.setThrowable(e);
@@ -392,11 +412,12 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
             }
             prepareDelete(conn, timeOut, readTimeOut, params);
             responce.code = conn.getResponseCode();
+            responce.contentEncoding = conn.getContentEncoding();
             if (responce.code == HttpURLConnection.HTTP_OK) {
                 initHeaders(conn, responce);
             }
             responce.url = conn.getURL();
-            responce.result = getResponce(conn, responce.code);
+            readResponce(conn, responce);
             conn.disconnect();
         } catch (Throwable e) {
             responce.setThrowable(e);

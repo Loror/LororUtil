@@ -10,6 +10,7 @@ public class Responce {
     protected URL url;
     protected int code;
     public byte[] result;
+    protected String contentEncoding;
     protected HashMap<String, String> cookies = new HashMap<>();
     protected Map<String, List<String>> headers;
     protected List<String> cookielist;
@@ -27,6 +28,13 @@ public class Responce {
      */
     public int getCode() {
         return code;
+    }
+
+    /**
+     * 获取编码
+     */
+    public String getContentEncoding() {
+        return contentEncoding;
     }
 
     /**

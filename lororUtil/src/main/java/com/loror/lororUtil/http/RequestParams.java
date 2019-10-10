@@ -26,6 +26,7 @@ public class RequestParams {
     private static boolean defaultUseFormForPost = false;
     private boolean userFormForPost = false, useDefaultConverterInPost = false;
     private boolean asJson;
+    private boolean gzip;
     private static RequestConverter defaultConverter = new RequestConverter() {
         @Override
         public String convert(String key, String value) {
@@ -59,6 +60,25 @@ public class RequestParams {
      */
     public boolean isAsJson() {
         return asJson;
+    }
+
+    /**
+     * 设置是否使用gzip压缩上传
+     */
+    public void setGzip(boolean gzip) {
+        this.gzip = gzip;
+        if (gzip) {
+            headers.put("Content-Encoding", "gzip");
+        } else if ("gzip".equals(headers.get("Content-Encoding"))) {
+            headers.remove("Content-Encoding");
+        }
+    }
+
+    /**
+     * 是否使用gzip压缩上传
+     */
+    public boolean isGzip() {
+        return gzip;
     }
 
     /**
