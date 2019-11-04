@@ -22,6 +22,7 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
     private int readTimeOut;
     private boolean followRedirects = true;
     private int fileReadLength = 1024 * 100;
+    private boolean keepStream;
     private T conn;
     private ProgressListener progressListener;
     protected Actuator callbackActuator;
@@ -40,6 +41,10 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
         this.progressListener = progressListener;
     }
 
+    public ProgressListener getProgressListener() {
+        return progressListener;
+    }
+
     /**
      * 设置超时时间
      */
@@ -49,11 +54,19 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
         }
     }
 
+    public int getTimeOut() {
+        return timeOut;
+    }
+
     /**
      * 设置读取超时时间
      */
     public void setReadTimeOut(int readTimeOut) {
         this.readTimeOut = readTimeOut;
+    }
+
+    public int getReadTimeOut() {
+        return readTimeOut;
     }
 
     /**
@@ -63,6 +76,10 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
         this.followRedirects = followRedirects;
     }
 
+    public boolean isFollowRedirects() {
+        return followRedirects;
+    }
+
     /**
      * 设置上传文件时每次读入大小
      */
@@ -70,38 +87,57 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
         this.fileReadLength = fileReadLength;
     }
 
+    public int getFileReadLength() {
+        return fileReadLength;
+    }
+
+    /**
+     * 设置是否保留原始流到responce不进行读取
+     */
+    public void setKeepStream(boolean keepStream) {
+        this.keepStream = keepStream;
+    }
+
+    public boolean isKeepStream() {
+        return keepStream;
+    }
+
     /**
      * 读取http头
      */
     protected void initHeaders(HttpURLConnection connection, Responce responce) {
-        String cookieskey = "Set-Cookie";
-        responce.headers = connection.getHeaderFields();
-        responce.cookielist = responce.headers.get(cookieskey);
-        if (responce.cookielist == null) {
-            responce.cookielist = new ArrayList<>();
-        }
-        for (String cookielist : responce.cookielist) {
-            if (cookielist == null) {
-                continue;
+        try {
+            String cookieskey = "Set-Cookie";
+            responce.headers = connection.getHeaderFields();
+            responce.cookielist = responce.headers.get(cookieskey);
+            if (responce.cookielist == null) {
+                responce.cookielist = new ArrayList<>();
             }
-            String[] cookies = cookielist.split(";");
-            for (int i = 0; i < cookies.length; i++) {
-                String cookie = cookies[i];
-                if (cookie == null) {
+            for (String cookielist : responce.cookielist) {
+                if (cookielist == null) {
                     continue;
                 }
-                try {
-                    cookie = cookie.trim();
-                    String[] keyValue = cookie.split("\\=");
-                    if (keyValue.length == 1) {
-                        responce.cookies.put(keyValue[0], null);
-                    } else {
-                        responce.cookies.put(keyValue[0], cookie.substring(keyValue[0].length() + 1));
+                String[] cookies = cookielist.split(";");
+                for (int i = 0; i < cookies.length; i++) {
+                    String cookie = cookies[i];
+                    if (cookie == null) {
+                        continue;
                     }
-                } catch (Exception e) {
-                    e.printStackTrace();
+                    try {
+                        cookie = cookie.trim();
+                        String[] keyValue = cookie.split("\\=");
+                        if (keyValue.length == 1) {
+                            responce.cookies.put(keyValue[0], null);
+                        } else {
+                            responce.cookies.put(keyValue[0], cookie.substring(keyValue[0].length() + 1));
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
             }
+        } catch (Throwable e) {
+            System.err.println("lost headers");
         }
     }
 
@@ -113,24 +149,30 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
         if ("gzip".equals(responce.getContentEncoding())) {
             inputStream = new GZIPInputStream(inputStream);
         }
-        List<byte[]> bytesList = new ArrayList<>();
-        byte[] bytes = new byte[1024];
-        int total = 0;
-        int length = 0;
-        while ((total = inputStream.read(bytes)) != -1) {
-            byte[] temp = new byte[total];
-            System.arraycopy(bytes, 0, temp, 0, total);
-            bytesList.add(temp);
-            length += total;
+        if (keepStream) {
+            responce.inputStream = inputStream;
+            responce.connection = conn;
+        } else {
+            List<byte[]> bytesList = new ArrayList<>();
+            byte[] bytes = new byte[1024];
+            int total = 0;
+            int length = 0;
+            while ((total = inputStream.read(bytes)) != -1) {
+                byte[] temp = new byte[total];
+                System.arraycopy(bytes, 0, temp, 0, total);
+                bytesList.add(temp);
+                length += total;
+            }
+            byte[] result = new byte[length];
+            int position = 0;
+            for (int i = 0; i < bytesList.size(); i++) {
+                byte[] temp = bytesList.get(i);
+                System.arraycopy(temp, 0, result, position, temp.length);
+                position += temp.length;
+            }
+            responce.result = result;
+            conn.disconnect();
         }
-        byte[] result = new byte[length];
-        int position = 0;
-        for (int i = 0; i < bytesList.size(); i++) {
-            byte[] temp = bytesList.get(i);
-            System.arraycopy(temp, 0, result, position, temp.length);
-            position += temp.length;
-        }
-        responce.result = result;
     }
 
     @Override
@@ -151,12 +193,9 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
             prepareGet(conn, timeOut, readTimeOut, params);
             responce.code = conn.getResponseCode();
             responce.contentEncoding = conn.getContentEncoding();
-            if (responce.code == HttpURLConnection.HTTP_OK) {
-                initHeaders(conn, responce);
-            }
             responce.url = conn.getURL();
+            initHeaders(conn, responce);
             readResponce(conn, responce);
-            conn.disconnect();
         } catch (Throwable e) {
             responce.setThrowable(e);
         }
@@ -196,11 +235,8 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
                 responce.url = conn.getURL();
                 responce.code = conn.getResponseCode();
                 responce.contentEncoding = conn.getContentEncoding();
-                if (responce.code == HttpURLConnection.HTTP_OK) {
-                    initHeaders(conn, responce);
-                }
+                initHeaders(conn, responce);
                 readResponce(conn, responce);
-                conn.disconnect();
             } catch (Throwable e) {
                 responce.setThrowable(e);
             } finally {
@@ -245,11 +281,8 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
                 responce.url = conn.getURL();
                 responce.code = conn.getResponseCode();
                 responce.contentEncoding = conn.getContentEncoding();
-                if (responce.code == HttpURLConnection.HTTP_OK) {
-                    initHeaders(conn, responce);
-                }
+                initHeaders(conn, responce);
                 readResponce(conn, responce);
-                conn.disconnect();
             } catch (Throwable e) {
                 responce.setThrowable(e);
             } finally {
@@ -320,11 +353,8 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
                 responce.url = conn.getURL();
                 responce.code = conn.getResponseCode();
                 responce.contentEncoding = conn.getContentEncoding();
-                if (responce.code == HttpURLConnection.HTTP_OK) {
-                    initHeaders(conn, responce);
-                }
+                initHeaders(conn, responce);
                 readResponce(conn, responce);
-                conn.disconnect();
             } catch (Throwable e) {
                 responce.setThrowable(e);
             } finally {
@@ -369,11 +399,8 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
                 responce.url = conn.getURL();
                 responce.code = conn.getResponseCode();
                 responce.contentEncoding = conn.getContentEncoding();
-                if (responce.code == HttpURLConnection.HTTP_OK) {
-                    initHeaders(conn, responce);
-                }
+                initHeaders(conn, responce);
                 readResponce(conn, responce);
-                conn.disconnect();
             } catch (Throwable e) {
                 responce.setThrowable(e);
             } finally {
@@ -430,12 +457,9 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
             prepareDelete(conn, timeOut, readTimeOut, params);
             responce.code = conn.getResponseCode();
             responce.contentEncoding = conn.getContentEncoding();
-            if (responce.code == HttpURLConnection.HTTP_OK) {
-                initHeaders(conn, responce);
-            }
             responce.url = conn.getURL();
+            initHeaders(conn, responce);
             readResponce(conn, responce);
-            conn.disconnect();
         } catch (Throwable e) {
             responce.setThrowable(e);
         }
@@ -630,19 +654,25 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
             }
             prepareGet(conn, timeOut, readTimeOut, params);
             conn.setRequestProperty("Accept-Encoding", "identity");
-            long length = length(conn);
             File file = getFile(conn, path, urlStr);
             responce.url = conn.getURL();
             responce.code = conn.getResponseCode();
-            if (file.exists() && !cover && file.length() == length) {
-                conn.disconnect();
-            } else {
-                downloadFile(file, length, conn.getInputStream(), progressListener, callbackActuator);
-                if (responce.code == HttpURLConnection.HTTP_OK) {
-                    initHeaders(conn, responce);
+            responce.contentEncoding = conn.getContentEncoding();
+            initHeaders(conn, responce);
+            if (responce.code == HttpURLConnection.HTTP_OK) {
+                long length = length(conn);
+                if (file.exists() && !cover && file.length() == length) {
+                    responce.result = "success".getBytes();
+                } else {
+                    InputStream inputStream = conn.getInputStream();
+                    if ("gzip".equals(responce.getContentEncoding())) {
+                        inputStream = new GZIPInputStream(inputStream);
+                    }
+                    downloadFile(file, length, inputStream, progressListener, callbackActuator);
+                    responce.result = "success".getBytes();
                 }
             }
-            responce.result = file.getAbsolutePath().getBytes();
+            conn.disconnect();
         } catch (Throwable e) {
             responce.setThrowable(e);
         } finally {
@@ -704,13 +734,24 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
             File file = getFile(conn, path, urlStr);
             responce.url = conn.getURL();
             responce.code = conn.getResponseCode();
-            long length = length(conn);
-            downloadFile(file, length, conn.getInputStream(), progressListener, callbackActuator);
-            if (responce.code == HttpURLConnection.HTTP_PARTIAL) {
-                initHeaders(conn, responce);
+            responce.contentEncoding = conn.getContentEncoding();
+            initHeaders(conn, responce);
+            if (responce.code == HttpURLConnection.HTTP_OK || responce.code == HttpURLConnection.HTTP_PARTIAL) {
+                long length = length(conn);
+                InputStream inputStream = conn.getInputStream();
+                if ("gzip".equals(responce.getContentEncoding())) {
+                    inputStream = new GZIPInputStream(inputStream);
+                }
+                downloadFile(file, length, inputStream, progressListener, callbackActuator);
+                if (responce.code == HttpURLConnection.HTTP_OK) {
+                    responce.result = "not support".getBytes();
+                } else {
+                    responce.result = "success".getBytes();
+                }
+            } else {
+                responce.result = null;
             }
             conn.disconnect();
-            responce.result = file.getAbsolutePath().getBytes();
         } catch (Throwable e) {
             e.printStackTrace();
         } finally {
@@ -767,7 +808,7 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
     }
 
     @SuppressLint("NewApi")
-    private long length(T conn) {
+    public long length(T conn) {
         long length = 0;
         try {
             length = conn.getContentLengthLong();

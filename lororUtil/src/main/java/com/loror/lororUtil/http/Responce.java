@@ -1,5 +1,7 @@
 package com.loror.lororUtil.http;
 
+import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.HashMap;
@@ -14,6 +16,8 @@ public class Responce {
     protected HashMap<String, String> cookies = new HashMap<>();
     protected Map<String, List<String>> headers;
     protected List<String> cookielist;
+    protected InputStream inputStream;
+    protected HttpURLConnection connection;
     protected Throwable throwable;
 
     /**
@@ -56,6 +60,23 @@ public class Responce {
      */
     public List<String> getCookieList() {
         return cookielist;
+    }
+
+    /**
+     * 获取流，设置client属性keepStream为true时可以获取，若使用了流，需手动调用close关闭连接
+     * 建议在io线程处理流相关代码
+     */
+    public InputStream getInputStream() {
+        return inputStream;
+    }
+
+    /**
+     * 关闭连接
+     */
+    public void close() {
+        if (connection != null) {
+            connection.disconnect();
+        }
     }
 
     /**
