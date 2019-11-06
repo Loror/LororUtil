@@ -1,5 +1,7 @@
 package com.loror.lororUtil.http;
 
+import android.annotation.SuppressLint;
+
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -68,6 +70,24 @@ public class Responce {
      */
     public InputStream getInputStream() {
         return inputStream;
+    }
+
+    /**
+     * 获取内容长度
+     */
+    @SuppressLint("NewApi")
+    public long getContentLength() {
+        long length = 0;
+        if (connection != null) {
+            try {
+                length = connection.getContentLengthLong();
+            } catch (Throwable e) {
+                length = connection.getContentLength();
+            }
+        } else if (result != null) {
+            length = result.length;
+        }
+        return length;
     }
 
     /**

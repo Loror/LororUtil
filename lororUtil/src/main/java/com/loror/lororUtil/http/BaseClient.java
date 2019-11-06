@@ -808,7 +808,7 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
     }
 
     @SuppressLint("NewApi")
-    public long length(T conn) {
+    private long length(T conn) {
         long length = 0;
         try {
             length = conn.getContentLengthLong();
