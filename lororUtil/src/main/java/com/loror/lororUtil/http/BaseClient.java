@@ -153,7 +153,7 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
         responce.connection = conn;
         if (!keepStream) {
             responce.readStream();
-            conn.disconnect();
+            responce.close();
         }
     }
 
