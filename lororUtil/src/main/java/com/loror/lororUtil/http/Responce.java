@@ -1,11 +1,13 @@
 package com.loror.lororUtil.http;
 
-import android.annotation.SuppressLint;
+import android.os.Build;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -75,12 +77,15 @@ public class Responce {
     /**
      * 获取内容长度
      */
-    @SuppressLint("NewApi")
     public long getContentLength() {
         long length = 0;
         if (connection != null) {
             try {
-                length = connection.getContentLengthLong();
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                    length = connection.getContentLengthLong();
+                } else {
+                    length = connection.getContentLength();
+                }
             } catch (Throwable e) {
                 length = connection.getContentLength();
             }
@@ -96,6 +101,7 @@ public class Responce {
     public void close() {
         if (connection != null) {
             connection.disconnect();
+            connection = null;
         }
     }
 
@@ -113,6 +119,32 @@ public class Responce {
         return throwable;
     }
 
+    /**
+     * 读取流中内容
+     */
+    protected void readStream() throws IOException {
+        List<byte[]> bytesList = new ArrayList<>();
+        byte[] bytes = new byte[1024];
+        int total = 0;
+        int length = 0;
+        while ((total = inputStream.read(bytes)) != -1) {
+            byte[] temp = new byte[total];
+            System.arraycopy(bytes, 0, temp, 0, total);
+            bytesList.add(temp);
+            length += total;
+        }
+        byte[] result = new byte[length];
+        int position = 0;
+        for (int i = 0; i < bytesList.size(); i++) {
+            byte[] temp = bytesList.get(i);
+            System.arraycopy(temp, 0, result, position, temp.length);
+            position += temp.length;
+        }
+        this.result = result;
+        inputStream = null;
+        close();
+    }
+
     @Override
     public String toString() {
         return toString(null);
@@ -124,6 +156,13 @@ public class Responce {
             return "an exception happen : " + this.throwable.getClass().getName();
         } else if (this.result != null) {
             return charset == null ? new String(this.result) : new String(this.result, charset);
+        } else if (this.connection != null) {
+            try {
+                readStream();
+                return charset == null ? new String(this.result) : new String(this.result, charset);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
         return null;
     }

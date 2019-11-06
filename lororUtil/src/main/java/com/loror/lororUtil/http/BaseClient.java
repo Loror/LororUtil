@@ -1,6 +1,6 @@
 package com.loror.lororUtil.http;
 
-import android.annotation.SuppressLint;
+import android.os.Build;
 
 import com.loror.lororUtil.text.TextUtil;
 
@@ -149,28 +149,10 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
         if ("gzip".equals(responce.getContentEncoding())) {
             inputStream = new GZIPInputStream(inputStream);
         }
-        if (keepStream) {
-            responce.inputStream = inputStream;
-            responce.connection = conn;
-        } else {
-            List<byte[]> bytesList = new ArrayList<>();
-            byte[] bytes = new byte[1024];
-            int total = 0;
-            int length = 0;
-            while ((total = inputStream.read(bytes)) != -1) {
-                byte[] temp = new byte[total];
-                System.arraycopy(bytes, 0, temp, 0, total);
-                bytesList.add(temp);
-                length += total;
-            }
-            byte[] result = new byte[length];
-            int position = 0;
-            for (int i = 0; i < bytesList.size(); i++) {
-                byte[] temp = bytesList.get(i);
-                System.arraycopy(temp, 0, result, position, temp.length);
-                position += temp.length;
-            }
-            responce.result = result;
+        responce.inputStream = inputStream;
+        responce.connection = conn;
+        if (!keepStream) {
+            responce.readStream();
             conn.disconnect();
         }
     }
@@ -807,11 +789,14 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
         return length;
     }
 
-    @SuppressLint("NewApi")
     private long length(T conn) {
         long length = 0;
         try {
-            length = conn.getContentLengthLong();
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                length = conn.getContentLengthLong();
+            } else {
+                length = conn.getContentLength();
+            }
         } catch (Throwable e) {
             length = conn.getContentLength();
         }
