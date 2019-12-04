@@ -7,6 +7,7 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * post提交参数类
@@ -158,32 +159,53 @@ public class RequestParams {
      * 添加参数
      */
     public RequestParams fromObject(Object object) {
-        Class<?> handlerType = object.getClass();
-        Field[] fields = handlerType.getDeclaredFields();
-        for (int i = 0; i < fields.length; i++) {
-            Field field = fields[i];
-            field.setAccessible(true);
-            //transient|static修饰(10001000)字段，放弃
-            if ((field.getModifiers() & 136) != 0) {
-                continue;
-            }
-            try {
-                String key = field.getName();
-                Object value = field.get(object);
-                Class<?> type = field.getType();
-                if (type == File.class) {
-                    addParams(key, value == null ? new FileBody(null, key) : new FileBody(((File) object).getAbsolutePath(), ((File) object).getName()));
-                } else if (type == FileBody.class) {
-                    addParams(key, value == null ? new FileBody(null, key) : (FileBody) value);
-                } else if (type == Integer.class || type == Integer.TYPE || type == Long.class || type == Long.TYPE
-                        || type == Float.class || type == Float.TYPE || type == Double.class || type == Double.TYPE
-                        || type == Boolean.class || type == Boolean.TYPE || type == String.class) {
-                    params.put(key, value);
-                } else {
-                    params.put(key, value == null ? null : String.valueOf(value));
+        if (object instanceof Map) {
+            Map map = (Map) object;
+            for (Object key : map.keySet()) {
+                if (key == null) {
+                    continue;
                 }
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
+                Object value = map.get(key);
+                if (value instanceof File) {
+                    addParams(key.toString(), new FileBody(((File) value).getAbsolutePath(), ((File) value).getName()));
+                } else if (value instanceof FileBody) {
+                    addParams(key.toString(), (FileBody) value);
+                } else if (value instanceof Integer || value instanceof Long
+                        || value instanceof Float || value instanceof Double
+                        || value instanceof Boolean) {
+                    params.put(key.toString(), value);
+                } else {
+                    params.put(key.toString(), value == null ? null : String.valueOf(value));
+                }
+            }
+        } else {
+            Class<?> handlerType = object.getClass();
+            Field[] fields = handlerType.getDeclaredFields();
+            for (int i = 0; i < fields.length; i++) {
+                Field field = fields[i];
+                field.setAccessible(true);
+                //transient|static修饰(10001000)字段，放弃
+                if ((field.getModifiers() & 136) != 0) {
+                    continue;
+                }
+                try {
+                    String key = field.getName();
+                    Object value = field.get(object);
+                    Class<?> type = field.getType();
+                    if (type == File.class) {
+                        addParams(key, value == null ? new FileBody(null, key) : new FileBody(((File) object).getAbsolutePath(), ((File) object).getName()));
+                    } else if (type == FileBody.class) {
+                        addParams(key, value == null ? new FileBody(null, key) : (FileBody) value);
+                    } else if (type == Integer.class || type == Integer.TYPE || type == Long.class || type == Long.TYPE
+                            || type == Float.class || type == Float.TYPE || type == Double.class || type == Double.TYPE
+                            || type == Boolean.class || type == Boolean.TYPE || type == String.class) {
+                        params.put(key, value);
+                    } else {
+                        params.put(key, value == null ? null : String.valueOf(value));
+                    }
+                } catch (IllegalAccessException e) {
+                    e.printStackTrace();
+                }
             }
         }
         return this;
