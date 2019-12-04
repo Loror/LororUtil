@@ -170,7 +170,7 @@ public class RequestParams {
             try {
                 String key = field.getName();
                 Object value = field.get(object);
-                Class<?> type = field.getDeclaringClass();
+                Class<?> type = field.getType();
                 if (type == File.class) {
                     addParams(key, value == null ? new FileBody(null, key) : new FileBody(((File) object).getAbsolutePath(), ((File) object).getName()));
                 } else if (type == FileBody.class) {
