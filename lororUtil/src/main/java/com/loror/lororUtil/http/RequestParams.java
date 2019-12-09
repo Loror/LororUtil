@@ -544,6 +544,11 @@ public class RequestParams {
             buffer.append("empty");
         }
         buffer.append("],");
+        if (json != null) {
+            buffer.append("[json:");
+            buffer.append(json);
+            buffer.append("],");
+        }
         buffer.append("[files:");
         if (files != null && files.size() > 0) {
             for (FileBody fileBody : files) {
