@@ -143,13 +143,15 @@ public class RequestParams {
      * 添加参数
      */
     public RequestParams fromKeyValue(String params) {
-        String[] keyValues = params.split("\\&");
-        for (int i = 0; i < keyValues.length; i++) {
-            String[] keyValue = keyValues[i].split("\\=");
-            if (keyValue.length > 1) {
-                addParams(keyValue[0], keyValues[i].substring(keyValues[i].indexOf("=") + 1));
-            } else {
-                addParams(keyValue[0], "");
+        if (params != null) {
+            String[] keyValues = params.split("\\&");
+            for (int i = 0; i < keyValues.length; i++) {
+                String[] keyValue = keyValues[i].split("\\=");
+                if (keyValue.length > 1) {
+                    addParams(keyValue[0], keyValues[i].substring(keyValues[i].indexOf("=") + 1));
+                } else {
+                    addParams(keyValue[0], "");
+                }
             }
         }
         return this;
@@ -178,7 +180,7 @@ public class RequestParams {
                     params.put(key.toString(), value == null ? null : String.valueOf(value));
                 }
             }
-        } else {
+        } else if (object != null) {
             Class<?> handlerType = object.getClass();
             Field[] fields = handlerType.getDeclaredFields();
             for (int i = 0; i < fields.length; i++) {
