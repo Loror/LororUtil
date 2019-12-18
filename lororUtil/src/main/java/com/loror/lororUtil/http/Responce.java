@@ -123,26 +123,29 @@ public class Responce {
      * 读取流中内容
      */
     protected void readStream() throws IOException {
-        List<byte[]> bytesList = new ArrayList<>();
-        byte[] bytes = new byte[1024];
-        int total = 0;
-        int length = 0;
-        while ((total = inputStream.read(bytes)) != -1) {
-            byte[] temp = new byte[total];
-            System.arraycopy(bytes, 0, temp, 0, total);
-            bytesList.add(temp);
-            length += total;
+        if (inputStream != null) {
+            List<byte[]> bytesList = new ArrayList<>();
+            byte[] bytes = new byte[1024];
+            int total = 0;
+            int length = 0;
+            while ((total = inputStream.read(bytes)) != -1) {
+                byte[] temp = new byte[total];
+                System.arraycopy(bytes, 0, temp, 0, total);
+                bytesList.add(temp);
+                length += total;
+            }
+            inputStream.close();
+            inputStream = null;
+            close();
+            byte[] result = new byte[length];
+            int position = 0;
+            for (int i = 0; i < bytesList.size(); i++) {
+                byte[] temp = bytesList.get(i);
+                System.arraycopy(temp, 0, result, position, temp.length);
+                position += temp.length;
+            }
+            this.result = result;
         }
-        byte[] result = new byte[length];
-        int position = 0;
-        for (int i = 0; i < bytesList.size(); i++) {
-            byte[] temp = bytesList.get(i);
-            System.arraycopy(temp, 0, result, position, temp.length);
-            position += temp.length;
-        }
-        this.result = result;
-        inputStream = null;
-        close();
     }
 
     @Override
