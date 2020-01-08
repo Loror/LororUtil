@@ -5,6 +5,7 @@ import android.os.Build;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
+import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -110,6 +111,10 @@ public class Responce {
      */
     public void setThrowable(Throwable throwable) {
         this.throwable = throwable;
+        //可能读取超时，此时已获取code，重置为0
+        if (throwable instanceof SocketTimeoutException) {
+            code = 0;
+        }
     }
 
     /**
