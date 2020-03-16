@@ -6,7 +6,7 @@
 
 ```
 dependencies {
-    compile 'com.github.Loror:LororUtil:1.6.32'
+    compile 'com.github.Loror:LororUtil:1.6.33'
 }
 
 allprojects {

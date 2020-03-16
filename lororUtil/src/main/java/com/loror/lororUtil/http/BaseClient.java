@@ -172,6 +172,7 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
             if (followRedirects) {
                 conn.setInstanceFollowRedirects(true);
             }
+            HttpsClient.suiteTSLAndroid4(conn);
             prepareGet(conn, timeOut, readTimeOut, params);
             responce.code = conn.getResponseCode();
             responce.contentEncoding = conn.getContentEncoding();
@@ -201,6 +202,7 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
                 if (followRedirects) {
                     conn.setInstanceFollowRedirects(true);
                 }
+                HttpsClient.suiteTSLAndroid4(conn);
                 preparePost(conn, timeOut, readTimeOut, params);
                 if (params != null) {
                     String strParams = params.packetOutParams("POST");
@@ -319,6 +321,7 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
                 if (followRedirects) {
                     conn.setInstanceFollowRedirects(true);
                 }
+                HttpsClient.suiteTSLAndroid4(conn);
                 preparePut(conn, timeOut, readTimeOut, params);
                 if (params != null) {
                     String strParams = params.packetOutParams("POST");
@@ -436,6 +439,7 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
             if (followRedirects) {
                 conn.setInstanceFollowRedirects(true);
             }
+            HttpsClient.suiteTSLAndroid4(conn);
             prepareDelete(conn, timeOut, readTimeOut, params);
             responce.code = conn.getResponseCode();
             responce.contentEncoding = conn.getContentEncoding();
