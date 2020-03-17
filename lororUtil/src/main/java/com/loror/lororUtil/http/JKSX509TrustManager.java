@@ -4,14 +4,15 @@ import java.io.InputStream;
 import java.security.KeyStore;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 
-public class LororX509TrustManager implements X509TrustManager {
-	X509TrustManager sunJSSEX509TrustManager;
+public class JKSX509TrustManager implements X509TrustManager {
+    X509TrustManager sunJSSEX509TrustManager;
 
-	LororX509TrustManager(InputStream inputStream, String password) throws Exception {
+    public JKSX509TrustManager(InputStream inputStream, String password) throws Exception {
         // create a "default" JSSE X509TrustManager.
         KeyStore ks = KeyStore.getInstance("JKS");
         ks.load(inputStream, password.toCharArray());
@@ -36,35 +37,35 @@ public class LororX509TrustManager implements X509TrustManager {
         throw new Exception("Couldn't initialize");
     }
 
-	/*
-	 * Delegate to the default trust manager.
-	 */
-	public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
-		try {
-			sunJSSEX509TrustManager.checkClientTrusted(chain, authType);
-		} catch (CertificateException excep) {
-			// do any special handling here, or rethrow exception.
-		}
-	}
+    /*
+     * Delegate to the default trust manager.
+     */
+    public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+        try {
+            sunJSSEX509TrustManager.checkClientTrusted(chain, authType);
+        } catch (CertificateException excep) {
+            // do any special handling here, or rethrow exception.
+        }
+    }
 
-	/*
-	 * Delegate to the default trust manager.
-	 */
-	public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
-		try {
-			sunJSSEX509TrustManager.checkServerTrusted(chain, authType);
-		} catch (CertificateException excep) {
-			/*
-			 * Possibly pop up a dialog box asking whether to trust the cert
-			 * chain.
-			 */
-		}
-	}
+    /*
+     * Delegate to the default trust manager.
+     */
+    public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+        try {
+            sunJSSEX509TrustManager.checkServerTrusted(chain, authType);
+        } catch (CertificateException excep) {
+            /*
+             * Possibly pop up a dialog box asking whether to trust the cert
+             * chain.
+             */
+        }
+    }
 
-	/*
-	 * Merely pass this through.
-	 */
-	public X509Certificate[] getAcceptedIssuers() {
-		return sunJSSEX509TrustManager.getAcceptedIssuers();
-	}
+    /*
+     * Merely pass this through.
+     */
+    public X509Certificate[] getAcceptedIssuers() {
+        return sunJSSEX509TrustManager.getAcceptedIssuers();
+    }
 }

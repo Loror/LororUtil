@@ -5,10 +5,7 @@ import android.os.Build;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
 
-import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 
@@ -16,12 +13,6 @@ public class SSLSocketFactoryCompat extends SSLSocketFactory {
     private static final String[] TLS_V12_ONLY = {"TLSv1.2"};
 
     private final SSLSocketFactory delegate;
-
-    public SSLSocketFactoryCompat() throws KeyManagementException, NoSuchAlgorithmException {
-        SSLContext sc = SSLContext.getInstance("TLS");
-        sc.init(null, null, null);
-        delegate = sc.getSocketFactory();
-    }
 
     public SSLSocketFactoryCompat(SSLSocketFactory delegate) {
         if (delegate == null) {
