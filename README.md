@@ -74,8 +74,9 @@ ImageUtil后台读取图片接口
 
 * 类HttpsClient
 基本方法与HttpClient相同
-    * 方法init(String keyPath, String password) 加载本地证书
+    * 方法setSocketFactory(SSLSocketFactory socketFactory) 设置SSLSocketFactory，用于加载证书
     * 方法setHostName(String hostName) 设置hostname校验，不设置时不校验
+    * 方法setSuiteTSLAndroid4(boolean suiteTSLAndroid4) 设置是否为安卓4开启TSL v1.2支持
 
 
 * 接口ProgressListenerHttpClient
