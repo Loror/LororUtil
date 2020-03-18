@@ -16,7 +16,7 @@ import javax.net.ssl.X509TrustManager;
 
 public class HttpsClient extends AsyncBaseClient<HttpsURLConnection> {
     //hostName校验
-    private static String hostName = "any";
+    private static String[] hostName;
     //是否为安卓4开启TSLv1.2
     private static boolean suiteTSLAndroid4 = false;
     //是否忽略证书校验
@@ -27,7 +27,7 @@ public class HttpsClient extends AsyncBaseClient<HttpsURLConnection> {
     /**
      * 设置域名校验
      */
-    public static void setHostName(String hostName) {
+    public static void setHostName(String... hostName) {
         HttpsClient.hostName = hostName;
         hostnameVerifier = null;
     }
@@ -66,55 +66,62 @@ public class HttpsClient extends AsyncBaseClient<HttpsURLConnection> {
         return socketFactory;
     }
 
-    /**
-     * 证书配置处理
-     */
-    protected static void httpsConfig(HttpURLConnection connection) throws Exception {
-        if (connection instanceof HttpsURLConnection) {
-            HttpsURLConnection httpsURLConnection = (HttpsURLConnection) connection;
-            if (hostnameVerifier == null) {
-                hostnameVerifier = new HostnameVerifier() {
-                    public boolean verify(String s, SSLSession sslsession) {
-                        boolean verify = (!TextUtil.isEmpty(hostName) && hostName.equals(s)) || "any".equals(hostName);
-                        if (!verify) {
+    public static class Config {
+        /**
+         * 证书配置处理
+         */
+        public static void httpsConfig(HttpURLConnection connection) throws Exception {
+            if (connection instanceof HttpsURLConnection) {
+                HttpsURLConnection httpsURLConnection = (HttpsURLConnection) connection;
+                if (hostnameVerifier == null) {
+                    hostnameVerifier = new HostnameVerifier() {
+                        public boolean verify(String s, SSLSession sslsession) {
+                            if (hostName == null) {
+                                System.out.println("warning: Hostname is setted not verify.");
+                                return true;
+                            }
+                            for (int i = 0; i < hostName.length; i++) {
+                                String host = hostName[i];
+                                if ((!TextUtil.isEmpty(host) && host.equals(s))) {
+                                    return true;
+                                }
+                            }
                             System.out.println("error: Hostname is not matched for cert.");
-                        } else if ("any".equals(hostName)) {
-                            System.out.println("warning: Hostname is setted not verify.");
+                            return false;
                         }
-                        return verify;
-                    }
-                };
-            }
-            httpsURLConnection.setHostnameVerifier(hostnameVerifier);
-            if (socketFactory != null) {
-                if (suiteTSLAndroid4) {
-                    httpsURLConnection.setSSLSocketFactory(new SSLSocketFactoryCompat(socketFactory));
-                } else {
-                    httpsURLConnection.setSSLSocketFactory(socketFactory);
+                    };
                 }
-            } else if (trustAll) {
-                TrustManager[] trustAllCerts = new TrustManager[]{new X509TrustManager() {
-                    public X509Certificate[] getAcceptedIssuers() {
-                        return new X509Certificate[0];
+                httpsURLConnection.setHostnameVerifier(hostnameVerifier);
+                if (socketFactory != null) {
+                    if (suiteTSLAndroid4) {
+                        httpsURLConnection.setSSLSocketFactory(new SSLSocketFactoryCompat(socketFactory));
+                    } else {
+                        httpsURLConnection.setSSLSocketFactory(socketFactory);
                     }
+                } else if (trustAll) {
+                    TrustManager[] trustAllCerts = new TrustManager[]{new X509TrustManager() {
+                        public X509Certificate[] getAcceptedIssuers() {
+                            return new X509Certificate[0];
+                        }
 
-                    @Override
-                    public void checkClientTrusted(X509Certificate[] certs, String authType) {
+                        @Override
+                        public void checkClientTrusted(X509Certificate[] certs, String authType) {
+                        }
+
+                        @Override
+                        public void checkServerTrusted(X509Certificate[] certs, String authType) {
+                        }
+                    }};
+
+                    SSLContext sc = SSLContext.getInstance("TLS");
+                    // trustAllCerts信任所有的证书
+                    sc.init(null, trustAllCerts, new SecureRandom());
+                    SSLSocketFactory socketFactory = sc.getSocketFactory();
+                    if (suiteTSLAndroid4) {
+                        httpsURLConnection.setSSLSocketFactory(new SSLSocketFactoryCompat(socketFactory));
+                    } else {
+                        httpsURLConnection.setSSLSocketFactory(socketFactory);
                     }
-
-                    @Override
-                    public void checkServerTrusted(X509Certificate[] certs, String authType) {
-                    }
-                }};
-
-                SSLContext sc = SSLContext.getInstance("TLS");
-                // trustAllCerts信任所有的证书
-                sc.init(null, trustAllCerts, new SecureRandom());
-                SSLSocketFactory socketFactory = sc.getSocketFactory();
-                if (suiteTSLAndroid4) {
-                    httpsURLConnection.setSSLSocketFactory(new SSLSocketFactoryCompat(socketFactory));
-                } else {
-                    httpsURLConnection.setSSLSocketFactory(socketFactory);
                 }
             }
         }

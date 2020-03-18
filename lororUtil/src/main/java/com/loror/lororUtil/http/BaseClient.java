@@ -172,7 +172,7 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
             if (followRedirects) {
                 conn.setInstanceFollowRedirects(true);
             }
-            HttpsClient.httpsConfig(conn);
+            HttpsClient.Config.httpsConfig(conn);
             prepareGet(conn, timeOut, readTimeOut, params);
             responce.code = conn.getResponseCode();
             responce.contentEncoding = conn.getContentEncoding();
@@ -202,7 +202,7 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
                 if (followRedirects) {
                     conn.setInstanceFollowRedirects(true);
                 }
-                HttpsClient.httpsConfig(conn);
+                HttpsClient.Config.httpsConfig(conn);
                 preparePost(conn, timeOut, readTimeOut, params);
                 if (params != null) {
                     String strParams = params.packetOutParams("POST");
@@ -321,7 +321,7 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
                 if (followRedirects) {
                     conn.setInstanceFollowRedirects(true);
                 }
-                HttpsClient.httpsConfig(conn);
+                HttpsClient.Config.httpsConfig(conn);
                 preparePut(conn, timeOut, readTimeOut, params);
                 if (params != null) {
                     String strParams = params.packetOutParams("POST");
@@ -439,7 +439,7 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
             if (followRedirects) {
                 conn.setInstanceFollowRedirects(true);
             }
-            HttpsClient.httpsConfig(conn);
+            HttpsClient.Config.httpsConfig(conn);
             prepareDelete(conn, timeOut, readTimeOut, params);
             responce.code = conn.getResponseCode();
             responce.contentEncoding = conn.getContentEncoding();

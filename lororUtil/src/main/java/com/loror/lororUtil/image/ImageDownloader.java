@@ -8,6 +8,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.loror.lororUtil.http.HttpsClient;
 import com.loror.lororUtil.sql.ConditionBuilder;
 import com.loror.lororUtil.sql.SQLiteUtil;
 
@@ -89,6 +90,7 @@ public class ImageDownloader {
             conn.setConnectTimeout(10000);
             conn.setDoInput(true);
             conn.setRequestProperty("Accept-Encoding", "identity");
+            HttpsClient.Config.httpsConfig(conn);
             long length = 0;
             try {
                 length = conn.getContentLengthLong();
