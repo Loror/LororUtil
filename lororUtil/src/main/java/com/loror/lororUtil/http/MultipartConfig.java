@@ -2,8 +2,8 @@ package com.loror.lororUtil.http;
 
 public class MultipartConfig {
 
-    protected static String LINEEND = "\r\n";// 换行符
-    protected static String PREFIX = "--";
+    protected static final String LINEEND = "\r\n";// 换行符
+    protected static final String PREFIX = "--";
     protected static String BOUNDARY = java.util.UUID.randomUUID().toString();// 定义数据分隔线
 
     /**

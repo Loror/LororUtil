@@ -23,6 +23,7 @@ public class RequestParams {
     private PacketConverter packetConverter;
     private BodyConverter bodyConverter;
     private SpliceConverter spliceConverter;
+    private String contentTransferEncoding;
     private static boolean defaultUseDefaultConverterInPost = false;
     private static boolean defaultNullToEmpty = true;
     private static boolean defaultUseMultiForPost = false;
@@ -35,6 +36,13 @@ public class RequestParams {
             return value == null ? null : UrlUtf8Util.toUrlString(value);
         }
     };
+
+    /**
+     * 设置contentTransferEncoding
+     */
+    public void setContentTransferEncoding(String contentTransferEncoding) {
+        this.contentTransferEncoding = contentTransferEncoding;
+    }
 
     /**
      * 是否使用表单提交post
@@ -509,10 +517,10 @@ public class RequestParams {
                 sb.append(MultipartConfig.LINEEND);
                 sb.append("Content-Disposition: form-data; name=\"").append(key).append("\"" + MultipartConfig.LINEEND);
                 sb.append("Content-Type: text/plain; charset=UTF-8" + MultipartConfig.LINEEND);
-                if (TextUtil.isEmpty(contentValue) || contentValue.length() < 1000) {
+                if (TextUtil.isEmpty(contentTransferEncoding)) {
                     sb.append("Content-Transfer-Encoding: 8bit" + MultipartConfig.LINEEND);
                 } else {
-                    sb.append("Content-Transfer-Encoding: binary" + MultipartConfig.LINEEND);
+                    sb.append("Content-Transfer-Encoding: ").append(contentTransferEncoding).append(MultipartConfig.LINEEND);
                 }
                 sb.append(MultipartConfig.LINEEND);
                 sb.append(contentValue);
