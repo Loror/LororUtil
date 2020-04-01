@@ -164,7 +164,7 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
             if (params != null) {
                 String strParams = params.packetOutParams("GET");
                 if (!TextUtil.isEmpty(strParams)) {
-                    urlStr += params.getSplicing(urlStr) + strParams;
+                    urlStr += params.getSplicing(urlStr, 0) + strParams;
                 }
             }
             URL url = new URL(urlStr);
@@ -191,10 +191,15 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
         if (params == null || (params.getFiles().size() == 0 && !params.isUseMultiForPost())) {
             Responce responce = new Responce();
             try {
-                if (params != null && params.isAsJson() && params.getJson() != null) {
-                    String strParams = params.packetOutParams("GET");
-                    if (!TextUtil.isEmpty(strParams)) {
-                        urlStr += params.getSplicing(urlStr) + strParams;
+                boolean queryParam = false;
+                if (params != null) {
+                    if ((params.isAsJson() && params.getJson() != null)
+                            || params.isUseQueryForPost()) {
+                        String strParams = params.packetOutParams("GET");
+                        if (!TextUtil.isEmpty(strParams)) {
+                            urlStr += params.getSplicing(urlStr, 0) + strParams;
+                        }
+                        queryParam = true;
                     }
                 }
                 URL url = new URL(urlStr);
@@ -206,6 +211,9 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
                 preparePost(conn, timeOut, readTimeOut, params);
                 if (params != null) {
                     String strParams = params.packetOutParams("POST");
+                    if (queryParam && !params.isAsJson()) {
+                        strParams = "";
+                    }
                     if (!TextUtil.isEmpty(strParams)) {
                         OutputStream out = conn.getOutputStream();
                         if (params.isGzip()) {
@@ -233,6 +241,12 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
             List<FileBody> files = params.getFiles();
             final Responce responce = new Responce();
             try {
+                if (params.isUseQueryForPost()) {
+                    String strParams = params.packetOutParams("GET");
+                    if (!TextUtil.isEmpty(strParams)) {
+                        urlStr += params.getSplicing(urlStr, 0) + strParams;
+                    }
+                }
                 URL url = new URL(urlStr);// 服务器的域名
                 conn = (T) url.openConnection();
                 if (followRedirects) {
@@ -247,10 +261,12 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
                 if (params.isGzip()) {
                     out = new GZIPOutputStream(out);
                 }
-                String strParams = params.packetOutParams("POST_MULTI");
-                if (!TextUtil.isEmpty(strParams)) {
-                    out.write(strParams.getBytes());
-                }// 提交参数
+                if (!params.isUseQueryForPost()) {
+                    String strParams = params.packetOutParams("POST_MULTI");
+                    if (!TextUtil.isEmpty(strParams)) {
+                        out.write(strParams.getBytes());
+                    }// 提交参数
+                }
                 if (files != null) {
                     int index = 0;
                     for (FileBody file : files) {
@@ -310,10 +326,15 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
         if (params == null || (params.getFiles().size() == 0 && !params.isUseMultiForPost())) {
             Responce responce = new Responce();
             try {
-                if (params != null && params.isAsJson() && params.getJson() != null) {
-                    String strParams = params.packetOutParams("GET");
-                    if (!TextUtil.isEmpty(strParams)) {
-                        urlStr += params.getSplicing(urlStr) + strParams;
+                boolean queryParam = false;
+                if (params != null) {
+                    if ((params.isAsJson() && params.getJson() != null)
+                            || params.isUseQueryForPost()) {
+                        String strParams = params.packetOutParams("GET");
+                        if (!TextUtil.isEmpty(strParams)) {
+                            urlStr += params.getSplicing(urlStr, 0) + strParams;
+                        }
+                        queryParam = true;
                     }
                 }
                 URL url = new URL(urlStr);
@@ -325,6 +346,9 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
                 preparePut(conn, timeOut, readTimeOut, params);
                 if (params != null) {
                     String strParams = params.packetOutParams("POST");
+                    if (queryParam && !params.isAsJson()) {
+                        strParams = "";
+                    }
                     if (!TextUtil.isEmpty(strParams)) {
                         OutputStream out = conn.getOutputStream();
                         if (params.isGzip()) {
@@ -352,6 +376,12 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
             List<FileBody> files = params.getFiles();
             final Responce responce = new Responce();
             try {
+                if (params.isUseQueryForPost()) {
+                    String strParams = params.packetOutParams("GET");
+                    if (!TextUtil.isEmpty(strParams)) {
+                        urlStr += params.getSplicing(urlStr, 0) + strParams;
+                    }
+                }
                 URL url = new URL(urlStr);// 服务器的域名
                 conn = (T) url.openConnection();
                 if (followRedirects) {
@@ -366,10 +396,12 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
                 if (params.isGzip()) {
                     out = new GZIPOutputStream(out);
                 }
-                String strParams = params.packetOutParams("POST_MULTI");
-                if (!TextUtil.isEmpty(strParams)) {
-                    out.write(strParams.getBytes());
-                } // 提交参数
+                if (!params.isUseQueryForPost()) {
+                    String strParams = params.packetOutParams("POST_MULTI");
+                    if (!TextUtil.isEmpty(strParams)) {
+                        out.write(strParams.getBytes());
+                    } // 提交参数
+                }
                 if (files != null) {
                     int index = 0;
                     for (FileBody file : files) {
@@ -431,7 +463,7 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
             if (params != null) {
                 String strParams = params.packetOutParams("GET");
                 if (!TextUtil.isEmpty(strParams)) {
-                    urlStr += params.getSplicing(urlStr) + strParams;
+                    urlStr += params.getSplicing(urlStr, 0) + strParams;
                 }
             }
             URL url = new URL(urlStr);
@@ -630,7 +662,7 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
             if (params != null) {
                 String strParams = params.packetOutParams("GET");
                 if (!TextUtil.isEmpty(strParams)) {
-                    urlStr += params.getSplicing(urlStr) + strParams;
+                    urlStr += params.getSplicing(urlStr, 0) + strParams;
                 }
             }
             URL url = new URL(urlStr);

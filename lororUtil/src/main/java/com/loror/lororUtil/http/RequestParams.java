@@ -19,17 +19,23 @@ public class RequestParams {
     private HashMap<String, Object> params = new HashMap<String, Object>();
     private List<FileBody> files;
     private String json;
+
     private RequestConverter getConverter, postConverter;
     private PacketConverter packetConverter;
     private BodyConverter bodyConverter;
     private SpliceConverter spliceConverter;
+
+    private boolean userMultiForPost;
+    private boolean useDefaultConverterInPost;
+    private boolean asJson;
+    private boolean gzip;
+    private boolean useQueryForPost;
     private String contentTransferEncoding;
+
     private static boolean defaultUseDefaultConverterInPost = false;
     private static boolean defaultNullToEmpty = true;
     private static boolean defaultUseMultiForPost = false;
-    private boolean userMultiForPost = false, useDefaultConverterInPost = false;
-    private boolean asJson;
-    private boolean gzip;
+
     private static RequestConverter defaultConverter = new RequestConverter() {
         @Override
         public String convert(String key, String value) {
@@ -42,6 +48,20 @@ public class RequestParams {
      */
     public void setContentTransferEncoding(String contentTransferEncoding) {
         this.contentTransferEncoding = contentTransferEncoding;
+    }
+
+    /**
+     * 设置是否post参数添加到url中提交
+     */
+    public void setUseQueryForPost(boolean useQueryForPost) {
+        this.useQueryForPost = useQueryForPost;
+    }
+
+    /**
+     * 是否post参数添加到url中提交
+     */
+    public boolean isUseQueryForPost() {
+        return useQueryForPost;
     }
 
     /**
@@ -384,9 +404,18 @@ public class RequestParams {
 
     /**
      * 获取拼接符
+     * type 0,1,2
      */
-    protected String getSplicing(String url) {
-        return spliceConverter != null ? spliceConverter.convert(url, 0) : (url.contains("?") ? "&" : "?");
+    public String getSplicing(String url, int type) {
+        switch (type) {
+            case 0:
+                return spliceConverter != null ? spliceConverter.convert(url, 0) : (url.contains("?") ? "&" : "?");
+            case 1:
+                return spliceConverter != null ? spliceConverter.convert(url, 1) : "=";
+            case 2:
+                return spliceConverter != null ? spliceConverter.convert(url, 2) : "&";
+        }
+        return "";
     }
 
     /**
@@ -499,9 +528,9 @@ public class RequestParams {
             case "GET":
                 contentValue = getConverter == null ? defaultConverter.convert(key, value) : getConverter.convert(key, value);
                 sb.append(key)
-                        .append(spliceConverter != null ? spliceConverter.convert(null, 1) : "=")
+                        .append(getSplicing(null, 1))
                         .append(contentValue)
-                        .append(spliceConverter != null ? spliceConverter.convert(null, 2) : "&");
+                        .append(getSplicing(null, 2));
                 break;
             case "POST":
                 contentValue = postConverter == null ? (isUseDefaultConverterInPost() ? defaultConverter.convert(key, value) : value) : postConverter.convert(key, value);
