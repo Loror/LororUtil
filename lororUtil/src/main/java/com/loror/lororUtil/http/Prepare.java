@@ -27,7 +27,7 @@ public class Prepare {
 
         conn.setRequestProperty("connection", "keep-alive");// 设置请求头参数
         conn.setRequestProperty("Charset", "UTF-8");
-        conn.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + Config.BOUNDARY);
+        conn.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + MultipartConfig.BOUNDARY);
 
         if (parmas != null && parmas.getHeaders().size() > 0) {
             for (String name : parmas.getHeaders().keySet()) {
@@ -97,7 +97,7 @@ public class Prepare {
 
         conn.setRequestProperty("connection", "keep-alive");// 设置请求头参数
         conn.setRequestProperty("Charset", "UTF-8");
-        conn.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + Config.BOUNDARY);
+        conn.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + MultipartConfig.BOUNDARY);
         if (parmas != null && parmas.getHeaders().size() > 0) {
             for (String name : parmas.getHeaders().keySet()) {
                 conn.setRequestProperty(name, parmas.getHeader(name));

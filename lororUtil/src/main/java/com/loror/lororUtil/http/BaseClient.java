@@ -247,9 +247,9 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
                 if (params.isGzip()) {
                     out = new GZIPOutputStream(out);
                 }
-                String StrParmas = params.packetOutParams("POST_FORM");
-                if (!TextUtil.isEmpty(StrParmas)) {
-                    out.write(StrParmas.getBytes());
+                String strParams = params.packetOutParams("POST_MULTI");
+                if (!TextUtil.isEmpty(strParams)) {
+                    out.write(strParams.getBytes());
                 }// 提交参数
                 if (files != null) {
                     int index = 0;
@@ -258,7 +258,7 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
                     }
                 } // 上传文件
                 // 定义最后数据分隔线，即--加上BOUNDARY再加上--，写上结尾标识
-                byte[] end_data = (Config.PREFIX + Config.BOUNDARY + Config.PREFIX + Config.LINEND).getBytes();
+                byte[] end_data = (MultipartConfig.PREFIX + MultipartConfig.BOUNDARY + MultipartConfig.PREFIX + MultipartConfig.LINEEND).getBytes();
                 out.write(end_data);
                 out.flush();
                 out.close();
@@ -366,7 +366,7 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
                 if (params.isGzip()) {
                     out = new GZIPOutputStream(out);
                 }
-                String strParams = params.packetOutParams("POST_FORM");
+                String strParams = params.packetOutParams("POST_MULTI");
                 if (!TextUtil.isEmpty(strParams)) {
                     out.write(strParams.getBytes());
                 } // 提交参数
@@ -377,7 +377,7 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
                     }
                 } // 上传文件
                 // 定义最后数据分隔线，即--加上BOUNDARY再加上--，写上结尾标识
-                byte[] end_data = (Config.PREFIX + Config.BOUNDARY + Config.PREFIX + Config.LINEND).getBytes();
+                byte[] end_data = (MultipartConfig.PREFIX + MultipartConfig.BOUNDARY + MultipartConfig.PREFIX + MultipartConfig.LINEEND).getBytes();
                 out.write(end_data);
                 out.flush();
                 out.close();
@@ -488,18 +488,18 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
             }
         }
         StringBuilder sb = new StringBuilder();
-        sb.append(Config.PREFIX);
-        sb.append(Config.BOUNDARY);
-        sb.append(Config.LINEND);
+        sb.append(MultipartConfig.PREFIX);
+        sb.append(MultipartConfig.BOUNDARY);
+        sb.append(MultipartConfig.LINEEND);
         // name是post中传参的键 filename是文件的名称
         sb.append("Content-Disposition: form-data; name=\"").append(file.getKey() == null ? "file" : file.getKey())
-                .append("\"; filename=\"").append(file.getName()).append("\"" + Config.LINEND);
-        sb.append("Content-Type: ").append(file.getContentType()).append("; charset=UTF-8" + Config.LINEND);
-        sb.append(Config.LINEND);
+                .append("\"; filename=\"").append(file.getName()).append("\"" + MultipartConfig.LINEEND);
+        sb.append("Content-Type: ").append(file.getContentType()).append(MultipartConfig.LINEEND);
+        sb.append(MultipartConfig.LINEEND);
         out.write(sb.toString().getBytes());
 
         sendFile(file.getFile(), out, progressListener, actuator);
-        out.write(Config.LINEND.getBytes());
+        out.write(MultipartConfig.LINEEND.getBytes());
     }
 
     /**

@@ -1,6 +1,7 @@
 package com.loror.lororUtil.http;
 
 import com.loror.lororUtil.convert.UrlUtf8Util;
+import com.loror.lororUtil.text.TextUtil;
 
 import java.io.File;
 import java.lang.reflect.Field;
@@ -403,7 +404,7 @@ public class RequestParams {
                     }
                 }
                 if (builder.length() > 0) {
-                    if (!"POST_FORM".equals(method)) {
+                    if (!"POST_MULTI".equals(method)) {
                         str = builder.deleteCharAt(builder.length() - 1).toString();
                     } else {
                         str = builder.toString();
@@ -478,29 +479,37 @@ public class RequestParams {
         if (defaultNullToEmpty && value == null) {
             value = "";
         }
+        String contentValue;
         switch (method) {
             case "GET":
+                contentValue = getConverter == null ? defaultConverter.convert(key, value) : getConverter.convert(key, value);
                 sb.append(key)
                         .append(spliceConverter != null ? spliceConverter.convert(null, 1) : "=")
-                        .append(getConverter == null ? defaultConverter.convert(key, value) : getConverter.convert(key, value))
+                        .append(contentValue)
                         .append(spliceConverter != null ? spliceConverter.convert(null, 2) : "&");
                 break;
             case "POST":
+                contentValue = postConverter == null ? ((defaultUseDefaultConverterInPost || useDefaultConverterInPost) ? defaultConverter.convert(key, value) : value) : postConverter.convert(key, value);
                 sb.append(key)
                         .append("=")
-                        .append(postConverter == null ? ((defaultUseDefaultConverterInPost || useDefaultConverterInPost) ? defaultConverter.convert(key, value) : value) : postConverter.convert(key, value))
+                        .append(contentValue)
                         .append("&");
                 break;
-            case "POST_FORM":
-                sb.append(Config.PREFIX);
-                sb.append(Config.BOUNDARY);
-                sb.append(Config.LINEND);
-                sb.append("Content-Disposition: form-data; name=\"").append(key).append("\"" + Config.LINEND);
-                sb.append("Content-Type: text/plain; charset=UTF-8" + Config.LINEND);
-                sb.append("Content-Transfer-Encoding: 8bit" + Config.LINEND);
-                sb.append(Config.LINEND);
-                sb.append(postConverter == null ? ((defaultUseDefaultConverterInPost || useDefaultConverterInPost) ? defaultConverter.convert(key, value) : value) : postConverter.convert(key, value));
-                sb.append(Config.LINEND);
+            case "POST_MULTI":
+                contentValue = postConverter == null ? ((defaultUseDefaultConverterInPost || useDefaultConverterInPost) ? defaultConverter.convert(key, value) : value) : postConverter.convert(key, value);
+                sb.append(MultipartConfig.PREFIX);
+                sb.append(MultipartConfig.BOUNDARY);
+                sb.append(MultipartConfig.LINEEND);
+                sb.append("Content-Disposition: form-data; name=\"").append(key).append("\"" + MultipartConfig.LINEEND);
+                sb.append("Content-Type: text/plain; charset=UTF-8" + MultipartConfig.LINEEND);
+                if (TextUtil.isEmpty(contentValue) || contentValue.length() < 1000) {
+                    sb.append("Content-Transfer-Encoding: 8bit" + MultipartConfig.LINEEND);
+                } else {
+                    sb.append("Content-Transfer-Encoding: binary" + MultipartConfig.LINEEND);
+                }
+                sb.append(MultipartConfig.LINEEND);
+                sb.append(contentValue);
+                sb.append(MultipartConfig.LINEEND);
                 break;
         }
     }
