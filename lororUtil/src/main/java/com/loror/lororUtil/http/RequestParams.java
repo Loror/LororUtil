@@ -24,8 +24,8 @@ public class RequestParams {
     private SpliceConverter spliceConverter;
     private static boolean defaultUseDefaultConverterInPost = false;
     private static boolean defaultNullToEmpty = true;
-    private static boolean defaultUseFormForPost = false;
-    private boolean userFormForPost = false, useDefaultConverterInPost = false;
+    private static boolean defaultUseMultiForPost = false;
+    private boolean userMultiForPost = false, useDefaultConverterInPost = false;
     private boolean asJson;
     private boolean gzip;
     private static RequestConverter defaultConverter = new RequestConverter() {
@@ -38,15 +38,15 @@ public class RequestParams {
     /**
      * 是否使用表单提交post
      */
-    public boolean isUseFormForPost() {
-        return defaultUseFormForPost || userFormForPost;
+    public boolean isUseMultiForPost() {
+        return defaultUseMultiForPost || userMultiForPost;
     }
 
     /**
      * 设置是否使用表单提交post
      */
-    public void setUserFormForPost(boolean userFormForPost) {
-        this.userFormForPost = userFormForPost;
+    public void setUserMultiForPost(boolean userMultiForPost) {
+        this.userMultiForPost = userMultiForPost;
     }
 
     /**
@@ -85,8 +85,8 @@ public class RequestParams {
     /**
      * 设置是否默认使用表单提交post
      */
-    public static void setDefaultUseFormForPost(boolean defaultUseFormForPost) {
-        RequestParams.defaultUseFormForPost = defaultUseFormForPost;
+    public static void setDefaultUseMultiForPost(boolean defaultUseMultiForPost) {
+        RequestParams.defaultUseMultiForPost = defaultUseMultiForPost;
     }
 
     /**
@@ -370,7 +370,7 @@ public class RequestParams {
      * 获取拼接符
      */
     protected String getSplicing(String url) {
-        return spliceConverter != null ? spliceConverter.convert(url) : (url.contains("?") ? "&" : "?");
+        return spliceConverter != null ? spliceConverter.convert(url, 0) : (url.contains("?") ? "&" : "?");
     }
 
     /**
@@ -481,9 +481,9 @@ public class RequestParams {
         switch (method) {
             case "GET":
                 sb.append(key)
-                        .append("=")
+                        .append(spliceConverter != null ? spliceConverter.convert(null, 1) : "=")
                         .append(getConverter == null ? defaultConverter.convert(key, value) : getConverter.convert(key, value))
-                        .append("&");
+                        .append(spliceConverter != null ? spliceConverter.convert(null, 2) : "&");
                 break;
             case "POST":
                 sb.append(key)

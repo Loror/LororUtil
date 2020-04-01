@@ -146,7 +146,7 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
      */
     protected void readResponce(HttpURLConnection conn, Responce responce) throws Exception {
         InputStream inputStream = responce.getCode() / 100 > 3 ? conn.getErrorStream() : conn.getInputStream();
-        if ("gzip".equals(responce.getContentEncoding())) {
+        if ("gzip".equalsIgnoreCase(responce.getContentEncoding())) {
             inputStream = new GZIPInputStream(inputStream);
         }
         responce.inputStream = inputStream;
@@ -188,7 +188,7 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
 
     @Override
     public Responce post(String urlStr, RequestParams params) {
-        if (params == null || (params.getFiles().size() == 0 && !params.isUseFormForPost())) {
+        if (params == null || (params.getFiles().size() == 0 && !params.isUseMultiForPost())) {
             Responce responce = new Responce();
             try {
                 if (params != null && params.isAsJson() && params.getJson() != null) {
@@ -307,7 +307,7 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
 
     @Override
     public Responce put(String urlStr, RequestParams params) {
-        if (params == null || (params.getFiles().size() == 0 && !params.isUseFormForPost())) {
+        if (params == null || (params.getFiles().size() == 0 && !params.isUseMultiForPost())) {
             Responce responce = new Responce();
             try {
                 if (params != null && params.isAsJson() && params.getJson() != null) {
