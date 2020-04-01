@@ -105,6 +105,13 @@ public class RequestParams {
     }
 
     /**
+     * 是否为post开启默认转换器
+     */
+    public boolean isUseDefaultConverterInPost() {
+        return defaultUseDefaultConverterInPost || useDefaultConverterInPost;
+    }
+
+    /**
      * 设置是否默认将null转化成“”
      */
     public static void setDefaultNullToEmpty(boolean defaultNullToEmpty) {
@@ -489,14 +496,14 @@ public class RequestParams {
                         .append(spliceConverter != null ? spliceConverter.convert(null, 2) : "&");
                 break;
             case "POST":
-                contentValue = postConverter == null ? ((defaultUseDefaultConverterInPost || useDefaultConverterInPost) ? defaultConverter.convert(key, value) : value) : postConverter.convert(key, value);
+                contentValue = postConverter == null ? (isUseDefaultConverterInPost() ? defaultConverter.convert(key, value) : value) : postConverter.convert(key, value);
                 sb.append(key)
                         .append("=")
                         .append(contentValue)
                         .append("&");
                 break;
             case "POST_MULTI":
-                contentValue = postConverter == null ? ((defaultUseDefaultConverterInPost || useDefaultConverterInPost) ? defaultConverter.convert(key, value) : value) : postConverter.convert(key, value);
+                contentValue = postConverter == null ? (isUseDefaultConverterInPost() ? defaultConverter.convert(key, value) : value) : postConverter.convert(key, value);
                 sb.append(MultipartConfig.PREFIX);
                 sb.append(MultipartConfig.BOUNDARY);
                 sb.append(MultipartConfig.LINEEND);

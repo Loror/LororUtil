@@ -54,14 +54,19 @@ public class Prepare {
         conn.setRequestProperty("Connection", "keep-alive");
         conn.setRequestProperty("Charset", "UTF-8");
 //        conn.setRequestProperty("Cache-Control", "no-cache");
-        if (parmas != null && parmas.isAsJson()) {
-            conn.setRequestProperty("Content-Type", "application/json");
-        }
-        if (parmas != null && parmas.getHeaders().size() > 0) {
-            for (String name : parmas.getHeaders().keySet()) {
-                conn.setRequestProperty(name, parmas.getHeader(name));
+        if (parmas != null) {
+            if (parmas.isAsJson()) {
+                conn.setRequestProperty("Content-Type", "application/json");
+            } else if (parmas.isUseDefaultConverterInPost()) {
+                conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+            }
+            if (parmas.getHeaders().size() > 0) {
+                for (String name : parmas.getHeaders().keySet()) {
+                    conn.setRequestProperty(name, parmas.getHeader(name));
+                }
             }
         }
+
     }
 
     /**
@@ -122,12 +127,16 @@ public class Prepare {
         conn.setRequestProperty("Connection", "keep-alive");
         conn.setRequestProperty("Charset", "UTF-8");
 
-        if (parmas != null && parmas.isAsJson()) {
-            conn.setRequestProperty("Content-Type", "application/json");
-        }
-        if (parmas != null && parmas.getHeaders().size() > 0) {
-            for (String name : parmas.getHeaders().keySet()) {
-                conn.setRequestProperty(name, parmas.getHeader(name));
+        if (parmas != null) {
+            if (parmas.isAsJson()) {
+                conn.setRequestProperty("Content-Type", "application/json");
+            } else if (parmas.isUseDefaultConverterInPost()) {
+                conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+            }
+            if (parmas.getHeaders().size() > 0) {
+                for (String name : parmas.getHeaders().keySet()) {
+                    conn.setRequestProperty(name, parmas.getHeader(name));
+                }
             }
         }
     }
