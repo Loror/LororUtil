@@ -7,6 +7,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.zip.GZIPInputStream;
 
 import com.loror.lororUtil.http.HttpsClient;
 import com.loror.lororUtil.sql.ConditionBuilder;
@@ -118,6 +119,9 @@ public class ImageDownloader {
                 file.createNewFile();
             }
             InputStream is = conn.getInputStream();
+            if ("gzip".equalsIgnoreCase(conn.getContentEncoding())) {
+                is = new GZIPInputStream(is);
+            }
             FileOutputStream fos = new FileOutputStream(file);
             byte[] out = new byte[2048];
             int total = 0;
