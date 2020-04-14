@@ -19,6 +19,7 @@ public class Responce {
     protected int code;
     public byte[] result;
     protected String contentEncoding;
+    protected String contentType;
     protected HashMap<String, String> cookies = new HashMap<>();
     protected Map<String, List<String>> headers;
     protected List<String> cookielist;
@@ -45,6 +46,13 @@ public class Responce {
      */
     public String getContentEncoding() {
         return contentEncoding;
+    }
+
+    /**
+     * 获取contentType
+     */
+    public String getContentType() {
+        return contentType;
     }
 
     /**

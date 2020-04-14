@@ -175,6 +175,7 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
             HttpsClient.Config.httpsConfig(conn);
             prepareGet(conn, timeOut, readTimeOut, params);
             responce.code = conn.getResponseCode();
+            responce.contentType = conn.getContentType();
             responce.contentEncoding = conn.getContentEncoding();
             responce.url = conn.getURL();
             initHeaders(conn, responce);
@@ -226,6 +227,7 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
                 }
                 responce.url = conn.getURL();
                 responce.code = conn.getResponseCode();
+                responce.contentType = conn.getContentType();
                 responce.contentEncoding = conn.getContentEncoding();
                 initHeaders(conn, responce);
                 readResponce(conn, responce);
@@ -280,6 +282,7 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
                 out.close();
                 responce.url = conn.getURL();
                 responce.code = conn.getResponseCode();
+                responce.contentType = conn.getContentType();
                 responce.contentEncoding = conn.getContentEncoding();
                 initHeaders(conn, responce);
                 readResponce(conn, responce);
@@ -361,6 +364,7 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
                 }
                 responce.url = conn.getURL();
                 responce.code = conn.getResponseCode();
+                responce.contentType = conn.getContentType();
                 responce.contentEncoding = conn.getContentEncoding();
                 initHeaders(conn, responce);
                 readResponce(conn, responce);
@@ -415,6 +419,7 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
                 out.close();
                 responce.url = conn.getURL();
                 responce.code = conn.getResponseCode();
+                responce.contentType = conn.getContentType();
                 responce.contentEncoding = conn.getContentEncoding();
                 initHeaders(conn, responce);
                 readResponce(conn, responce);
@@ -474,6 +479,7 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
             HttpsClient.Config.httpsConfig(conn);
             prepareDelete(conn, timeOut, readTimeOut, params);
             responce.code = conn.getResponseCode();
+            responce.contentType = conn.getContentType();
             responce.contentEncoding = conn.getContentEncoding();
             responce.url = conn.getURL();
             initHeaders(conn, responce);
