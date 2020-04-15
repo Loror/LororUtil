@@ -22,7 +22,7 @@ public class ImageDownloader {
     private static ImageDownloaderConfig imageDownloaderConfig;
 
     public interface ImageDownloaderConfig {
-        void beforeLoad(HttpURLConnection connection);
+        void beforeLoad(String url, HttpURLConnection connection);
     }
 
     public static void setImageDownloaderConfig(ImageDownloaderConfig imageDownloaderConfig) {
@@ -103,7 +103,7 @@ public class ImageDownloader {
             conn.setRequestProperty("Accept-Encoding", "identity");
             HttpsClient.Config.httpsConfig(conn);
             if (imageDownloaderConfig != null) {
-                imageDownloaderConfig.beforeLoad(conn);
+                imageDownloaderConfig.beforeLoad(urlStr, conn);
             }
             long length = 0;
             try {
