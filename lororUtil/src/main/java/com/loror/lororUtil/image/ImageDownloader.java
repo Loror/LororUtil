@@ -19,6 +19,16 @@ import android.os.Environment;
 
 public class ImageDownloader {
 
+    private static ImageDownloaderConfig imageDownloaderConfig;
+
+    public interface ImageDownloaderConfig {
+        void beforeLoad(HttpURLConnection connection);
+    }
+
+    public static void setImageDownloaderConfig(ImageDownloaderConfig imageDownloaderConfig) {
+        ImageDownloader.imageDownloaderConfig = imageDownloaderConfig;
+    }
+
     /**
      * 删除sql缓存，files为保留路径
      */
@@ -92,6 +102,9 @@ public class ImageDownloader {
             conn.setDoInput(true);
             conn.setRequestProperty("Accept-Encoding", "identity");
             HttpsClient.Config.httpsConfig(conn);
+            if (imageDownloaderConfig != null) {
+                imageDownloaderConfig.beforeLoad(conn);
+            }
             long length = 0;
             try {
                 length = conn.getContentLengthLong();
