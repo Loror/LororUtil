@@ -100,7 +100,7 @@ public class ImageDownloader {
             conn.setRequestMethod("GET");
             conn.setConnectTimeout(10000);
             conn.setDoInput(true);
-            conn.setRequestProperty("Accept-Encoding", "identity");
+//            conn.setRequestProperty("Accept-Encoding", "identity");
             HttpsClient.Config.httpsConfig(conn);
             if (imageDownloaderConfig != null) {
                 imageDownloaderConfig.beforeLoad(urlStr, conn);
@@ -144,7 +144,7 @@ public class ImageDownloader {
             }
             is.close();
             fos.close();
-            return length == file.length();
+            return length <= file.length();
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
