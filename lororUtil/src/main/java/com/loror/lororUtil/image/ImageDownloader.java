@@ -117,11 +117,6 @@ public class ImageDownloader {
             compare.length = length;
             compare.url = urlStr;
             compare.path = file.getAbsolutePath();
-            if (compare.id == 0) {
-                sqLiteUtil.insert(compare);
-            } else {
-                sqLiteUtil.updateById(compare);
-            }
             if (file.exists() && !cover && compare.length == file.length()) {
                 file.setLastModified(System.currentTimeMillis());
                 conn.disconnect();
@@ -132,7 +127,8 @@ public class ImageDownloader {
                 file.createNewFile();
             }
             InputStream is = conn.getInputStream();
-            if ("gzip".equalsIgnoreCase(conn.getContentEncoding())) {
+            String contentEncoding = conn.getContentEncoding();
+            if ("gzip".equalsIgnoreCase(contentEncoding)) {
                 is = new GZIPInputStream(is);
             }
             FileOutputStream fos = new FileOutputStream(file);
@@ -144,7 +140,15 @@ public class ImageDownloader {
             }
             is.close();
             fos.close();
-            return length <= file.length();
+            if ("gzip".equalsIgnoreCase(contentEncoding)) {
+                compare.length = file.length();
+            }
+            if (compare.id == 0) {
+                sqLiteUtil.insert(compare);
+            } else {
+                sqLiteUtil.updateById(compare);
+            }
+            return true;
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
