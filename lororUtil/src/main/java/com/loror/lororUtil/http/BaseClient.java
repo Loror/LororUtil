@@ -558,7 +558,7 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
             long now = System.currentTimeMillis();
             final long timeGo = now - lastTime;
             if (timeGo > 30) {
-                final int progress = (int) (transed * 1.0 / length * 100);
+                final float progress = (float) (transed * 1.0 / length * 100);
                 final int finalSpeed = speed;
                 if (progressListener != null) {
                     Runnable runnable = new Runnable() {
@@ -614,7 +614,7 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
             long now = System.currentTimeMillis();
             final long timeGo = now - last;
             if (timeGo > 30) {
-                final int progress = (int) (transed * 1.0 / length * 100);
+                final float progress = (float) (transed * 1.0 / length * 100);
                 final int finalSpeed = speed;
                 if (progressListener != null) {
                     Runnable runnable = new Runnable() {
