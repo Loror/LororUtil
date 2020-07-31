@@ -490,22 +490,29 @@ public class RequestParams {
                             || val instanceof Float || val instanceof Double
                             || val instanceof Boolean) {
                         builder.append(val);
-                    } else {
+                    } else if (val instanceof CharSequence) {
                         builder.append("\"")
                                 .append(val)
                                 .append("\"");
+                    } else {
+                        builder.append(val);
                     }
                     if (i != values.length - 1) {
                         builder.append(",");
                     }
                 }
                 builder.append("]");
-            } else {
+            } else if (value instanceof CharSequence) {
                 builder.append("\"")
                         .append(key)
                         .append("\":\"")
                         .append(value)
                         .append("\"");
+            } else {
+                builder.append("\"")
+                        .append(key)
+                        .append("\":")
+                        .append(value);
             }
             builder.append(",");
         }

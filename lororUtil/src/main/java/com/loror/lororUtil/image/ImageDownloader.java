@@ -1,5 +1,13 @@
 package com.loror.lororUtil.image;
 
+import android.annotation.SuppressLint;
+import android.content.Context;
+import android.os.Environment;
+
+import com.loror.lororUtil.http.HttpsClient;
+import com.loror.lororUtil.sql.Model;
+import com.loror.lororUtil.sql.SQLiteUtil;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
@@ -8,15 +16,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
-
-import com.loror.lororUtil.http.HttpsClient;
-import com.loror.lororUtil.sql.ConditionBuilder;
-import com.loror.lororUtil.sql.Model;
-import com.loror.lororUtil.sql.SQLiteUtil;
-
-import android.annotation.SuppressLint;
-import android.content.Context;
-import android.os.Environment;
 
 public class ImageDownloader {
 
