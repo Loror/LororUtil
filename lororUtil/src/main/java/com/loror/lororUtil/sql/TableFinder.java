@@ -8,84 +8,25 @@ import java.util.List;
 import android.database.Cursor;
 
 public class TableFinder {
-    /**
-     * 获得表名
-     */
-    public static String getTableName(Class<?> entityType) {
-        String tableName = null;
-        Table table = (Table) entityType.getAnnotation(Table.class);
-        if (table == null) {
-            throw new IllegalArgumentException("this object does not define table");
-        }
-        tableName = table.name();
-        if (tableName.length() == 0) {
-            tableName = entityType.getSimpleName();
-        }
-        return tableName;
-    }
 
     /**
      * 获得创建语句
      */
-    public static String getCreateSql(Class<?> entityType) {
-        String tableName = getTableName(entityType);
-        Field[] fields = entityType.getDeclaredFields();
-        if (fields == null) {
-            throw new IllegalArgumentException("this object does not contains any field");
-        }
-        int mainCount = 0;
-        int columnCount = 0;
+    public static String getCreateSql(ModelInfo modelInfo) {
         StringBuilder builder = new StringBuilder();
         builder.append("create table if not exists ")
-                .append(tableName)
+                .append(modelInfo.getTableName())
                 .append("(");
-        for (int i = 0; i < fields.length; i++) {
-            Field field = fields[i];
-            field.setAccessible(true);
-            try {
-                Column column = (Column) field.getAnnotation(Column.class);
-                if (column != null) {
-                    String columnName = column.name();
-                    if (columnName.length() == 0) {
-                        columnName = field.getName();
-                    }
-                    Class<?> type = field.getType();
-                    if (type == int.class || type == long.class || type == Integer.class || type == Long.class) {
-                        builder.append(columnName)
-                                .append(" int,");
-                    } else if (type == float.class || type == double.class || type == Float.class || type == Double.class) {
-                        builder.append(columnName)
-                                .append(" real,");
-                    } else if (type == String.class) {
-                        builder.append(columnName)
-                                .append(" text,");
-                    }
-                    columnCount++;
-                } else {
-                    Id id = (Id) field.getAnnotation(Id.class);
-                    if (id != null) {
-                        Class<?> type = field.getType();
-                        if (type != int.class && type != long.class && type != Integer.class && type != Long.class) {
-                            throw new IllegalArgumentException("primary key must be Integer or Long");
-                        }
-                        String idName = id.name();
-                        builder.append(idName.length() == 0 ? "id" : idName)
-                                .append(" integer PRIMARY KEY AUTOINCREMENT,");
-                        mainCount++;
-                    }
-                }
-            } catch (Exception e) {
-                if(e instanceof IllegalArgumentException){
-                    throw e;
-                }
-                e.printStackTrace();
+        for (ModelInfo.ColumnInfo columnInfo : modelInfo.getColumnInfos()) {
+            if (columnInfo.isPrimaryKey()) {
+                builder.append(columnInfo.getName())
+                        .append(" integer PRIMARY KEY AUTOINCREMENT,");
+            } else {
+                builder.append(columnInfo.getName())
+                        .append(" ")
+                        .append(columnInfo.getType())
+                        .append(",");
             }
-        }
-        if (columnCount == 0) {
-            throw new IllegalArgumentException("this object does not contains any column");
-        }
-        if (mainCount > 1) {
-            throw new IllegalArgumentException("cannot contain more than 1 primary key");
         }
         builder.deleteCharAt(builder.length() - 1);
         builder.append(")");
@@ -95,70 +36,68 @@ public class TableFinder {
     /**
      * 获得删表语句
      */
-    public static String getDropTableSql(Class<?> entityType) {
-        return "drop table if exists " + getTableName(entityType);
+    public static String getDropTableSql(ModelInfo modelInfo) {
+        return "drop table if exists " + modelInfo.getTableName();
+    }
+
+    /**
+     * 获取最后自增id语句
+     */
+    public static String getLastIdSql(ModelInfo modelInfo) {
+        return "select last_insert_rowid() from " + modelInfo.getTableName();
     }
 
     /**
      * 获得更新语句
      */
-    public static String getUpdateSql(Object entity) {
-        String tableName = getTableName(entity.getClass());
-        HashMap<String, String> columns = new HashMap<>();
+    public static String getUpdateSql(Object entity, ModelInfo modelInfo) {
         String idName = "id";
         String idVolume = "0";
-        Class<?> handlerType = entity.getClass();
-        Field[] fields = handlerType.getDeclaredFields();
-        if (fields == null) {
-            throw new IllegalArgumentException("this object does not contains any field");
-        }
-        for (int i = 0; i < fields.length; i++) {
-            Field field = fields[i];
+        ModelInfo.ColumnInfo columnInfo = modelInfo.getId();
+        if (columnInfo != null) {
+            idName = columnInfo.getName();
+            Field field = columnInfo.getField();
             field.setAccessible(true);
             try {
-                Column column = (Column) field.getAnnotation(Column.class);
-                if (column != null) {
-                    String columnName = column.name();
-                    if (columnName.length() == 0) {
-                        columnName = field.getName();
-                    }
-                    Object object = field.get(entity);
-                    if (object != null) {
-                        String value = String.valueOf(object);
-                        if (column.encryption() != Encryption.class) {
-                            value = getEncryption(column.encryption()).encrypt(value);
-                        }
-                        columns.put(columnName, value);
-                    } else {
-                        String defaultValue = column.defaultValue();
-                        if (column.notNull() && defaultValue.length() == 0) {
-                            throw new NullPointerException("column " + columnName + " can not be null");
-                        }
-                        if (defaultValue.length() != 0 && column.encryption() != Encryption.class) {
-                            defaultValue = getEncryption(column.encryption()).encrypt(defaultValue);
-                        }
-                        columns.put(columnName, defaultValue.length() == 0 ? null : defaultValue);
-                    }
-                } else {
-                    Id id = (Id) field.getAnnotation(Id.class);
-                    if (id != null) {
-                        Object object = field.get(entity);
-                        String name = id.name();
-                        if (name.length() > 0) {
-                            idName = name;
-                        }
-                        idVolume = object.toString();
-                    }
+                Object object = field.get(entity);
+                if (object != null) {
+                    idVolume = object.toString();
                 }
-            } catch (Exception e) {
-                if (e instanceof NullPointerException) {
-                    throw ((NullPointerException) e);
-                }
+            } catch (IllegalAccessException e) {
                 e.printStackTrace();
             }
         }
-        if (columns.size() == 0) {
-            throw new IllegalArgumentException("this object does not contains any column");
+
+        StringBuilder builder = new StringBuilder();
+        builder.append(getUpdateSqlNoWhere(entity, modelInfo, false));
+        builder.append(" where ")
+                .append(idName)
+                .append(" = ")
+                .append(idVolume);
+        return builder.toString();
+    }
+
+    /**
+     * 获得更新语句
+     */
+    public static String getUpdateSqlNoWhere(Object entity, ModelInfo modelInfo, boolean ignoreNull) {
+        String tableName = modelInfo.getTableName();
+        HashMap<String, String> columns = new HashMap<>();
+        for (ModelInfo.ColumnInfo columnInfo : modelInfo.getColumnInfos()) {
+            Field field = columnInfo.getField();
+            field.setAccessible(true);
+            try {
+                if (!columnInfo.isPrimaryKey()) {
+                    Object object = field.get(entity);
+                    if (ignoreNull && object == null) {
+                        continue;
+                    }
+                    Column column = (Column) field.getAnnotation(Column.class);
+                    columns.put(columnInfo.getName(), ColumnFilter.getColumn(columnInfo.getName(), object, column));
+                }
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            }
         }
         StringBuilder builder = new StringBuilder();
         builder.append("update ")
@@ -171,82 +110,39 @@ public class TableFinder {
             } else {
                 builder.append(o)
                         .append(" = '")
-                        .append(columns.get(o).replace("'", "''"))
+                        .append(ColumnFilter.safeColumn(columns.get(o)))
                         .append("',");
             }
         }
         builder.deleteCharAt(builder.length() - 1);
-        builder.append(" where ")
-                .append(idName)
-                .append(" = ")
-                .append(idVolume);
         return builder.toString();
     }
 
     /**
      * 获得插入语句
      */
-    public static String getInsertSql(Object entity) {
-        String tableName = getTableName(entity.getClass());
+    public static String getInsertSql(Object entity, ModelInfo modelInfo) {
+        String tableName = modelInfo.getTableName();
         HashMap<String, String> columns = new HashMap<>();
-        Class<?> handlerType = entity.getClass();
-        Field[] fields = handlerType.getDeclaredFields();
-        if (fields == null) {
-            throw new IllegalArgumentException("this object does not contains any field");
-        }
-        for (int i = 0; i < fields.length; i++) {
-            Field field = fields[i];
+        for (ModelInfo.ColumnInfo columnInfo : modelInfo.getColumnInfos()) {
+            Field field = columnInfo.getField();
             field.setAccessible(true);
             try {
-                Column column = (Column) field.getAnnotation(Column.class);
-                if (column != null) {
-                    String columnName = column.name();
-                    if (columnName.length() == 0) {
-                        columnName = field.getName();
-                    }
-                    Object object = field.get(entity);
+                Object object = field.get(entity);
+                if (columnInfo.isPrimaryKey()) {
                     if (object != null) {
-                        String value = String.valueOf(object);
-                        if (column.encryption() != Encryption.class) {
-                            value = getEncryption(column.encryption()).encrypt(value);
-                        }
-                        columns.put(columnName, value);
-                    } else {
-                        String defaultValue = column.defaultValue();
-                        if (defaultValue.length() == 0) {
-                            if (column.notNull()) {
-                                throw new NullPointerException("column " + columnName + " can not be null");
-                            }
-                            columns.put(columnName, null);
-                        } else {
-                            if (column.encryption() != Encryption.class) {
-                                defaultValue = getEncryption(column.encryption()).encrypt(defaultValue);
-                            }
-                            columns.put(columnName, defaultValue);
+                        long idValue = Long.parseLong(object.toString());
+                        if (idValue > 0) {
+                            columns.put(columnInfo.getName(), object.toString());
                         }
                     }
                 } else {
-                    Id id = (Id) field.getAnnotation(Id.class);
-                    if (id != null) {
-                        Object object = field.get(entity);
-                        if (object != null) {
-                            long idValue = Long.parseLong(object.toString());
-                            if (idValue > 0) {
-                                String name = id.name();
-                                columns.put(name.length() == 0 ? "id" : name, object.toString());
-                            }
-                        }
-                    }
+                    Column column = (Column) field.getAnnotation(Column.class);
+                    columns.put(columnInfo.getName(), ColumnFilter.getColumn(columnInfo.getName(), object, column));
                 }
-            } catch (Exception e) {
-                if (e instanceof NullPointerException) {
-                    throw ((NullPointerException) e);
-                }
+            } catch (IllegalAccessException e) {
                 e.printStackTrace();
             }
-        }
-        if (columns.size() == 0) {
-            throw new IllegalArgumentException("this object does not contains any column");
         }
         StringBuilder keys = new StringBuilder();
         StringBuilder values = new StringBuilder();
@@ -257,7 +153,7 @@ public class TableFinder {
                 values.append("null,");
             } else {
                 values.append("'")
-                        .append(columns.get(o).replace("'", "''"))
+                        .append(ColumnFilter.safeColumn(columns.get(o)))
                         .append("',");
             }
         }
@@ -269,52 +165,23 @@ public class TableFinder {
     /**
      * 获得删除语句
      */
-    public static String getDeleteSql(Object entity) {
-        String tableName = getTableName(entity.getClass());
+    public static String getDeleteSql(Object entity, ModelInfo modelInfo) {
+        String tableName = modelInfo.getTableName();
         HashMap<String, String> columns = new HashMap<>();
-        Class<?> handlerType = entity.getClass();
-        Field[] fields = handlerType.getDeclaredFields();
-        if (fields == null) {
-            throw new IllegalStateException("this object does not contains any column");
-        }
-        for (int i = 0; i < fields.length; i++) {
-            Field field = fields[i];
+        for (ModelInfo.ColumnInfo columnInfo : modelInfo.getColumnInfos()) {
+            Field field = columnInfo.getField();
             field.setAccessible(true);
             try {
-                Column column = (Column) field.getAnnotation(Column.class);
-                if (column != null) {
-                    String columnName = column.name();
-                    if (columnName.length() == 0) {
-                        columnName = field.getName();
-                    }
-                    Object object = field.get(entity);
-                    if (object != null) {
-                        String value = String.valueOf(object);
-                        if (column.encryption() != Encryption.class) {
-                            value = getEncryption(column.encryption()).encrypt(value);
-                        }
-                        columns.put(columnName, value);
-                    } else {
-                        String defaultValue = column.defaultValue();
-                        if (defaultValue.length() != 0 && column.encryption() != Encryption.class) {
-                            defaultValue = getEncryption(column.encryption()).encrypt(defaultValue);
-                        }
-                        columns.put(columnName, defaultValue.length() == 0 ? null : defaultValue);
-                    }
+                Object object = field.get(entity);
+                if (columnInfo.isPrimaryKey()) {
+                    columns.put(columnInfo.getName(), String.valueOf(object));
                 } else {
-                    Id id = (Id) field.getAnnotation(Id.class);
-                    if (id != null) {
-                        Object object = field.get(entity);
-                        String name = id.name();
-                        columns.put(name.length() == 0 ? "id" : name, String.valueOf(object));
-                    }
+                    Column column = (Column) field.getAnnotation(Column.class);
+                    columns.put(columnInfo.getName(), ColumnFilter.getColumn(columnInfo.getName(), object, column));
                 }
-            } catch (Exception e) {
+            } catch (IllegalAccessException e) {
                 e.printStackTrace();
             }
-        }
-        if (columns.size() == 0) {
-            throw new IllegalArgumentException("this object does not contains any column");
         }
         StringBuilder builder = new StringBuilder();
         builder.append("delete from ")
@@ -327,7 +194,7 @@ public class TableFinder {
             } else {
                 builder.append(o)
                         .append(" = '")
-                        .append(columns.get(o).replace("'", "''"))
+                        .append(ColumnFilter.safeColumn(columns.get(o)))
                         .append("' and ");
             }
         }
@@ -340,7 +207,7 @@ public class TableFinder {
     public static void find(Object entity, Cursor cursor) {
         Class<?> handlerType = entity.getClass();
         Field[] fields = handlerType.getDeclaredFields();
-        if (fields == null) {
+        if (fields == null || fields.length == 0) {
             return;
         }
         for (int i = 0; i < fields.length; i++) {
@@ -355,13 +222,7 @@ public class TableFinder {
                     }
                     Class<?> type = field.getType();
                     String result = cursor.getString(cursor.getColumnIndex(columnName));
-                    if (result != null) {
-                        if (column.encryption() != Encryption.class) {
-                            result = getEncryption(column.encryption()).decrypt(result);
-                        }
-                    } else if (column.defaultValue().length() != 0) {
-                        result = column.defaultValue();
-                    }
+                    result = ColumnFilter.decodeColumn(result, column);
                     if (result != null) {
                         if (type == int.class || type == Integer.class) {
                             field.set(entity, Integer.parseInt(result));
@@ -398,28 +259,4 @@ public class TableFinder {
         }
     }
 
-    private static List<Encryption> encryptions = new ArrayList<>();
-
-    protected static Encryption getEncryption(Class<? extends Encryption> encryptionType) {
-        Encryption encryption = null;
-        for (int i = 0; i < encryptions.size(); i++) {
-            if (encryptions.get(i).getClass() == encryptionType) {
-                encryption = encryptions.get(i);
-                break;
-            }
-        }
-        if (encryption == null) {
-            try {
-                encryption = encryptionType.newInstance();
-            } catch (Exception e) {
-                e.printStackTrace();
-                throw new IllegalArgumentException(encryptionType.getSimpleName() + " have no non parametric constructor");
-            }
-        }
-        if (encryptions.size() > 10) {
-            encryptions.remove(0);
-        }
-        encryptions.add(encryption);
-        return encryption;
-    }
 }

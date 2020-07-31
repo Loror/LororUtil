@@ -18,7 +18,7 @@ public class ConditionBuilder {
 
     }
 
-    public static ConditionBuilder builder() {
+    public static ConditionBuilder create() {
         return new ConditionBuilder();
     }
 
@@ -81,7 +81,7 @@ public class ConditionBuilder {
             Object column = columns.get(i);
             if (column != null) {
                 builder.append("'")
-                        .append(String.valueOf(columns.get(i)).replace("'", "''"))
+                        .append(ColumnFilter.safeColumn(columns.get(i)))
                         .append("'");
                 if (i != columns.size() - 1) {
                     builder.append(",");

@@ -11,6 +11,7 @@ import java.util.zip.GZIPInputStream;
 
 import com.loror.lororUtil.http.HttpsClient;
 import com.loror.lororUtil.sql.ConditionBuilder;
+import com.loror.lororUtil.sql.Model;
 import com.loror.lororUtil.sql.SQLiteUtil;
 
 import android.annotation.SuppressLint;
@@ -56,11 +57,11 @@ public class ImageDownloader {
                     }
                 }
             }
-            ConditionBuilder conditionBuilder = ConditionBuilder.builder();
+            Model<Compare> model = sqLiteUtil.model(Compare.class);
             for (int i = 0; i < removes.size(); i++) {
-                conditionBuilder.addOrCondition("path", removes.get(i));
+                model.whereOr("path", removes.get(i));
             }
-            sqLiteUtil.deleteByCondition(conditionBuilder, Compare.class);
+            model.delete();
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
@@ -90,8 +91,7 @@ public class ImageDownloader {
         sqLiteUtil.createTableIfNotExists(Compare.class);
         try {
             File file = new File(path);
-            Compare compare = sqLiteUtil.getFirstByCondition(ConditionBuilder.builder().addCondition("url", urlStr),
-                    Compare.class);
+            Compare compare = sqLiteUtil.model(Compare.class).where("url", urlStr).first();
             if (!checkNet && file.exists() && !cover && compare != null && compare.length == file.length()) {
                 return true;
             }

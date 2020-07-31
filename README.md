@@ -6,7 +6,7 @@
 
 ```
 dependencies {
-    compile 'com.github.Loror:LororUtil:1.6.46'
+    compile 'com.github.Loror:LororUtil:1.6.48'
 }
 
 allprojects {
@@ -180,38 +180,28 @@ HttpClient HttpsClient使用参数类
     * 方法createTableIfNotExists(Class<?> table) 如果不存在表时创建表
     * 方法changeTableIfColumnAdd(Class<?> table) 如果表字段增加时插入字段
     * 方法insert(Object entity)  插入对象到数据库
-    * 方法getLastId(Class<?> table) 获取最后插入主键id
+    * 方法lastInsertId(Class<?> table) 获取最后插入主键id
     * 方法delete(Object entity)  删除数据库条目，只删除与对象中所有参数相同的条目
     * 方法deleteById(String id, Class<?> table)  根据主键id删除数据
-    * 方法deleteByCondition(ConditionBuilder conditionBuilder, Class<?> table) 通过条件删除条目
     * 方法deleteAll(Class<?> table) 清除表中所有数据
     * 方法updateById(Object entity) 更新数据，将根据主键id更新所有数据
-    * 方法getById(String id, Class<T> table)  根据主键id获取数据
-    * 方法getByCondition(ConditionBuilder conditionBuilder, Class<T> table)  通过条件获取数据
-    * 方法getFirst(Class<T> table)  获取数据库首条数据
-    * 方法getFirstByCondition(ConditionBuilder conditionBuilder, Class<T> table)  通过条件获取首条数据
     * 方法getAll(Class<T> table) 获取所有条目，返回对象数组
     * 方法count(Class<?> table) 获取总条目数
-    * 方法countByCondition(ConditionBuilder conditionBuilder, Class<?> table) 根据条件获取总条目数
+    * 方法model(Class<T> table, boolean checkTable) 获取条件查询类Model
     * 方法close() 关闭数据库
 
-* 类ConditionBuilder
-    * 静态方法builder() 获取ConditionBuilder对象
-    * 方法getConditionList() 获取所有已设置条件
-    * 方法getOrder() 获取已设置排序条件
-    * 方法addCondition(String key, String operator, Object column) 添加and条件
-    * 方法addCondition(String key, Object column) 添加and条件，默认以=构造操作符
-    * 方法addOrCondition(String key, String operator, Object column) 添加or条件
-    * 方法addOrCondition(String key, Object column) 添加or条件，默认以=构造操作符
-    * 方法withCondition(String key, String operator, Object column) 追加and条件，将附属于前一个addCondition或addOrCondition条件，若前面未调用addCondition或addOrCondition，则该方法调用无效，若连续调用都追加到前一addCondition或addOrCondition条件
-    * 方法withCondition(String key, Object column) 追加and条件，默认以=构造操作符
-    * 方法withOrCondition(String key, String operator, Object column) 追加or条件，将附属于前一个addCondition或addOrCondition条件，若前面未调用addCondition或addOrCondition，则该方法调用无效，若连续调用都追加到前一addCondition或addOrCondition条件
-    * 方法withOrCondition(String key, Object column) 追加or条件，默认以=构造操作符
-    * 方法addInCondition(String key, String operator, List columns) 添加in条件，list为空将出现异常，list的size为1时将自动退化为=，operator支持in/not in
-    * 方法addIdCondition(String operator, Object column) 添加主键条件
-    * 方法addIdCondition(Object column) 添加主键条件，默认以=构造操作符
-    * 方法withOrder(String key, int orderType) 设置排序条件
-    * 方法withPagination(int page, int number) 设置分页，第page页，每页number个
+* 类Model
+    * 方法type(int type) 设置类型
+    * 方法where(String key, String operator, Object column) 添加and条件(type为0)，追加and条件(type为1)
+    * 方法where(String key, Object column) 添加and条件，默认以=构造操作符
+    * 方法whereOr(String key, String operator, Object column) 添加or条件(type为0)，追加or条件(type为1)
+    * 方法whereOr(String key, Object column) 添加or条件，默认以=构造操作符
+    * 方法whereIn(String key, String operator, String... vars) 添加in条件，list为空将出现异常，list的size为1时将自动退化为=，operator支持in/not in
+    * 方法orderBy(String key, int orderType) 设置排序条件
+    * 方法page(int page, int number) 设置分页，第page页，每页number个
+    * 方法get() 查询结果
+    * 方法first() 查询第一条结果
+    * 方法count() 查询结果数量
     
 * 注：上面类所用orderType可用两个参数Order.ORDER_DESC（反序）与Order.ORDER_ASC（正序）
 注：用于创建表的类权限需为public，并必须包含无参构造，若为内部类必须为静态内部类

@@ -10,9 +10,10 @@ public class Image {
     public long id;
     @Column(notNull = true, encryption = Code.class)
     public String path;
+    public String flag;
 
     @Override
     public String toString() {
-        return "{id=" + id + ",path=" + path + "}";
+        return "{id=" + id + ",path=" + path + ",flag=" + flag + "}";
     }
 }
