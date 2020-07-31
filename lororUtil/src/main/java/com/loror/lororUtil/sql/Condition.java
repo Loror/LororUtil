@@ -24,7 +24,7 @@ public class Condition {
         this.key = key;
         this.operator = operator;
         if (quotation) {
-            this.column = column == null ? null : column.replace("'", "''");
+            this.column = column == null ? null : ColumnFilter.safeColumn(column);
         } else {
             this.column = column;
         }

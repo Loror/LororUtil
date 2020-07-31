@@ -3,8 +3,8 @@ package com.loror.lororUtil.sql;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -33,57 +33,34 @@ public class SQLiteUtil {
     }
 
     public SQLiteUtil(Context context, String dbName) {
-        this(context, dbName, null, 1, null);
+        this(context, dbName, 1);
     }
 
     public SQLiteUtil(Context context, String dbName, int version) {
-        this(context, dbName, null, version, null);
-    }
-
-    public SQLiteUtil(Context context, String dbName, Class<?> table, int version) {
-        this(context, dbName, table, version, null);
+        this(context, dbName, version, null);
     }
 
     public SQLiteUtil(Context context, String dbName, int version, OnChange onChange) {
-        this(context, dbName, null, version, onChange);
-    }
-
-    public SQLiteUtil(Context context, String dbName, Class<?> table, int version, OnChange onChange) {
         this.context = context;
         this.dbName = dbName;
         this.onChange = onChange;
         this.version = version;
-        init(table);
+        init();
     }
 
     /**
      * 初始化
      */
-    private void init(final Class<?> table) {
+    private void init() {
         close();
-        this.helper = new DataBaseHelper(context, dbName, version, onChange != null ? onChange : new OnChange() {
+        this.helper = new DataBaseHelper(context, dbName, version, onChange,
+                new Link() {
 
-            @Override
-            public void onUpdate(SQLiteUtil sqLiteUtil) {
-                if (table != null) {
-                    sqLiteUtil.createTableIfNotExists(table);
-                    sqLiteUtil.changeTableIfColumnAdd(table);
-                }
-            }
-
-            @Override
-            public void onCreate(SQLiteUtil sqLiteUtil) {
-                if (table != null) {
-                    sqLiteUtil.createTableIfNotExists(table);
-                }
-            }
-        }, new Link() {
-
-            @Override
-            public void link(SQLiteDatabase database) {
-                SQLiteUtil.this.database = database;
-            }
-        }, this);
+                    @Override
+                    public void link(SQLiteDatabase database) {
+                        SQLiteUtil.this.database = database;
+                    }
+                }, this);
         this.database = this.helper.getWritableDatabase();
     }
 
@@ -96,19 +73,6 @@ public class SQLiteUtil {
      */
     public SQLiteDatabase getDatabase() {
         return database;
-    }
-
-    /**
-     * 生成实例
-     */
-    private Object newInstance(Class<?> table) throws Exception {
-        try {
-            return table.newInstance();
-        } catch (Exception e) {
-            Constructor constructor = table.getDeclaredConstructor();
-            constructor.setAccessible(true);
-            return constructor.newInstance();
-        }
     }
 
     private ModelInfo getModel(Class<?> table) {
@@ -238,7 +202,11 @@ public class SQLiteUtil {
     public <T> Model<T> model(Class<T> table, boolean checkTable) {
         if (checkTable) {
             createTableIfNotExists(table);
-            changeTableIfColumnAdd(table);
+            try {
+                changeTableIfColumnAdd(table);
+            } catch (Exception e) {
+                Log.e("SQLiteUtil", "changeTable failed:", e);
+            }
         }
         return new Model<>(table, this, getModel(table));
     }
@@ -327,7 +295,7 @@ public class SQLiteUtil {
         while (cursor.moveToNext()) {
             T entity = null;
             try {
-                entity = (T) newInstance(table);
+                entity = (T) getModel(table).getTableObject();
                 entitys.add(entity);
                 TableFinder.find(entity, cursor);
             } catch (Exception e) {
@@ -362,6 +330,15 @@ public class SQLiteUtil {
             SQLiteDatabase.releaseMemory();
         }
         return count;
+    }
+
+    /**
+     * 重新开启
+     */
+    public void reStart() {
+        if (this.database == null) {
+            init();
+        }
     }
 
     /**

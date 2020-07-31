@@ -36,7 +36,7 @@ public class Model<T> {
     }
 
     public Model<T> where(String key, Object var) {
-        return where(key, "=", var);
+        return where(key, var == null ? "is" : "=", var);
     }
 
     public Model<T> where(String key, String operation, Object var) {
@@ -49,7 +49,7 @@ public class Model<T> {
     }
 
     public Model<T> whereOr(String key, Object var) {
-        return where(key, "=", var);
+        return where(key, var == null ? "is" : "=", var);
     }
 
     public Model<T> whereOr(String key, String operation, Object var) {
@@ -73,6 +73,22 @@ public class Model<T> {
             conditionBuilder.addInCondition(key, operation, Arrays.asList(var));
         } else {
             conditionBuilder.withInCondition(key, operation, Arrays.asList(var));
+        }
+        return this;
+    }
+
+    public Model<T> whereOrIn(String key, String... vars) {
+        return whereOrIn(key, "in", vars);
+    }
+
+    public Model<T> whereOrIn(String key, String operation, String... var) {
+        if (var == null || var.length == 0) {
+            return this;
+        }
+        if (type == TYPE_NORMAL) {
+            conditionBuilder.addOrInCondition(key, operation, Arrays.asList(var));
+        } else {
+            conditionBuilder.withOrInCondition(key, operation, Arrays.asList(var));
         }
         return this;
     }
@@ -169,8 +185,9 @@ public class Model<T> {
                     builder.append(" and ");
                 }
                 builder.append(key)
-                        .append(" = ")
-                        .append(ColumnFilter.safeColumn(condition.get(key)));
+                        .append(" = '")
+                        .append(ColumnFilter.safeColumn(condition.get(key)))
+                        .append("'");
             }
         }
         sqLiteUtil.getDatabase().execSQL(builder.toString());

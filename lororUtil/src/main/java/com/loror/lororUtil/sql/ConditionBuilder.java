@@ -60,13 +60,6 @@ public class ConditionBuilder {
     /**
      * 增加条件
      */
-    public ConditionBuilder addCondition(String key, Object column) {
-        return addCondition(key, column == null ? "is" : "=", column);
-    }
-
-    /**
-     * 增加条件
-     */
     public ConditionBuilder addCondition(String key, String operator, Object column) {
         return addCondition(key, operator, column, true);
     }
@@ -96,14 +89,11 @@ public class ConditionBuilder {
      * 增加in条件
      */
     public ConditionBuilder addInCondition(String key, String operator, List columns) {
-//        if (!"in".equalsIgnoreCase(operator) && !"not in".equals(operator)) {
-//            throw new IllegalArgumentException("operator只支持in/not in");
-//        }
-        if (columns == null || columns.size() == 0) {
+        if (columns == null) {
             throw new IllegalArgumentException("columns不能为空");
         }
         if (columns.size() == 1) {
-            return addCondition(key, operator, columns.get(0), true);
+            return addCondition(key, "not in".equalsIgnoreCase(operator) ? "<>" : "=", columns.get(0), true);
         } else {
             return addCondition(key, operator, getListCondition(columns), false);
         }
@@ -123,13 +113,6 @@ public class ConditionBuilder {
     /**
      * 增加条件
      */
-    public ConditionBuilder addOrCondition(String key, Object column) {
-        return addOrCondition(key, column == null ? "is" : "=", column);
-    }
-
-    /**
-     * 增加条件
-     */
     public ConditionBuilder addOrCondition(String key, String operator, Object column) {
         return addOrCondition(key, operator, column, true);
     }
@@ -138,11 +121,11 @@ public class ConditionBuilder {
      * 增加in条件
      */
     public ConditionBuilder addOrInCondition(String key, String operator, List columns) {
-        if (columns == null || columns.size() == 0) {
+        if (columns == null) {
             throw new IllegalArgumentException("columns不能为空");
         }
         if (columns.size() == 1) {
-            return addOrCondition(key, operator, columns.get(0), true);
+            return addOrCondition(key, "not in".equalsIgnoreCase(operator) ? "<>" : "=", columns.get(0), true);
         } else {
             return addOrCondition(key, operator, getListCondition(columns), false);
         }
@@ -162,13 +145,6 @@ public class ConditionBuilder {
     /**
      * 追加条件
      */
-    public ConditionBuilder withCondition(String key, Object column) {
-        return withCondition(key, column == null ? "is" : "=", column);
-    }
-
-    /**
-     * 追加条件
-     */
     public ConditionBuilder withCondition(String key, String operator, Object column) {
         return withCondition(key, operator, column, true);
     }
@@ -177,11 +153,11 @@ public class ConditionBuilder {
      * 追加增加in条件
      */
     public ConditionBuilder withInCondition(String key, String operator, List columns) {
-        if (columns == null || columns.size() == 0) {
+        if (columns == null ) {
             throw new IllegalArgumentException("columns不能为空");
         }
         if (columns.size() == 1) {
-            return withCondition(key, operator, columns.get(0), true);
+            return withCondition(key, "not in".equalsIgnoreCase(operator) ? "<>" : "=", columns.get(0), true);
         } else {
             return withCondition(key, operator, getListCondition(columns), false);
         }
@@ -204,13 +180,6 @@ public class ConditionBuilder {
     /**
      * 追加条件
      */
-    public ConditionBuilder withOrCondition(String key, Object column) {
-        return withOrCondition(key, column == null ? "is" : "=", column);
-    }
-
-    /**
-     * 追加条件
-     */
     public ConditionBuilder withOrCondition(String key, String operator, Object column) {
         return withOrCondition(key, operator, column, true);
     }
@@ -219,11 +188,11 @@ public class ConditionBuilder {
      * 追加增加in条件
      */
     public ConditionBuilder withOrInCondition(String key, String operator, List columns) {
-        if (columns == null || columns.size() == 0) {
+        if (columns == null ) {
             throw new IllegalArgumentException("columns不能为空");
         }
         if (columns.size() == 1) {
-            return withOrCondition(key, operator, columns.get(0), true);
+            return withOrCondition(key, "not in".equalsIgnoreCase(operator) ? "<>" : "=", columns.get(0), true);
         } else {
             return withOrCondition(key, operator, getListCondition(columns), false);
         }
