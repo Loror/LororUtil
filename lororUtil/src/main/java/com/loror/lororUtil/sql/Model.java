@@ -48,7 +48,7 @@ public class Model<T> {
     }
 
     public Model<T> whereOr(String key, Object var) {
-        return where(key, var == null ? "is" : "=", var);
+        return whereOr(key, var == null ? "is" : "=", var);
     }
 
     public Model<T> whereOr(String key, String operation, Object var) {
@@ -64,14 +64,25 @@ public class Model<T> {
         return whereIn(key, "in", vars);
     }
 
-    public Model<T> whereIn(String key, String operation, String... var) {
-        if (var == null || var.length == 0) {
+    public Model<T> whereIn(String key, String operation, String... vars) {
+        if (vars == null || vars.length == 0) {
+            return this;
+        }
+        return whereIn(key, operation, Arrays.asList(vars));
+    }
+
+    public Model<T> whereIn(String key, List<?> vars) {
+        return whereIn(key, "in", vars);
+    }
+
+    public Model<T> whereIn(String key, String operation, List<?> vars) {
+        if (vars == null || vars.size() == 0) {
             return this;
         }
         if (type == TYPE_NORMAL) {
-            conditionBuilder.addInCondition(key, operation, Arrays.asList(var));
+            conditionBuilder.addInCondition(key, operation, vars);
         } else {
-            conditionBuilder.withInCondition(key, operation, Arrays.asList(var));
+            conditionBuilder.withInCondition(key, operation, vars);
         }
         return this;
     }
@@ -80,14 +91,25 @@ public class Model<T> {
         return whereOrIn(key, "in", vars);
     }
 
-    public Model<T> whereOrIn(String key, String operation, String... var) {
-        if (var == null || var.length == 0) {
+    public Model<T> whereOrIn(String key, String operation, String... vars) {
+        if (vars == null || vars.length == 0) {
+            return this;
+        }
+        return whereOrIn(key, operation, Arrays.asList(vars));
+    }
+
+    public Model<T> whereOrIn(String key, List<?> vars) {
+        return whereOrIn(key, "in", vars);
+    }
+
+    public Model<T> whereOrIn(String key, String operation, List<?> vars) {
+        if (vars == null || vars.size() == 0) {
             return this;
         }
         if (type == TYPE_NORMAL) {
-            conditionBuilder.addOrInCondition(key, operation, Arrays.asList(var));
+            conditionBuilder.addOrInCondition(key, operation, vars);
         } else {
-            conditionBuilder.withOrInCondition(key, operation, Arrays.asList(var));
+            conditionBuilder.withOrInCondition(key, operation, vars);
         }
         return this;
     }
@@ -295,7 +317,6 @@ public class Model<T> {
         if (sqLiteUtil.mitiProgress) {
             SQLiteDatabase.releaseMemory();
         }
-
         return entity;
     }
 }
