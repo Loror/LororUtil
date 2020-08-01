@@ -8,19 +8,21 @@ import android.util.Log;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 
 public class SQLiteUtil {
 
-    private DataBaseHelper helper;
-    private SQLiteDatabase database;
     private Context context;
     private String dbName;
     private OnChange onChange;
     private int version;
+    private SQLiteDatabase database;
     protected boolean mitiProgress = true;
-    private boolean execTableUpdated;
+    private List<Class<?>> execTableCreated = new LinkedList<>();//已执行过创建
+    private List<Class<?>> execTableUpdated = new LinkedList<>();//已执行过更新表
     private HashMap<Class<?>, ModelInfo> classModel = new HashMap<>();
+    private OnClose onClose;//执行close方法时候调用，如果为空则执行关闭连接
 
     public interface OnChange {
         void onCreate(SQLiteUtil sqLiteUtil);
@@ -32,6 +34,10 @@ public class SQLiteUtil {
         void link(SQLiteDatabase database);
     }
 
+    protected interface OnClose {
+        void close(SQLiteUtil sqLiteUtil);
+    }
+
     public SQLiteUtil(Context context, String dbName) {
         this(context, dbName, 1);
     }
@@ -41,7 +47,7 @@ public class SQLiteUtil {
     }
 
     public SQLiteUtil(Context context, String dbName, int version, OnChange onChange) {
-        this.context = context;
+        this.context = context.getApplicationContext();
         this.dbName = dbName;
         this.onChange = onChange;
         this.version = version;
@@ -53,7 +59,7 @@ public class SQLiteUtil {
      */
     private void init() {
         close();
-        this.helper = new DataBaseHelper(context, dbName, version, onChange,
+        DataBaseHelper helper = new DataBaseHelper(context, dbName, version, onChange,
                 new Link() {
 
                     @Override
@@ -61,11 +67,21 @@ public class SQLiteUtil {
                         SQLiteUtil.this.database = database;
                     }
                 }, this);
-        this.database = this.helper.getWritableDatabase();
+        this.database = helper.getWritableDatabase();
     }
 
-    public void setMutiProgress(boolean mutiProgress) {
+    public String getDbName() {
+        return dbName;
+    }
+
+    public SQLiteUtil setMutiProgress(boolean mutiProgress) {
         this.mitiProgress = mutiProgress;
+        return this;
+    }
+
+    public SQLiteUtil setOnClose(OnClose onClose) {
+        this.onClose = onClose;
+        return this;
     }
 
     /**
@@ -92,6 +108,7 @@ public class SQLiteUtil {
      */
     public void dropTable(Class<?> table) {
         database.execSQL(TableFinder.getDropTableSql(getModel(table)));
+        execTableCreated.remove(table);
         if (mitiProgress) {
             SQLiteDatabase.releaseMemory();
         }
@@ -101,6 +118,10 @@ public class SQLiteUtil {
      * 创建表
      */
     public void createTableIfNotExists(Class<?> table) {
+        if (execTableCreated.contains(table)) {
+            return;
+        }
+        execTableCreated.add(table);
         database.execSQL(TableFinder.getCreateSql(getModel(table)));
         if (mitiProgress) {
             SQLiteDatabase.releaseMemory();
@@ -112,10 +133,10 @@ public class SQLiteUtil {
      * 注意：执行更新表后，可能表未及时变化，下次执行会再次执行更新表而报错，需保证close之前只执行一次
      */
     public void changeTableIfColumnAdd(Class<?> table) {
-        if (execTableUpdated) {
+        if (execTableUpdated.contains(table)) {
             return;
         }
-        execTableUpdated = true;
+        execTableUpdated.add(table);
         Cursor cursor = database.rawQuery("select * from " + getModel(table).getTableName() + " where 0", null);
         String[] columnNames = cursor.getColumnNames();
         cursor.close();
@@ -345,9 +366,13 @@ public class SQLiteUtil {
      * 关闭
      */
     public void close() {
-        if (this.database != null) {
-            this.database.close();
-            this.database = null;
+        if (this.onClose != null) {
+            this.onClose.close(this);
+        } else {
+            if (this.database != null) {
+                this.database.close();
+                this.database = null;
+            }
         }
     }
 

@@ -78,6 +78,7 @@ public class ModelInfo {
         for (ModelInfo.ColumnInfo columnInfo : columnInfos) {
             if (columnInfo.isPrimaryKey()) {
                 idColumn = columnInfo;
+                break;
             }
         }
         return idColumn;

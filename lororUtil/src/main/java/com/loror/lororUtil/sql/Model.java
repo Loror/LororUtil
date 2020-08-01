@@ -6,7 +6,6 @@ import android.database.sqlite.SQLiteDatabase;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 
 public class Model<T> {
@@ -169,28 +168,12 @@ public class Model<T> {
     /**
      * 修改
      */
-    public void update(T entity, HashMap<String, Object> condition, boolean ignoreNull) {
+    public void update(T entity, boolean ignoreNull) {
         if (entity == null) {
             return;
         }
-        StringBuilder builder = new StringBuilder();
-        builder.append(TableFinder.getUpdateSqlNoWhere(entity, modelInfo, ignoreNull));
-        if (condition != null && condition.size() > 0) {
-            int flag = 0;
-            for (String key : condition.keySet()) {
-                if (flag == 0) {
-                    flag = 1;
-                    builder.append(" where ");
-                } else {
-                    builder.append(" and ");
-                }
-                builder.append(key)
-                        .append(" = '")
-                        .append(ColumnFilter.safeColumn(condition.get(key)))
-                        .append("'");
-            }
-        }
-        sqLiteUtil.getDatabase().execSQL(builder.toString());
+        sqLiteUtil.getDatabase().execSQL(TableFinder.getUpdateSqlNoWhere(entity, modelInfo, ignoreNull)
+                + conditionBuilder.getConditionsWithoutPage());
         if (sqLiteUtil.mitiProgress) {
             SQLiteDatabase.releaseMemory();
         }
