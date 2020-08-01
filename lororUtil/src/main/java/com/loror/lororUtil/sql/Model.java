@@ -201,7 +201,7 @@ public class Model<T> {
     /**
      * 修改
      */
-    public void update(T entity) {
+    public void updateById(T entity) {
         sqLiteUtil.updateById(entity);
     }
 
