@@ -159,6 +159,24 @@ public class Model<T> {
     }
 
     /**
+     * 清空表
+     */
+    public void clear() {
+        sqLiteUtil.deleteAll(table);
+    }
+
+    /**
+     * 截断表
+     */
+    public void truncate() {
+        sqLiteUtil.deleteAll(table);
+        sqLiteUtil.getDatabase().execSQL("delete from sqlite_sequence WHERE name = " + modelInfo.getTableName());
+        if (sqLiteUtil.mitiProgress) {
+            SQLiteDatabase.releaseMemory();
+        }
+    }
+
+    /**
      * 修改
      */
     public void update(T entity) {
