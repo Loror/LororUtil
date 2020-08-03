@@ -201,13 +201,6 @@ public class Model<T> {
     /**
      * 修改
      */
-    public void updateById(T entity) {
-        sqLiteUtil.updateById(entity);
-    }
-
-    /**
-     * 修改
-     */
     public void update(T entity, boolean ignoreNull) {
         if (entity == null) {
             return;
