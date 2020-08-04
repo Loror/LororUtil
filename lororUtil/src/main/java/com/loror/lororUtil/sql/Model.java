@@ -323,4 +323,9 @@ public class Model<T> {
         }
         return entity;
     }
+
+    @Override
+    public String toString() {
+        return conditionBuilder.toString();
+    }
 }
