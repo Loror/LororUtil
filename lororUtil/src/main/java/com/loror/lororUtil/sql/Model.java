@@ -19,6 +19,10 @@ public class Model<T> {
     private int type = TYPE_NORMAL;
     private ConditionBuilder conditionBuilder = ConditionBuilder.create();
 
+    public interface onWhen<T> {
+        void when(Model<T> model);
+    }
+
     public Model(Class<T> table, SQLiteUtil sqLiteUtil, ModelInfo modelInfo) {
         this.table = table;
         this.sqLiteUtil = sqLiteUtil;
@@ -77,7 +81,7 @@ public class Model<T> {
 
     public Model<T> whereIn(String key, String operation, List<?> vars) {
         if (vars == null || vars.size() == 0) {
-            return this;
+            throw new IllegalArgumentException("in condition can not be empty");
         }
         if (type == TYPE_NORMAL) {
             conditionBuilder.addInCondition(key, operation, vars);
@@ -104,12 +108,19 @@ public class Model<T> {
 
     public Model<T> whereOrIn(String key, String operation, List<?> vars) {
         if (vars == null || vars.size() == 0) {
-            return this;
+            throw new IllegalArgumentException("in condition can not be empty");
         }
         if (type == TYPE_NORMAL) {
             conditionBuilder.addOrInCondition(key, operation, vars);
         } else {
             conditionBuilder.withOrInCondition(key, operation, vars);
+        }
+        return this;
+    }
+
+    public Model<T> when(boolean satisfy, onWhen<T> onWhen) {
+        if (satisfy && onWhen != null) {
+            onWhen.when(this);
         }
         return this;
     }
