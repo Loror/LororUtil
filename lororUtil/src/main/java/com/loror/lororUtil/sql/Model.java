@@ -25,39 +25,47 @@ public class Model<T> implements Where {
         return modelInfo;
     }
 
+    @Override
     public Model<T> where(String key, Object var) {
         return where(key, var == null ? "is" : "=", var);
     }
 
+    @Override
     public Model<T> where(String key, String operation, Object var) {
         conditionBuilder.addCondition(key, operation, var);
         return this;
     }
 
+    @Override
     public Model<T> whereOr(String key, Object var) {
         return whereOr(key, var == null ? "is" : "=", var);
     }
 
+    @Override
     public Model<T> whereOr(String key, String operation, Object var) {
         conditionBuilder.addOrCondition(key, operation, var);
         return this;
     }
 
-    public Model<T> whereIn(String key, String... vars) {
+    @Override
+    public Model<T> whereIn(String key, Object[] vars) {
         return whereIn(key, "in", vars);
     }
 
-    public Model<T> whereIn(String key, String operation, String... vars) {
+    @Override
+    public Model<T> whereIn(String key, String operation, Object[] vars) {
         if (vars == null || vars.length == 0) {
             return this;
         }
         return whereIn(key, operation, Arrays.asList(vars));
     }
 
+    @Override
     public Model<T> whereIn(String key, List<?> vars) {
         return whereIn(key, "in", vars);
     }
 
+    @Override
     public Model<T> whereIn(String key, String operation, List<?> vars) {
         if (vars == null || vars.size() == 0) {
             throw new IllegalArgumentException("in condition can not be empty");
@@ -66,21 +74,25 @@ public class Model<T> implements Where {
         return this;
     }
 
-    public Model<T> whereOrIn(String key, String... vars) {
+    @Override
+    public Model<T> whereOrIn(String key, Object[] vars) {
         return whereOrIn(key, "in", vars);
     }
 
-    public Model<T> whereOrIn(String key, String operation, String... vars) {
+    @Override
+    public Model<T> whereOrIn(String key, String operation, Object[] vars) {
         if (vars == null || vars.length == 0) {
             return this;
         }
         return whereOrIn(key, operation, Arrays.asList(vars));
     }
 
+    @Override
     public Model<T> whereOrIn(String key, List<?> vars) {
         return whereOrIn(key, "in", vars);
     }
 
+    @Override
     public Model<T> whereOrIn(String key, String operation, List<?> vars) {
         if (vars == null || vars.size() == 0) {
             throw new IllegalArgumentException("in condition can not be empty");
@@ -89,10 +101,12 @@ public class Model<T> implements Where {
         return this;
     }
 
+    @Override
     public Model<T> where(OnWhere onWhere) {
         return where(onWhere, 0);
     }
 
+    @Override
     public Model<T> whereOr(OnWhere onWhere) {
         return where(onWhere, 1);
     }
@@ -117,6 +131,7 @@ public class Model<T> implements Where {
         return this;
     }
 
+    @Override
     public Model<T> when(boolean satisfy, OnWhere onWhere) {
         if (satisfy && onWhere != null) {
             onWhere.where(this);

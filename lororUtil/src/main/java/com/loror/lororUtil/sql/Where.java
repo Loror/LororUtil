@@ -16,17 +16,17 @@ public interface Where {
 
     Where whereOr(String key, String operation, Object var);
 
-    Where whereIn(String key, String... vars);
+    Where whereIn(String key, Object[] vars);
 
-    Where whereIn(String key, String operation, String... vars);
+    Where whereIn(String key, String operation, Object[] vars);
 
     Where whereIn(String key, List<?> vars);
 
     Where whereIn(String key, String operation, List<?> vars);
 
-    Where whereOrIn(String key, String... vars);
+    Where whereOrIn(String key, Object[] vars);
 
-    Where whereOrIn(String key, String operation, String... vars);
+    Where whereOrIn(String key, String operation, Object[] vars);
 
     Where whereOrIn(String key, List<?> vars);
 

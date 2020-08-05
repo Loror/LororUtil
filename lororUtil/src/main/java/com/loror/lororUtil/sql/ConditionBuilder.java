@@ -67,7 +67,7 @@ public class ConditionBuilder {
     /**
      * list条件拼接
      */
-    private String getListCondition(List columns) {
+    private String getListCondition(List<?> columns) {
         StringBuilder builder = new StringBuilder();
         builder.append("(");
         for (int i = 0; i < columns.size(); i++) {
@@ -88,7 +88,7 @@ public class ConditionBuilder {
     /**
      * 增加in条件
      */
-    public ConditionBuilder addInCondition(String key, String operator, List columns) {
+    public ConditionBuilder addInCondition(String key, String operator, List<?> columns) {
         if (columns.size() == 1) {
             return addCondition(key, "not in".equalsIgnoreCase(operator) ? "<>" : "=", columns.get(0), true);
         } else {
@@ -117,7 +117,7 @@ public class ConditionBuilder {
     /**
      * 增加in条件
      */
-    public ConditionBuilder addOrInCondition(String key, String operator, List columns) {
+    public ConditionBuilder addOrInCondition(String key, String operator, List<?> columns) {
         if (columns.size() == 1) {
             return addOrCondition(key, "not in".equalsIgnoreCase(operator) ? "<>" : "=", columns.get(0), true);
         } else {
