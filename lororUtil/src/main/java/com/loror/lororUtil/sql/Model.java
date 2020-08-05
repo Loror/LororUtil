@@ -230,14 +230,10 @@ public class Model<T> implements Where {
         Cursor cursor = null;
         if (conditionBuilder.getConditionCount() == 0) {
             cursor = sqLiteUtil.getDatabase().rawQuery("select count(1) from " + modelInfo.getTableName(), null);
-        } else if (conditionBuilder.isHasNull()) {
-            cursor = sqLiteUtil.getDatabase().rawQuery(
-                    "select count(1) from " + modelInfo.getTableName() + conditionBuilder.getConditions(true),
-                    null);
         } else {
             cursor = sqLiteUtil.getDatabase().rawQuery(
-                    "select count(1) from " + modelInfo.getTableName() + conditionBuilder.getConditions(false),
-                    conditionBuilder.getColumnArray());
+                    "select count(1) from " + modelInfo.getTableName() + conditionBuilder.getConditionsWithoutPage(true),
+                    null);
         }
         if (cursor.moveToNext()) {
             try {
@@ -258,16 +254,9 @@ public class Model<T> implements Where {
      */
     public List<T> get() {
         List<T> entitys = new ArrayList<>();
-        Cursor cursor = null;
-        if (conditionBuilder.isHasNull()) {
-            cursor = sqLiteUtil.getDatabase().rawQuery(
-                    "select * from " + modelInfo.getTableName() + conditionBuilder.getConditions(true),
-                    null);
-        } else {
-            cursor = sqLiteUtil.getDatabase().rawQuery(
-                    "select * from " + modelInfo.getTableName() + conditionBuilder.getConditions(false),
-                    conditionBuilder.getColumnArray());
-        }
+        Cursor cursor = sqLiteUtil.getDatabase().rawQuery(
+                "select * from " + modelInfo.getTableName() + conditionBuilder.getConditions(true),
+                null);
         while (cursor.moveToNext()) {
             T entity = null;
             try {
@@ -293,18 +282,10 @@ public class Model<T> implements Where {
      */
     public T first() {
         T entity = null;
-        Cursor cursor = null;
-        if (conditionBuilder.isHasNull()) {
-            cursor = sqLiteUtil.getDatabase().rawQuery(
-                    "select * from " + modelInfo.getTableName()
-                            + conditionBuilder.getConditionsWithoutPage(true) + " limit 0,2",
-                    null);
-        } else {
-            cursor = sqLiteUtil.getDatabase().rawQuery(
-                    "select * from " + modelInfo.getTableName()
-                            + conditionBuilder.getConditionsWithoutPage(false) + " limit 0,2",
-                    conditionBuilder.getColumnArray());
-        }
+        Cursor cursor = sqLiteUtil.getDatabase().rawQuery(
+                "select * from " + modelInfo.getTableName()
+                        + conditionBuilder.getConditionsWithoutPage(true) + " limit 0,2",
+                null);
         if (cursor.moveToNext()) {
             try {
                 entity = (T) modelInfo.getTableObject();
@@ -321,10 +302,6 @@ public class Model<T> implements Where {
             SQLiteDatabase.releaseMemory();
         }
         return entity;
-    }
-
-    public ConditionBuilder getConditionBuilder() {
-        return conditionBuilder;
     }
 
     @Override
