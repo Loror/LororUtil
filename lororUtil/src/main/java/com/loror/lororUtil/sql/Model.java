@@ -8,20 +8,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class Model<T> {
-
-    public static final int TYPE_NORMAL = 0;
-    public static final int TYPE_APPEND = 1;
+public class Model<T> implements Where {
 
     private Class<T> table;
     private SQLiteUtil sqLiteUtil;
     private ModelInfo modelInfo;
-    private int type = TYPE_NORMAL;
     private ConditionBuilder conditionBuilder = ConditionBuilder.create();
-
-    public interface onWhen<T> {
-        void when(Model<T> model);
-    }
 
     public Model(Class<T> table, SQLiteUtil sqLiteUtil, ModelInfo modelInfo) {
         this.table = table;
@@ -33,21 +25,12 @@ public class Model<T> {
         return modelInfo;
     }
 
-    public Model<T> type(int type) {
-        this.type = type;
-        return this;
-    }
-
     public Model<T> where(String key, Object var) {
         return where(key, var == null ? "is" : "=", var);
     }
 
     public Model<T> where(String key, String operation, Object var) {
-        if (type == TYPE_NORMAL) {
-            conditionBuilder.addCondition(key, operation, var);
-        } else {
-            conditionBuilder.withCondition(key, operation, var);
-        }
+        conditionBuilder.addCondition(key, operation, var);
         return this;
     }
 
@@ -56,11 +39,7 @@ public class Model<T> {
     }
 
     public Model<T> whereOr(String key, String operation, Object var) {
-        if (type == TYPE_NORMAL) {
-            conditionBuilder.addOrCondition(key, operation, var);
-        } else {
-            conditionBuilder.withOrCondition(key, operation, var);
-        }
+        conditionBuilder.addOrCondition(key, operation, var);
         return this;
     }
 
@@ -83,11 +62,7 @@ public class Model<T> {
         if (vars == null || vars.size() == 0) {
             throw new IllegalArgumentException("in condition can not be empty");
         }
-        if (type == TYPE_NORMAL) {
-            conditionBuilder.addInCondition(key, operation, vars);
-        } else {
-            conditionBuilder.withInCondition(key, operation, vars);
-        }
+        conditionBuilder.addInCondition(key, operation, vars);
         return this;
     }
 
@@ -110,17 +85,41 @@ public class Model<T> {
         if (vars == null || vars.size() == 0) {
             throw new IllegalArgumentException("in condition can not be empty");
         }
-        if (type == TYPE_NORMAL) {
-            conditionBuilder.addOrInCondition(key, operation, vars);
-        } else {
-            conditionBuilder.withOrInCondition(key, operation, vars);
+        conditionBuilder.addOrInCondition(key, operation, vars);
+        return this;
+    }
+
+    public Model<T> where(OnWhere onWhere) {
+        return where(onWhere, 0);
+    }
+
+    public Model<T> whereOr(OnWhere onWhere) {
+        return where(onWhere, 1);
+    }
+
+    private Model<T> where(OnWhere onWhere, int type) {
+        if (onWhere != null) {
+            Model<T> model = new Model<T>(table, sqLiteUtil, modelInfo);
+            onWhere.where(model);
+            List<Condition> conditions = model.conditionBuilder.getConditionList();
+            if (conditions.size() > 0) {
+                Condition top = conditions.get(0);
+                top.setType(type);
+                for (Condition condition : conditions) {
+                    if (condition == top) {
+                        continue;
+                    }
+                    top.addCondition(condition);
+                }
+                conditionBuilder.addCondition(top, model.conditionBuilder.isHasNull());
+            }
         }
         return this;
     }
 
-    public Model<T> when(boolean satisfy, onWhen<T> onWhen) {
-        if (satisfy && onWhen != null) {
-            onWhen.when(this);
+    public Model<T> when(boolean satisfy, OnWhere onWhere) {
+        if (satisfy && onWhere != null) {
+            onWhere.where(this);
         }
         return this;
     }
@@ -184,7 +183,7 @@ public class Model<T> {
      */
     public void delete() {
         if (conditionBuilder.getConditionCount() > 0) {
-            sqLiteUtil.getDatabase().execSQL("delete from " + modelInfo.getTableName() + conditionBuilder.getConditions());
+            sqLiteUtil.getDatabase().execSQL("delete from " + modelInfo.getTableName() + conditionBuilder.getConditions(true));
             if (sqLiteUtil.mitiProgress) {
                 SQLiteDatabase.releaseMemory();
             }
@@ -217,7 +216,7 @@ public class Model<T> {
             return;
         }
         sqLiteUtil.getDatabase().execSQL(TableFinder.getUpdateSqlNoWhere(entity, modelInfo, ignoreNull)
-                + conditionBuilder.getConditionsWithoutPage());
+                + conditionBuilder.getConditionsWithoutPage(true));
         if (sqLiteUtil.mitiProgress) {
             SQLiteDatabase.releaseMemory();
         }
@@ -233,11 +232,11 @@ public class Model<T> {
             cursor = sqLiteUtil.getDatabase().rawQuery("select count(1) from " + modelInfo.getTableName(), null);
         } else if (conditionBuilder.isHasNull()) {
             cursor = sqLiteUtil.getDatabase().rawQuery(
-                    "select count(1) from " + modelInfo.getTableName() + conditionBuilder.getConditions(),
+                    "select count(1) from " + modelInfo.getTableName() + conditionBuilder.getConditions(true),
                     null);
         } else {
             cursor = sqLiteUtil.getDatabase().rawQuery(
-                    "select count(1) from " + modelInfo.getTableName() + conditionBuilder.getNoColumnConditions(),
+                    "select count(1) from " + modelInfo.getTableName() + conditionBuilder.getConditions(false),
                     conditionBuilder.getColumnArray());
         }
         if (cursor.moveToNext()) {
@@ -262,11 +261,11 @@ public class Model<T> {
         Cursor cursor = null;
         if (conditionBuilder.isHasNull()) {
             cursor = sqLiteUtil.getDatabase().rawQuery(
-                    "select * from " + modelInfo.getTableName() + conditionBuilder.getConditions(),
+                    "select * from " + modelInfo.getTableName() + conditionBuilder.getConditions(true),
                     null);
         } else {
             cursor = sqLiteUtil.getDatabase().rawQuery(
-                    "select * from " + modelInfo.getTableName() + conditionBuilder.getNoColumnConditions(),
+                    "select * from " + modelInfo.getTableName() + conditionBuilder.getConditions(false),
                     conditionBuilder.getColumnArray());
         }
         while (cursor.moveToNext()) {
@@ -298,12 +297,12 @@ public class Model<T> {
         if (conditionBuilder.isHasNull()) {
             cursor = sqLiteUtil.getDatabase().rawQuery(
                     "select * from " + modelInfo.getTableName()
-                            + conditionBuilder.getConditionsWithoutPage() + " limit 0,2",
+                            + conditionBuilder.getConditionsWithoutPage(true) + " limit 0,2",
                     null);
         } else {
             cursor = sqLiteUtil.getDatabase().rawQuery(
                     "select * from " + modelInfo.getTableName()
-                            + conditionBuilder.getNoColumnConditionsWithoutPage() + " limit 0,2",
+                            + conditionBuilder.getConditionsWithoutPage(false) + " limit 0,2",
                     conditionBuilder.getColumnArray());
         }
         if (cursor.moveToNext()) {
@@ -322,6 +321,10 @@ public class Model<T> {
             SQLiteDatabase.releaseMemory();
         }
         return entity;
+    }
+
+    public ConditionBuilder getConditionBuilder() {
+        return conditionBuilder;
     }
 
     @Override

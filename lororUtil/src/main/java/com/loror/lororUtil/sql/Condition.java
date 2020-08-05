@@ -1,5 +1,8 @@
 package com.loror.lororUtil.sql;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Created by Loror on 2018/2/8.
  */
@@ -10,23 +13,23 @@ public class Condition {
     private String column;
     private int type;//0,and.1,or
     private boolean quotation;
-    private Condition condition;
+    private List<Condition> conditions;
 
-    public Condition(String key, String operator, String column) {
+    public Condition(String key, String operator, Object column) {
         this(key, operator, column, 0);
     }
 
-    public Condition(String key, String operator, String column, int type) {
+    public Condition(String key, String operator, Object column, int type) {
         this(key, operator, column, type, true);
     }
 
-    public Condition(String key, String operator, String column, int type, boolean quotation) {
+    public Condition(String key, String operator, Object column, int type, boolean quotation) {
         this.key = key;
         this.operator = operator;
         if (quotation) {
-            this.column = column == null ? null : ColumnFilter.safeColumn(column);
+            this.column = ColumnFilter.safeColumn(column);
         } else {
-            this.column = column;
+            this.column = column == null ? null : String.valueOf(column);
         }
         this.type = type;
         this.quotation = quotation;
@@ -65,60 +68,53 @@ public class Condition {
     }
 
     public void addCondition(Condition condition) {
-        if (this.condition == null) {
-            this.condition = condition;
-        } else {
-            this.condition.addCondition(condition);
+        if (this.conditions == null) {
+            this.conditions = new ArrayList<>();
         }
+        this.conditions.add(condition);
     }
 
-    public Condition getCondition() {
-        return condition;
+    public List<Condition> getConditions() {
+        return conditions;
     }
 
     @Override
     public String toString() {
+        return toString(true);
+    }
+
+    public String toString(boolean withColumn) {
         StringBuilder builder = new StringBuilder();
-        Condition that = condition;
-        if (that != null) {
+        if (conditions != null) {
             builder.append("(");
         }
         builder.append(key);
         builder.append(" ");
         builder.append(operator);
-        if (column == null) {
-            builder.append(" null");
-        } else {
-            if (quotation) {
-                builder.append(" '");
+        if (withColumn) {
+            if (column == null) {
+                builder.append(" null");
             } else {
-                builder.append(" ");
-            }
-            builder.append(column);
-            if (quotation) {
-                builder.append("'");
-            }
-        }
-        if (that != null) {
-            do {
-                builder.append(that.getType() == 0 ? " and " : " or ");
-                builder.append(that.getKey());
-                builder.append(" ");
-                builder.append(that.getOperator());
-                if (that.getColumn() == null) {
-                    builder.append(" null");
+                if (quotation) {
+                    builder.append(" '");
                 } else {
-                    if (quotation) {
-                        builder.append(" '");
-                    } else {
-                        builder.append(" ");
-                    }
-                    builder.append(that.getColumn());
-                    if (quotation) {
-                        builder.append("'");
-                    }
+                    builder.append(" ");
                 }
-            } while ((that = that.getCondition()) != null);
+                builder.append(column);
+                if (quotation) {
+                    builder.append("'");
+                }
+            }
+        } else {
+            builder.append(" ?");
+        }
+        if (conditions != null) {
+            int size = conditions.size();
+            for (int i = 0; i < size; i++) {
+                Condition condition = conditions.get(i);
+                builder.append(conditions.get(0).getType() == 0 ? " and " : " or ");
+                builder.append(condition.toString(withColumn));
+            }
             builder.append(")");
         }
         return builder.toString();
