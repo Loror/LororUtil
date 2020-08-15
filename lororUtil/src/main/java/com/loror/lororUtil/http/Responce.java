@@ -10,7 +10,6 @@ import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -20,9 +19,9 @@ public class Responce {
     public byte[] result;
     protected String contentEncoding;
     protected String contentType;
-    protected HashMap<String, String> cookies = new HashMap<>();
     protected Map<String, List<String>> headers;
     protected List<String> cookielist;
+    protected Cookies cookies;
     protected InputStream inputStream;
     protected HttpURLConnection connection;
     protected Throwable throwable;
@@ -65,7 +64,7 @@ public class Responce {
     /**
      * 获取cookie
      */
-    public HashMap<String, String> getCookies() {
+    public Cookies getCookies() {
         return cookies;
     }
 

@@ -68,12 +68,17 @@ public class ScanUtil {
 
     }
 
+    private int total = 0;
+    private int count = 0;
+
     /**
      * 扫描sd卡，传入参数，1，起点目录，2，需扫描后缀数组，3，回调接口
      */
     public void scanSDCard(final File rootFileDir, final String[] suffixs, final ScanCallBack callBack) {
         new Thread() {
             public void run() {
+                total = 0;
+                count = 0;
                 inintPaths(rootFileDir.listFiles(), suffixs, callBack);
                 handler.post(new Runnable() {
 
@@ -90,8 +95,6 @@ public class ScanUtil {
      * 递归扫描
      */
     private void inintPaths(final File[] files, String[] suffixs, final ScanCallBack callBack) {
-        int total = 0;
-        int count = 0;
         if (files != null && files.length > 0) {
             for (int i = 0; i < files.length; i++) {
                 if (files[i].isFile()) {

@@ -113,28 +113,9 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
             if (responce.cookielist == null) {
                 responce.cookielist = new ArrayList<>();
             }
-            for (String cookielist : responce.cookielist) {
-                if (cookielist == null) {
-                    continue;
-                }
-                String[] cookies = cookielist.split(";");
-                for (int i = 0; i < cookies.length; i++) {
-                    String cookie = cookies[i];
-                    if (cookie == null) {
-                        continue;
-                    }
-                    try {
-                        cookie = cookie.trim();
-                        String[] keyValue = cookie.split("\\=");
-                        if (keyValue.length == 1) {
-                            responce.cookies.put(keyValue[0], null);
-                        } else {
-                            responce.cookies.put(keyValue[0], cookie.substring(keyValue[0].length() + 1));
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
+            responce.cookies = new Cookies();
+            for (String cookie : responce.cookielist) {
+                responce.cookies.parse(cookie);
             }
         } catch (Throwable e) {
             System.err.println("lost headers");

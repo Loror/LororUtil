@@ -162,6 +162,20 @@ public class RequestParams {
     }
 
     /**
+     * 添加Cookie
+     */
+    public RequestParams addCookies(Cookies cookie) {
+        if (cookie != null) {
+            String oldCookie = headers.get("Cookie");
+            if (!TextUtil.isEmpty(oldCookie)) {
+                cookie.parse(oldCookie);
+            }
+            headers.put("Cookie", cookie.toString());
+        }
+        return this;
+    }
+
+    /**
      * 获取header
      */
     public String getHeader(String key) {
