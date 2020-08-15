@@ -8,8 +8,9 @@ public class Cookies {
 
     protected HashMap<String, String> cookies = new HashMap<>();
 
-    public void putCookie(String key, String value) {
+    public Cookies putCookie(String key, String value) {
         cookies.put(key, value);
+        return this;
     }
 
     public String getCookie(String key) {
