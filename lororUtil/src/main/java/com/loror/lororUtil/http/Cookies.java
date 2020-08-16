@@ -45,9 +45,10 @@ public class Cookies {
     public String toString() {
         StringBuilder builder = new StringBuilder();
         for (String key : cookies.keySet()) {
+            String value = cookies.get(key);
             builder.append(key)
                     .append("=")
-                    .append(cookies.get(key))
+                    .append(value == null ? "" : value)
                     .append(";");
         }
         if (builder.length() > 0) {
