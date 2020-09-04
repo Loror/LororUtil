@@ -3,12 +3,13 @@ package com.loror.lororUtil.http;
 import com.loror.lororUtil.text.TextUtil;
 
 import java.util.HashMap;
+import java.util.Set;
 
 public class Cookies {
 
     protected HashMap<String, String> cookies = new HashMap<>();
 
-    public Cookies putCookie(String key, String value) {
+    public Cookies addCookie(String key, String value) {
         cookies.put(key, value);
         return this;
     }
@@ -17,9 +18,13 @@ public class Cookies {
         return cookies.get(key);
     }
 
-    public void parse(String cookieStr) {
+    public Set<String> keys(){
+        return cookies.keySet();
+    }
+
+    public Cookies parse(String cookieStr) {
         if (TextUtil.isEmpty(cookieStr)) {
-            return;
+            return this;
         }
         String[] cookies = cookieStr.split(";");
         for (int i = 0; i < cookies.length; i++) {
@@ -39,6 +44,7 @@ public class Cookies {
                 e.printStackTrace();
             }
         }
+        return this;
     }
 
     @Override

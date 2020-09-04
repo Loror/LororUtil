@@ -164,13 +164,17 @@ public class RequestParams {
     /**
      * 添加Cookie
      */
-    public RequestParams addCookies(Cookies cookie) {
-        if (cookie != null) {
+    public RequestParams addCookies(Cookies cookies) {
+        if (cookies != null) {
             String oldCookie = headers.get("Cookie");
             if (!TextUtil.isEmpty(oldCookie)) {
-                cookie.parse(oldCookie);
+                Cookies old = new Cookies().parse(oldCookie);
+                for (String key : cookies.keys()) {
+                    old.addCookie(key, cookies.getCookie(key));
+                }
+                cookies = old;
             }
-            headers.put("Cookie", cookie.toString());
+            headers.put("Cookie", cookies.toString());
         }
         return this;
     }
