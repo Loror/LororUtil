@@ -109,13 +109,16 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
         try {
             String cookieskey = "Set-Cookie";
             responce.headers = connection.getHeaderFields();
-            responce.cookielist = responce.headers.get(cookieskey);
-            if (responce.cookielist == null) {
-                responce.cookielist = new ArrayList<>();
+            responce.cookieList = responce.headers.get(cookieskey);
+            if (responce.cookieList == null) {
+                responce.cookieList = new ArrayList<>();
             }
-            responce.cookies = new Cookies();
-            for (String cookie : responce.cookielist) {
-                responce.cookies.parse(cookie);
+            responce.cookies = new ArrayList<>();
+            for (String cookie : responce.cookieList) {
+                SetCookie setCookie = SetCookie.parse(cookie);
+                if (setCookie != null) {
+                    responce.cookies.add(setCookie);
+                }
             }
         } catch (Throwable e) {
             System.err.println("lost headers");

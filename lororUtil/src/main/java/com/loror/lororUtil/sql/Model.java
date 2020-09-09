@@ -179,17 +179,33 @@ public class Model<T> implements Where {
     /**
      * 保存
      */
-    public void save(List<T> entities) {
-        sqLiteUtil.getDatabase().beginTransaction();
-        try {
+    public boolean save(List<T> entities) {
+        return save(entities, true);
+    }
+
+    /**
+     * 保存
+     */
+    public boolean save(List<T> entities, boolean transaction) {
+        if (transaction && !sqLiteUtil.getDatabase().inTransaction()) {
+            sqLiteUtil.getDatabase().beginTransaction();
+            try {
+                for (T t : entities) {
+                    save(t);
+                }
+                sqLiteUtil.getDatabase().setTransactionSuccessful();
+                return true;
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                sqLiteUtil.getDatabase().endTransaction();
+            }
+            return false;
+        } else {
             for (T t : entities) {
                 save(t);
             }
-            sqLiteUtil.getDatabase().setTransactionSuccessful();
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            sqLiteUtil.getDatabase().endTransaction();
+            return true;
         }
     }
 

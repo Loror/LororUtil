@@ -20,8 +20,8 @@ public class Responce {
     protected String contentEncoding;
     protected String contentType;
     protected Map<String, List<String>> headers;
-    protected List<String> cookielist;
-    protected Cookies cookies;
+    protected List<String> cookieList;
+    protected List<SetCookie> cookies;
     protected InputStream inputStream;
     protected HttpURLConnection connection;
     protected Throwable throwable;
@@ -64,7 +64,7 @@ public class Responce {
     /**
      * 获取cookie
      */
-    public Cookies getCookies() {
+    public List<SetCookie> getCookies() {
         return cookies;
     }
 
@@ -72,7 +72,7 @@ public class Responce {
      * 获取cookie列表
      */
     public List<String> getCookieList() {
-        return cookielist;
+        return cookieList;
     }
 
     /**

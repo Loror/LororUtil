@@ -15,7 +15,6 @@ public class SQLiteUtil {
 
     private Context context;
     private String dbName;
-    private OnChange onChange;
     private int version;
     private SQLiteDatabase database;
     protected boolean mitiProgress = true;
@@ -49,15 +48,14 @@ public class SQLiteUtil {
     public SQLiteUtil(Context context, String dbName, int version, OnChange onChange) {
         this.context = context.getApplicationContext();
         this.dbName = dbName;
-        this.onChange = onChange;
         this.version = version;
-        init();
+        init(onChange);
     }
 
     /**
      * 初始化
      */
-    private void init() {
+    private void init(OnChange onChange) {
         close();
         DataBaseHelper helper = new DataBaseHelper(context, dbName, version, onChange,
                 new Link() {
@@ -74,8 +72,8 @@ public class SQLiteUtil {
         return dbName;
     }
 
-    public SQLiteUtil setMutiProgress(boolean mutiProgress) {
-        this.mitiProgress = mutiProgress;
+    public SQLiteUtil setMultiProgress(boolean multiProgress) {
+        this.mitiProgress = multiProgress;
         return this;
     }
 
@@ -232,6 +230,29 @@ public class SQLiteUtil {
         return new Model<>(table, this, getModel(table));
     }
 
+    public boolean transaction(Runnable runnable) {
+        if (runnable == null) {
+            return false;
+        }
+
+        if (database.inTransaction()) {
+            runnable.run();
+            return true;
+        }
+
+        database.beginTransaction();
+        try {
+            runnable.run();
+            database.setTransactionSuccessful();
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            database.endTransaction();
+        }
+        return false;
+    }
+
     /**
      * 插入数据
      */
@@ -358,7 +379,7 @@ public class SQLiteUtil {
      */
     public void reStart() {
         if (this.database == null) {
-            init();
+            init(null);
         }
     }
 
