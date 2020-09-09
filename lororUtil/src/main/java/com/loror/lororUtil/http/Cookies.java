@@ -18,7 +18,7 @@ public class Cookies {
         return cookies.get(key);
     }
 
-    public Set<String> keys(){
+    public Set<String> keys() {
         return cookies.keySet();
     }
 
@@ -50,8 +50,14 @@ public class Cookies {
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
+        boolean top = true;
         for (String key : cookies.keySet()) {
             String value = cookies.get(key);
+            if (top) {
+                top = false;
+            } else {
+                builder.append(" ");
+            }
             builder.append(key)
                     .append("=")
                     .append(value == null ? "" : value)
