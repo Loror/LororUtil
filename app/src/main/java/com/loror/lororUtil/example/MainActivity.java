@@ -34,7 +34,7 @@ public class MainActivity extends AppCompatActivity {
     @Find
     GridView list;
 
-    private List<Image> images = new ArrayList<>();
+    private final List<Image> images = new ArrayList<>();
     private SimpleAdapter adapter;
 
     @Override

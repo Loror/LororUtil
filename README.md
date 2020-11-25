@@ -6,7 +6,7 @@
 
 ```
 dependencies {
-    compile 'com.github.Loror:LororUtil:1.7.8'
+    compile 'com.github.Loror:LororUtil:1.8.0'
 }
 
 allprojects {
@@ -52,7 +52,7 @@ ImageUtil后台读取图片接口
     * 抽象方法readImage(String path, int widthLimit, boolean asGif) 子类重写读取图片方法
     * 已实现的实现类SmartReadImage，读取网络图片，ReadSDCardImage，读取sd卡图片，ReadSDCardVideo，读取sd卡视频缩略图。
 
-## http包
+## 网络访问框架
 
 * 类HttpClient
     * 方法setTimeOut(int timeOut) 设置http连接超时时间
@@ -115,6 +115,102 @@ HttpsClient使用参数类
 HttpClient HttpsClient使用参数类
     * 构造方法FileBody(String filePath, String fileName, String contentType) 构造一个FileBody对象，post提交时会提交名字与文件流，fileName为空时默认以文件名构造，contentType为空时默认以"application/octet-stream"构造
 
+## 二次封装
+
+* 注解@GET @POST @PUT @DELETE
+    * 网络访问注解封装，类似retrofit，修饰于接口上的方法
+    * 支持返回类型原生responce（Responce），字符串（String），对象（将使用Json解释器生成对象）
+    * 返回Observable对象时为异步请求，直接返回所需对象将同步请求
+    * 内部未内置json解析框架，请在Application中指定Json解释器
+
+* 注解@Url @Path
+    * 重新指定url地址/url通配替换
+
+* 注解@BaseUrl
+    * 网络访问注解封装，修饰于接口上
+
+* 注解@DefaultHeaders @DefaultParams
+    * 网络访问注解封装，修饰于方法上，用于标示请求时传递的默认参数
+
+* 注解@Header @Param @ParamObject @ParamJson
+    * 网络访问注解封装，修饰于方法中参数，用于标示请求时传递的参数
+    * 分别为添加到header，添加一个参数，抽取对象中所有属性到参数，以Json方式上传（指定传参为json后，其他参数将被拼接到url中）
+
+* 注解@AsJson
+    * 修饰于方法上，网络访问参数将以json形式上传，仅对post生效
+
+* 注解@UrlEncode
+    * 修饰于方法上，对网络访问参数进行url编码
+
+* 注解@Gzip
+    * 修饰于方法上，上传参数进行gzip压缩
+
+* 示例代码
+
+```
+@BaseUrl("http://127.0.0.1")
+public interface ServerApi {
+    @GET("/test")
+    @DefaultParams(keys = "key", values = "123")//用于指定固定参数，key，value位置需一一对应
+    Observable<Responce> getResult(@Header("token") String token, @Param("id") String id);
+    //支持返回类型原生responce（Responce），字符串（String），对象（将使用Json解释器生成对象）
+    //请求类型@GET，@POST，@DELETE，@PUT
+    //参数@Header，@Param，@ParamObject，@ParamJson
+}
+```
+
+```
+new ApiClient()
+    .setBaseUrl("https://www.baidu.com") //可在此设置，也可使用注解，注解优先度较高，会覆盖此处设置
+    .setOnRequestListener(new OnRequestListener() {//监听请求的生命周期，可做公共处理
+        @Override
+        public void onRequestBegin(HttpClient client, ApiRequest request) {
+            Log.e("RESULT_", request.getUrl() + " " + request.getParams());
+        }
+
+        @Override
+        public void onRequestEnd(HttpClient client, ApiResult result) {
+
+        }
+    })
+    .create(ServerApi.class)
+    .getResult("xxxx",1)
+    .subscribe(new Observer<Responce>() {
+        @Override
+        public void success(Responce data) {
+            Log.e("RESULT_", data.toString() + " ");
+        }
+
+        @Override
+        public void failed(int code, Throwable e) {
+            Log.e("RESULT_", code + " = " + e);
+        }
+    });
+```
+
+注：网络请求包含多个默认配置
+</br>
+GET/DELETE请求，默认参数将进行url编码
+</br>
+POST/PUT，默认参数不进行url编码，参数中带有文件时将使用multipart/form-data进行传参；@AsJson将param组合为json进行提交，
+    @ParamJson指定了json参数时，其他参数将拼接到url中进行提交，@ParamJson会覆盖@AsJson使其失效，json传参仅对post生效，post参数中携带文件时无法使用json传参，json相关注解将失效
+</br>
+框架内部未引入json解析器，请用你使用的json解析器配置json解析，推荐在application中指定
+
+```
+//如要使用注解形式网络访问，必须实现Json解释器
+ApiClient.setJsonParser(new JsonParser() {
+    @Override
+    public Object jsonToObject(String json, Class<?> classType) {
+        return JSON.parseObject(json, classType);
+    }
+
+    @Override
+    public String objectToJson(Object object) {
+        return JSON.toJSONString(object);
+    }
+});
+```
 
 ## view包
 ##### 以下注解需配合工具类ViewUtil使用

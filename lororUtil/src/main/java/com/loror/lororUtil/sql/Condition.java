@@ -112,7 +112,7 @@ public class Condition {
             int size = conditions.size();
             for (int i = 0; i < size; i++) {
                 Condition condition = conditions.get(i);
-                builder.append(conditions.get(i).getType() == 0 ? " and " : " or ");
+                builder.append(condition.getType() == 0 ? " and " : " or ");
                 builder.append(condition.toString(withColumn));
             }
             builder.append(")");
