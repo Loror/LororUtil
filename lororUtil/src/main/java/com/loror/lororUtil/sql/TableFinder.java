@@ -207,7 +207,7 @@ public class TableFinder {
     public static void find(Object entity, Cursor cursor) {
         Class<?> handlerType = entity.getClass();
         Field[] fields = handlerType.getDeclaredFields();
-        if (fields == null || fields.length == 0) {
+        if (fields.length == 0) {
             return;
         }
         for (int i = 0; i < fields.length; i++) {

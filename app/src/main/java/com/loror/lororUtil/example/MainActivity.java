@@ -91,6 +91,10 @@ public class MainActivity extends AppCompatActivity {
         Log.e("TAG_WHERE", "======================");
 
         images.addAll(util.model(Image.class).get());
+        Log.e("TAG_WHERE", "model:" + images);
+
+        List<Image> list = util.nativeQuery().executeQuery("select * from Image").list(Image.class);
+        Log.e("TAG_WHERE", "native:" + list);
 
         util.close();
         adapter.notifyDataSetChanged();

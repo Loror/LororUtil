@@ -10,10 +10,10 @@ import java.util.List;
 
 public class Model<T> implements Where {
 
-    private Class<T> table;
-    private SQLiteUtil sqLiteUtil;
-    private ModelInfo modelInfo;
-    private ConditionBuilder conditionBuilder = ConditionBuilder.create();
+    private final Class<T> table;
+    private final SQLiteUtil sqLiteUtil;
+    private final ModelInfo modelInfo;
+    private final ConditionBuilder conditionBuilder = ConditionBuilder.create();
 
     public Model(Class<T> table, SQLiteUtil sqLiteUtil, ModelInfo modelInfo) {
         this.table = table;

@@ -13,14 +13,14 @@ import java.util.List;
 
 public class SQLiteUtil {
 
-    private Context context;
-    private String dbName;
-    private int version;
+    private final Context context;
+    private final String dbName;
+    private final int version;
     private SQLiteDatabase database;
     protected boolean mitiProgress = true;
-    private List<Class<?>> execTableCreated = new LinkedList<>();//已执行过创建
-    private List<Class<?>> execTableUpdated = new LinkedList<>();//已执行过更新表
-    private HashMap<Class<?>, ModelInfo> classModel = new HashMap<>();
+    private final List<Class<?>> execTableCreated = new LinkedList<>();//已执行过创建
+    private final List<Class<?>> execTableUpdated = new LinkedList<>();//已执行过更新表
+    private final HashMap<Class<?>, ModelInfo> classModel = new HashMap<>();
     private OnClose onClose;//执行close方法时候调用，如果为空则执行关闭连接
 
     public interface OnChange {
@@ -228,6 +228,13 @@ public class SQLiteUtil {
             }
         }
         return new Model<>(table, this, getModel(table));
+    }
+
+    /**
+     * native查询
+     */
+    public NativeQuery nativeQuery() {
+        return new NativeQuery(database);
     }
 
     public boolean transaction(Runnable runnable) {
