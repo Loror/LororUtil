@@ -13,8 +13,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class DataBus {
 
     private static int stickCount = 10;
-    private static List<ThreadModeReceiver> receivers = new ArrayList<>();
-    private static List<StickEvent> stickEvents = new CopyOnWriteArrayList<>();//粘性事件，仅保留stickCount个
+    private static final List<ThreadModeReceiver> receivers = new ArrayList<>();
+    private static final List<StickEvent> stickEvents = new CopyOnWriteArrayList<>();//粘性事件，仅保留stickCount个
 
     /**
      * 设置粘性事件个数

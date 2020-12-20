@@ -5,7 +5,7 @@ import android.database.sqlite.SQLiteDatabase;
 
 public class NativeQuery {
 
-    private SQLiteDatabase database;
+    private final SQLiteDatabase database;
 
     public NativeQuery(SQLiteDatabase database) {
         this.database = database;

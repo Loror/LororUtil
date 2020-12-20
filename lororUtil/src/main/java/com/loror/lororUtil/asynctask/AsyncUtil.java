@@ -6,7 +6,7 @@ import java.util.concurrent.Executors;
 import com.loror.lororUtil.flyweight.ObjectPool;
 
 public class AsyncUtil {
-    private static ExecutorService server = Executors.newFixedThreadPool(3);
+    private static final ExecutorService server = Executors.newFixedThreadPool(3);
 
     /**
      * 回调接口

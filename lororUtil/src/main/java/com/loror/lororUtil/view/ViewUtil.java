@@ -18,7 +18,15 @@ import android.widget.AdapterView;
 public class ViewUtil {
     private static Class<?> globalIdClass;
     private static boolean suiteHump;
-    private static boolean notClassAnotation;
+    private static boolean notClassAnnotation;
+    private static int humpPriority;
+
+    /**
+     * 设置驼峰权重
+     */
+    public static void setHumpPriority(int humpPriority) {
+        ViewUtil.humpPriority = humpPriority;
+    }
 
     /**
      * 设置是适配驼峰
@@ -102,7 +110,7 @@ public class ViewUtil {
      */
     private static void find(Object object, Class<?> idClass) {
         //非反射模式，尝试使用注解处理器类
-        if (!notClassAnotation) {
+        if (!notClassAnnotation) {
             try {
                 injectOfClassAnotation(object, null, object);
                 return;
@@ -112,10 +120,10 @@ public class ViewUtil {
                 }
             }
         }
-        if (injectFind(object, new ViewFinder(object), idClass) && !notClassAnotation) {
+        if (injectFind(object, new ViewFinder(object), idClass) && !notClassAnnotation) {
             Log.e("TAG_FIND", "进入反射模式");
             //进入反射模式
-            notClassAnotation = true;
+            notClassAnnotation = true;
         }
     }
 
@@ -123,7 +131,7 @@ public class ViewUtil {
      * 抽取控件
      */
     public static void find(Object holder, View view, Class<?> idClass) {
-        if (!notClassAnotation) {
+        if (!notClassAnnotation) {
             try {
                 injectOfClassAnotation(null, view, holder);
                 return;
@@ -133,9 +141,9 @@ public class ViewUtil {
                 }
             }
         }
-        if (injectFind(holder, new ViewFinder(view), idClass) && !notClassAnotation) {
+        if (injectFind(holder, new ViewFinder(view), idClass) && !notClassAnnotation) {
             Log.e("TAG_FIND", "进入反射模式");
-            notClassAnotation = true;
+            notClassAnnotation = true;
         }
     }
 
@@ -175,9 +183,28 @@ public class ViewUtil {
             Find find = (Find) field.getAnnotation(Find.class);
             if (find != null) {
                 try {
-                    View annotations = finder.findViewById(find.value() == -1 ? getResourceId(name, idClass) : find.value());
-                    if (suiteHump && annotations == null) {
-                        annotations = finder.findViewById(find.value() == -1 ? getResourceId(TextUtil.humpToUnderlineLowercase(name), idClass) : find.value());
+                    int id = find.value();
+                    View annotations;
+                    if (id != -1) {
+                        //已设置id使用id
+                        annotations = finder.findViewById(find.value());
+                    } else {
+                        if (suiteHump) {
+                            //优先使用驼峰查找控件
+                            if (humpPriority > 0) {
+                                annotations = finder.findViewById(getResourceId(TextUtil.humpToUnderlineLowercase(name), idClass));
+                                if (annotations == null) {
+                                    annotations = finder.findViewById(getResourceId(name, idClass));
+                                }
+                            } else {
+                                annotations = finder.findViewById(getResourceId(TextUtil.humpToUnderlineLowercase(name), idClass));
+                                if (annotations == null) {
+                                    annotations = finder.findViewById(getResourceId(TextUtil.humpToUnderlineLowercase(name), idClass));
+                                }
+                            }
+                        } else {
+                            annotations = finder.findViewById(getResourceId(name, idClass));
+                        }
                     }
                     if (annotations != null) {
                         field.setAccessible(true);
@@ -185,7 +212,7 @@ public class ViewUtil {
                     }
                     injected = true;
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Log.e("TAG_FIND", "cannot find view:" + (find.value() == -1 ? name : find.value()));
                 }
             }
         }
@@ -237,7 +264,7 @@ public class ViewUtil {
      * 抽取控件
      */
     private static void click(Object Object) {
-        if (!notClassAnotation) {
+        if (!notClassAnnotation) {
             try {
                 injectClickOfClassAnotation(Object, null, Object);
                 return;
@@ -247,8 +274,8 @@ public class ViewUtil {
                 }
             }
         }
-        if (injectClick(Object, new ViewFinder(Object)) && !notClassAnotation) {
-            notClassAnotation = true;
+        if (injectClick(Object, new ViewFinder(Object)) && !notClassAnnotation) {
+            notClassAnnotation = true;
             Log.e("TAG_CLICK", "进入反射模式");
         }
     }
@@ -257,7 +284,7 @@ public class ViewUtil {
      * 抽取控件
      */
     public static void click(Object holder, View view) {
-        if (!notClassAnotation) {
+        if (!notClassAnnotation) {
             try {
                 injectClickOfClassAnotation(null, view, holder);
                 return;
@@ -267,8 +294,8 @@ public class ViewUtil {
                 }
             }
         }
-        if (injectClick(holder, new ViewFinder(view)) && !notClassAnotation) {
-            notClassAnotation = true;
+        if (injectClick(holder, new ViewFinder(view)) && !notClassAnnotation) {
+            notClassAnnotation = true;
             Log.e("TAG_CLICK", "进入反射模式");
         }
     }
