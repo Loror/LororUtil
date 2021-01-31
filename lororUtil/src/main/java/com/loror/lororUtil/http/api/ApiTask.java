@@ -212,6 +212,9 @@ public class ApiTask {
      * 处理返回结果
      */
     private Object result(Responce responce, TypeInfo typeInfo) {
+        if (responce.getThrowable() != null) {
+            return new ResultException(responce);
+        }
         Type classType = typeInfo.getType();
         //优先外部筛选器通过尝试解析，否则200系列解析，返回类型Responce通过success返回
         if (classType == Responce.class || (apiClient.codeFilter != null ? apiClient.codeFilter.isSuccessCode(responce.getCode()) : responce.getCode() / 100 == 2)) {
