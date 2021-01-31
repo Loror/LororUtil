@@ -9,18 +9,12 @@ public class ApiResult {
     protected String url;
     protected RequestParams params;
     protected Responce responce;
+    protected ApiTask apiTask;
 
-    protected int type;//0，同步，1，异步
     protected boolean accept;//是否已经重新请求
     protected boolean isMock;//是否为mock数据
 
     //框架需使用的参数及拦截所需参数
-    protected TypeInfo typeInfo;
-    protected ApiClient apiClient;
-    protected ApiRequest request;
-    //异步
-    protected Observable observable;
-    //同步
     protected Object responceObject;
 
     public String getUrl() {
@@ -35,10 +29,6 @@ public class ApiResult {
         return responce;
     }
 
-    public int getType() {
-        return type;
-    }
-
     public void setAccept(boolean accept) {
         this.accept = accept;
     }
@@ -51,27 +41,12 @@ public class ApiResult {
         this.responceObject = responce;
     }
 
-    public TypeInfo getTypeInfo() {
-        return typeInfo;
-    }
-
-    public ApiRequest getRequest() {
-        return request;
-    }
-
-    public Observer getObserver() {
-        return observable == null ? null : observable.getObserver();
-    }
-
-    //通知重新请求，结束后请求将接收到新的结果
+    /**
+     * 通知重新请求，结束后请求将接收到新的结果
+     * 仅对内部异步方式有效
+     */
     public void requestAgain() {
-        if (type == 0) {
-            accept = true;
-            responceObject = apiClient.connect(request, typeInfo.getType());
-        } else if (type == 1) {
-            accept = true;
-            apiClient.asyncConnect(request, typeInfo.getType(), observable);
-        }
+        apiTask.requestAgain(this);
     }
 
 }

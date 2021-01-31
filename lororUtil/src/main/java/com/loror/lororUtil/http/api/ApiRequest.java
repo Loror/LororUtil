@@ -143,7 +143,7 @@ public class ApiRequest {
     /**
      * 创建RequestParams
      */
-    protected void generateParams(Method method, Object[] args) throws Throwable {
+    protected void generateParams(Method method, Object[] args) {
         params = new RequestParams();
         DefaultParams defaultParams = method.getAnnotation(DefaultParams.class);
         if (defaultParams != null) {
@@ -276,10 +276,8 @@ public class ApiRequest {
                 if (arg != null) {
                     if (type == String.class) {
                         params.setJson((String) arg);
-                    } else if (ApiClient.jsonParser != null) {
-                        params.setJson(ApiClient.jsonParser.objectToJson(arg));
                     } else {
-                        params.setJson(String.valueOf(arg));
+                        params.setJson(ApiClient.objectToString(arg));
                     }
                 }
                 break;

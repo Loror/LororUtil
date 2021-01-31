@@ -5,7 +5,7 @@ import java.util.List;
 
 public class ColumnFilter {
 
-    private static List<Encryption> encryptions = new ArrayList<>();
+    private static final List<Encryption> encryptions = new ArrayList<>();
 
     protected static Encryption getEncryption(Class<? extends Encryption> encryptionType) {
         Encryption encryption = null;
@@ -36,6 +36,9 @@ public class ColumnFilter {
     public static String getColumn(String name, Object var, Column column) {
         if (var != null) {
             String value = String.valueOf(var);
+            if (var instanceof Boolean) {
+                value = ((Boolean) var) ? "1" : "0";
+            }
             if (column.encryption() != Encryption.class) {
                 value = getEncryption(column.encryption()).encrypt(value);
             }

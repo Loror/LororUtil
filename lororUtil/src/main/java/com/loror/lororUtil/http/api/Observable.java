@@ -1,35 +1,22 @@
 package com.loror.lororUtil.http.api;
 
+import com.loror.lororUtil.asynctask.AsyncUtil;
 import com.loror.lororUtil.http.ProgressListener;
-
-import java.lang.reflect.Type;
+import com.loror.lororUtil.http.Responce;
 
 public class Observable<T> {
 
-    private ApiClient apiClient;
+    private ApiTask apiTask;
     private ApiRequest apiRequest;
-    private Type returnType;
     private Observer<T> observer;
     protected ObservableManager observableManager;
 
-    protected void setApiClient(ApiClient apiClient) {
-        this.apiClient = apiClient;
+    public void setApiTask(ApiTask apiTask) {
+        this.apiTask = apiTask;
     }
 
     protected void setApiRequest(ApiRequest apiRequest) {
         this.apiRequest = apiRequest;
-    }
-
-    public ApiRequest getApiRequest() {
-        return apiRequest;
-    }
-
-    protected void setReturnType(Type returnType) {
-        this.returnType = returnType;
-    }
-
-    public Type getReturnType() {
-        return returnType;
     }
 
     public Observer<T> getObserver() {
@@ -49,9 +36,35 @@ public class Observable<T> {
     /**
      * 开始任务并提交监听
      */
-    public Observable<T> subscribe(Observer<T> observer) {
+    public Observable<T> subscribe(final Observer<T> observer) {
         this.observer = observer;
-        apiClient.asyncConnect(apiRequest, returnType, this);
+        if (observer == null) {
+            return this;
+        }
+        if (observableManager != null) {
+            observableManager.registerObservable(this);
+        }
+        AsyncUtil.excute(new AsyncUtil.Excute<Responce>() {
+            @Override
+            public Responce doBack() {
+                return apiTask.connect();
+            }
+
+            @Override
+            public void result(Responce responce) {
+                if (observableManager != null) {
+                    observableManager.unRegisterObservable(Observable.this);
+                }
+                if (responce != null) {
+                    Object result = apiTask.toResult(responce);
+                    if (result instanceof Throwable) {
+                        observer.failed(responce.getCode(), (Throwable) result);
+                    } else {
+                        observer.success((T) result);
+                    }
+                }
+            }
+        });
         return this;
     }
 

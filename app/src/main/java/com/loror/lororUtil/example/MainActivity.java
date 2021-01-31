@@ -13,10 +13,20 @@ import android.widget.GridView;
 import android.widget.Toast;
 
 import com.alibaba.fastjson.JSON;
+import com.loror.lororUtil.asynctask.AsyncUtil;
 import com.loror.lororUtil.http.DefaultAsyncClient;
 import com.loror.lororUtil.http.HttpClient;
 import com.loror.lororUtil.http.RequestParams;
 import com.loror.lororUtil.http.Responce;
+import com.loror.lororUtil.http.api.ApiClient;
+import com.loror.lororUtil.http.api.ApiRequest;
+import com.loror.lororUtil.http.api.ApiResult;
+import com.loror.lororUtil.http.api.ApiTask;
+import com.loror.lororUtil.http.api.JsonParser;
+import com.loror.lororUtil.http.api.Observer;
+import com.loror.lororUtil.http.api.OnRequestListener;
+import com.loror.lororUtil.http.api.ReturnAdapter;
+import com.loror.lororUtil.http.api.TypeInfo;
 import com.loror.lororUtil.sql.SQLiteUtil;
 import com.loror.lororUtil.sql.Where;
 import com.loror.lororUtil.view.Click;
@@ -26,8 +36,14 @@ import com.loror.lororUtil.view.ItemLongClick;
 import com.loror.lororUtil.view.LongClick;
 import com.loror.lororUtil.view.ViewUtil;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
+
+import rx.Observable;
+import rx.Subscriber;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -44,6 +60,103 @@ public class MainActivity extends AppCompatActivity {
         initView();
         requestPermission("android.permission.WRITE_EXTERNAL_STORAGE", 0);
 //        connectNet();
+        connectNetByApi();
+    }
+
+    private void connectNetByApi() {
+        TypeInfo.setRawType(rx.Observable.class);
+        ApiClient.setJsonParser(new JsonParser() {
+            @Override
+            public Object jsonToObject(String json, TypeInfo typeInfo) {
+                return JSON.parseObject(json, typeInfo.getType());
+            }
+
+            @Override
+            public String objectToJson(Object object) {
+                return JSON.toJSONString(object);
+            }
+        });
+        ApiClient.setReturnAdapter(new ReturnAdapter() {
+
+            @Override
+            public boolean filterType(Type type, Class<?> rawType) {
+                return rawType == rx.Observable.class;
+            }
+
+            @Override
+            public Object returnAdapter(final ApiTask apiTask) {
+                return rx.Observable.create(new Observable.OnSubscribe<Object>() {
+                    @Override
+                    public void call(Subscriber<? super Object> subscriber) {
+                        Object data = apiTask.execute();
+                        //无效请求
+                        if (data == null) {
+                            return;
+                        }
+                        if (data instanceof Throwable) {
+                            subscriber.onError((Throwable) data);
+                        } else {
+                            subscriber.onNext(data);
+                        }
+                    }
+                });
+            }
+        });
+        final ApiTest apiTest = new ApiClient()
+                .setOnRequestListener(new OnRequestListener() {
+                    @Override
+                    public void onRequestBegin(HttpClient client, ApiRequest request) {
+
+                    }
+
+                    @Override
+                    public void onRequestEnd(HttpClient client, ApiResult result) {
+
+                    }
+                })
+                .create(ApiTest.class);
+        apiTest.test()
+                .subscribe(new Observer<String>() {
+                    @Override
+                    public void success(String data) {
+                        Log.e("RESULT_1", data);
+                    }
+
+                    @Override
+                    public void failed(int code, Throwable e) {
+                        Log.e("RESULT_1", "err:" + code);
+                    }
+                });
+        AsyncUtil.excute(new AsyncUtil.Excute<String>() {
+            @Override
+            public String doBack() {
+                return apiTest.test1();
+            }
+
+            @Override
+            public void result(String result) {
+                Log.e("RESULT_2", result);
+            }
+        });
+        apiTest.test2()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Subscriber<String>() {
+                    @Override
+                    public void onCompleted() {
+                        Log.e("RESULT_3", "onCompleted");
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        Log.e("RESULT_3", "e:", e);
+                    }
+
+                    @Override
+                    public void onNext(String s) {
+                        Log.e("RESULT_3", s);
+                    }
+                });
     }
 
     private void connectNet() {
@@ -73,6 +186,7 @@ public class MainActivity extends AppCompatActivity {
             for (int i = 0; i < 20; i++) {
                 Image image = new Image();
                 image.path = imgs[i % imgs.length];
+                image.flag = true;
                 images.add(image);
             }
             util.model(Image.class, false).save(images);

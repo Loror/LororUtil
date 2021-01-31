@@ -17,9 +17,9 @@ import java.nio.charset.Charset;
 
 public class MockData {
 
-    private Charset charset;
-    private ApiRequest apiRequest;
-    private OnRequestListener onRequestListener;
+    private final Charset charset;
+    private final ApiRequest apiRequest;
+    private final OnRequestListener onRequestListener;
     private String url;
     private HttpClient client;
     private RequestParams params;
@@ -62,9 +62,6 @@ public class MockData {
                     apiResult.url = url;
                     apiResult.params = params;
                     apiResult.responce = responce;
-                    apiResult.typeInfo = null;
-                    apiResult.type = 0;
-                    apiResult.request = apiRequest;
                     apiResult.isMock = true;
                     onRequestListener.onRequestEnd(client, apiResult);
                 }
@@ -154,9 +151,6 @@ public class MockData {
                 apiResult.url = url;
                 apiResult.params = params;
                 apiResult.responce = responce;
-                apiResult.typeInfo = null;
-                apiResult.type = 0;
-                apiResult.request = apiRequest;
                 apiResult.isMock = true;
                 onRequestListener.onRequestEnd(client, apiResult);
             }

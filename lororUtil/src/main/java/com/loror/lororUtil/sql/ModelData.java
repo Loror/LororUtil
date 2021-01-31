@@ -243,6 +243,8 @@ public class ModelData {
                     field.set(obj, Integer.parseInt(value));
                 } else if (fieldType == long.class || fieldType == Long.class) {
                     field.set(obj, Long.parseLong(value));
+                } else if (fieldType == boolean.class || fieldType == Boolean.class) {
+                    field.set(obj, (value != null && !"0".equals(value)));
                 } else if (fieldType == float.class || fieldType == Float.class) {
                     field.set(obj, Float.parseFloat(value));
                 } else if (fieldType == double.class || fieldType == Double.class) {

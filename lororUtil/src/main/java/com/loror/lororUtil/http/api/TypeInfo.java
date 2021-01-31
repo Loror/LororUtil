@@ -10,12 +10,42 @@ import java.util.List;
 public class TypeInfo {
 
     private Type type;
+    private static Class<?>[] rawType;
 
     public TypeInfo(@NonNull Type type) {
-        if (type instanceof ParameterizedType && ((ParameterizedType) type).getRawType() == Observable.class) {
-            this.type = ((ParameterizedType) type).getActualTypeArguments()[0];
+        if (type instanceof ParameterizedType) {
+            if (((ParameterizedType) type).getRawType() == Observable.class) {
+                this.type = ((ParameterizedType) type).getActualTypeArguments()[0];
+            } else if (rawType != null) {
+                boolean oneOf = false;
+                for (Class<?> pop : rawType) {
+                    if (pop == ((ParameterizedType) type).getRawType()) {
+                        oneOf = true;
+                        break;
+                    }
+                }
+                this.type = oneOf ? ((ParameterizedType) type).getActualTypeArguments()[0] : type;
+            }
         } else {
             this.type = type;
+        }
+    }
+
+    /**
+     * 设置忽略头
+     */
+    public static void setRawType(Class<?>... rawType) {
+        TypeInfo.rawType = rawType;
+    }
+
+    /**
+     * 如该类型在首位移除
+     */
+    public void pop(Class<?> head) {
+        if (this.type instanceof ParameterizedType) {
+            if (((ParameterizedType) this.type).getRawType() == head) {
+                this.type = ((ParameterizedType) type).getActualTypeArguments()[0];
+            }
         }
     }
 
@@ -78,5 +108,21 @@ public class TypeInfo {
      */
     public Type getType() {
         return type;
+    }
+
+    /**
+     * 修改解析结果
+     * 确定您了解框架工作原理再修改
+     */
+    @Deprecated
+    public void setType(Type type) {
+        this.type = type;
+    }
+
+    @Override
+    public String toString() {
+        return "TypeInfo{" +
+                "type=" + type +
+                '}';
     }
 }

@@ -228,6 +228,8 @@ public class TableFinder {
                             field.set(entity, Integer.parseInt(result));
                         } else if (type == long.class || type == Long.class) {
                             field.set(entity, Long.parseLong(result));
+                        } else if (type == boolean.class || type == Boolean.class) {
+                            field.set(entity, (result != null && !"0".equals(result)));
                         } else if (type == float.class || type == Float.class) {
                             field.set(entity, Float.parseFloat(result));
                         } else if (type == double.class || type == Double.class) {

@@ -10,7 +10,8 @@ public class Image {
     public long id;
     @Column(notNull = true, encryption = Code.class)
     public String path;
-    public String flag;
+    @Column
+    public boolean flag;
 
     @Override
     public String toString() {

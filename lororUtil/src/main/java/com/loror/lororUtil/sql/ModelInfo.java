@@ -6,9 +6,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ModelInfo {
-    private Class<?> tableClass;
+    private final Class<?> tableClass;
     private String tableName;
-    private List<ColumnInfo> columnInfos = new ArrayList<>();
+    private final List<ColumnInfo> columnInfos = new ArrayList<>();
 
     public ModelInfo(Class<?> tableClass) {
         this.tableClass = tableClass;
@@ -96,11 +96,11 @@ public class ModelInfo {
 
     public static class ColumnInfo {
 
-        private boolean primaryKey;
-        private Class<?> typeClass;
-        private String type;
-        private String name;
-        private Field field;
+        private final boolean primaryKey;
+        private final Class<?> typeClass;
+        private final String type;
+        private final String name;
+        private final Field field;
 
         public ColumnInfo(boolean primaryKey, Field field, String name) {
             this.primaryKey = primaryKey;
@@ -112,7 +112,8 @@ public class ModelInfo {
                     throw new IllegalArgumentException("primary key must be Integer or Long :" + name);
                 }
             }
-            if (typeClass == int.class || typeClass == long.class || typeClass == Integer.class || typeClass == Long.class) {
+            if (typeClass == int.class || typeClass == long.class || typeClass == Integer.class || typeClass == Long.class
+                    || typeClass == Boolean.class || typeClass == boolean.class) {
                 type = "int";
             } else if (typeClass == float.class || typeClass == double.class || typeClass == Float.class || typeClass == Double.class) {
                 type = "real";
