@@ -75,6 +75,10 @@ public class ApiRequest {
         this.url = url;
     }
 
+    public String getMethod() {
+        return url;
+    }
+
     /**
      * 获取最终url
      */
@@ -237,12 +241,11 @@ public class ApiRequest {
                         addArray(params, name, array, type.getComponentType());
                     }
                 } else if (arg instanceof List) {
-                    List list = (List) arg;
+                    List<?> list = (List<?>) arg;
                     if (list.size() > 0) {
                         Object[] array = list.toArray(new Object[0]);
-                        Class componentType = null;
-                        for (int j = 0; j < array.length; j++) {
-                            Object o = array[j];
+                        Class<?> componentType = null;
+                        for (Object o : array) {
                             if (o != null) {
                                 if (componentType == null) {
                                     componentType = o.getClass();
@@ -293,17 +296,17 @@ public class ApiRequest {
                 if (type.isArray()) {
                     if (arg != null) {
                         Object[] array = (Object[]) arg;
-                        for (int j = 0; j < array.length; j++) {
-                            UrlPath path = new UrlPath(name, array[j]);
+                        for (Object o : array) {
+                            UrlPath path = new UrlPath(name, o);
                             querys.add(path);
                         }
                     }
                 } else if (arg instanceof List) {
-                    List list = (List) arg;
+                    List<?> list = (List<?>) arg;
                     if (list.size() > 0) {
                         Object[] array = list.toArray(new Object[0]);
-                        for (int j = 0; j < array.length; j++) {
-                            UrlPath path = new UrlPath(name, array[j]);
+                        for (Object o : array) {
+                            UrlPath path = new UrlPath(name, o);
                             querys.add(path);
                         }
                     }
@@ -334,14 +337,14 @@ public class ApiRequest {
     /**
      * 添加数组形参数到param
      */
-    private void addArray(RequestParams params, String name, Object[] array, Class componentType) {
+    private void addArray(RequestParams params, String name, Object[] array, Class<?> componentType) {
         if (componentType == FileBody.class) {
-            for (int j = 0; j < array.length; j++) {
-                params.addParams(name, (FileBody) array[j]);
+            for (Object o : array) {
+                params.addParams(name, (FileBody) o);
             }
         } else if (componentType == File.class) {
-            for (int j = 0; j < array.length; j++) {
-                params.addParams(name, new FileBody(array[j] == null ? null : ((File) array[j]).getAbsolutePath()));
+            for (Object o : array) {
+                params.addParams(name, new FileBody(o == null ? null : ((File) o).getAbsolutePath()));
             }
         } else {
             params.addParams(name, array);

@@ -6,11 +6,13 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ApiClient {
 
     protected static JsonParser jsonParser;
-    protected static ReturnAdapter returnAdapter;
+    protected static List<ReturnAdapter> returnAdapters = new ArrayList<>();
 
     protected OnRequestListener onRequestListener;
     protected CodeFilter codeFilter;
@@ -63,12 +65,12 @@ public class ApiClient {
     /**
      * 自定义请求筛选处理器
      */
-    public static void setReturnAdapter(ReturnAdapter returnAdapter) {
-        ApiClient.returnAdapter = returnAdapter;
+    public static void addReturnAdapter(ReturnAdapter returnAdapter) {
+        ApiClient.returnAdapters.add(returnAdapter);
     }
 
-    public static ReturnAdapter getReturnAdapter() {
-        return returnAdapter;
+    public static List<ReturnAdapter> getReturnAdapters() {
+        return returnAdapters;
     }
 
     /**
@@ -103,8 +105,12 @@ public class ApiClient {
             apiTask.setObservable(observable);
             return observable;
         }
-        if (returnAdapter != null && returnAdapter.filterType(method.getGenericReturnType(), method.getReturnType())) {
-            return returnAdapter.returnAdapter(apiTask);
+        if (returnAdapters.size() > 0) {
+            for (ReturnAdapter returnAdapter : returnAdapters) {
+                if (returnAdapter.filterType(method.getGenericReturnType(), method.getReturnType())) {
+                    return returnAdapter.returnAdapter(apiTask);
+                }
+            }
         }
         return apiTask.execute();
     }

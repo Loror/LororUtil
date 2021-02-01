@@ -1,15 +1,14 @@
 package com.loror.lororUtil.http.api;
 
-import com.loror.lororUtil.http.RequestParams;
 import com.loror.lororUtil.http.Responce;
 
 public class ApiResult {
 
     //基本信息
     protected String url;
-    protected RequestParams params;
-    protected Responce responce;
+    protected ApiRequest apiRequest;
     protected ApiTask apiTask;
+    protected Responce responce;
 
     protected boolean accept;//是否已经重新请求
     protected boolean isMock;//是否为mock数据
@@ -21,12 +20,16 @@ public class ApiResult {
         return url;
     }
 
-    public RequestParams getParams() {
-        return params;
+    public ApiRequest getApiRequest() {
+        return apiRequest;
     }
 
     public Responce getResponce() {
         return responce;
+    }
+
+    public void setResponce(Responce responce) {
+        this.responce = responce;
     }
 
     public void setAccept(boolean accept) {
@@ -49,4 +52,7 @@ public class ApiResult {
         apiTask.requestAgain(this);
     }
 
+    public ApiTask getApiTask() {
+        return apiTask;
+    }
 }

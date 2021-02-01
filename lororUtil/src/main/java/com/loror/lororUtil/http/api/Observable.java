@@ -47,7 +47,7 @@ public class Observable<T> {
         AsyncUtil.excute(new AsyncUtil.Excute<Responce>() {
             @Override
             public Responce doBack() {
-                return apiTask.connect();
+                return apiTask.request();
             }
 
             @Override

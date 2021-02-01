@@ -39,8 +39,7 @@ public class ApiTask {
         if (apiRequest.getType() != 0) {
             apiRequest.setAnoBaseUrl(anoBaseUrl);
             apiRequest.generateParams(method, args);
-            apiRequest.apiName = (declaringClass != null ? declaringClass.getName() : service.getName())
-                    + "." + method.getName();
+            apiRequest.apiName = declaringClass.getName() + "." + method.getName();
         }
     }
 
@@ -57,7 +56,7 @@ public class ApiTask {
      */
     public Object execute() {
         if (apiRequest.getType() != 0) {
-            Responce responce = connect();
+            Responce responce = request();
             return toResult(responce);
         } else {
             return null;
@@ -71,9 +70,9 @@ public class ApiTask {
         if (observable != null) {
             apiResult.accept = true;
             observable.subscribe(observable.getObserver());
-        } else if (ApiClient.returnAdapter == null) {
+        } else if (ApiClient.returnAdapters.size() == 0) {
             apiResult.accept = true;
-            Responce responce = connect();
+            Responce responce = request();
             apiResult.responceObject = toResult(responce);
         }
     }
@@ -122,11 +121,10 @@ public class ApiTask {
     /**
      * 同步请求
      */
-    public Responce connect() {
-        final TypeInfo typeInfo = new TypeInfo(returnType);
+    public Responce request() {
         //使用mock数据
         if (apiClient.mockEnable && apiRequest.mockData != null) {
-            MockData mockData = new MockData(apiRequest, apiClient.onRequestListener, apiClient.charset);
+            MockData mockData = new MockData(apiRequest, this);
             String result = mockData.getResult();
             Responce responce = mockData.getResponce();
             if (responce == null) {
@@ -141,6 +139,14 @@ public class ApiTask {
             }
             return responce;
         }
+        return connect();
+    }
+
+    /**
+     * 连接网络
+     */
+    protected Responce connect() {
+        final TypeInfo typeInfo = new TypeInfo(returnType);
         ++apiRequest.useTimes;
         final HttpClient client = new HttpClient();
         final RequestParams params = apiRequest.getParams();
@@ -166,35 +172,38 @@ public class ApiTask {
         } else {
             return null;
         }
-        ApiResult apiResult = null;
         if (apiClient.onRequestListener != null) {
-            apiResult = new ApiResult();
+            ApiResult apiResult = new ApiResult();
             apiResult.url = url;
-            apiResult.params = params;
+            apiResult.apiRequest = apiRequest;
             apiResult.responce = responce;
             apiResult.apiTask = ApiTask.this;
             apiClient.onRequestListener.onRequestEnd(client, apiResult);
-        }
-        //事务拦截
-        if (apiResult != null && apiResult.accept) {
-            Object acceptObject = apiResult.responceObject;
-            //设置了拦截返回数据则返回
-            if (acceptObject != null) {
-                String result = ApiClient.objectToString(acceptObject);
-                responce = new Responce();
-                try {
-                    Field field = Responce.class.getDeclaredField("code");
-                    field.setAccessible(true);
-                    field.set(responce, 200);
-                } catch (Exception ignore) {
+            //事务拦截
+            if (apiResult.accept) {
+                //responce被重写
+                if (apiResult.responce != responce) {
+                    responce = apiResult.responce;
+                } else {
+                    Object acceptObject = apiResult.responceObject;
+                    //设置了拦截返回数据则返回
+                    if (acceptObject != null) {
+                        String result = ApiClient.objectToString(acceptObject);
+                        responce = new Responce();
+                        try {
+                            Field field = Responce.class.getDeclaredField("code");
+                            field.setAccessible(true);
+                            field.set(responce, 200);
+                        } catch (Exception ignore) {
+                        }
+                        responce.result = result == null ? null : result.getBytes();
+                        return responce;
+                    }
+                    return null;
                 }
-                responce.result = result == null ? null : result.getBytes();
-                return responce;
             }
-            return null;
-        } else {
-            return responce;
         }
+        return responce;
     }
 
     /**

@@ -76,7 +76,7 @@ public class MainActivity extends AppCompatActivity {
                 return JSON.toJSONString(object);
             }
         });
-        ApiClient.setReturnAdapter(new ReturnAdapter() {
+        ApiClient.addReturnAdapter(new ReturnAdapter() {
 
             @Override
             public boolean filterType(Type type, Class<?> rawType) {
