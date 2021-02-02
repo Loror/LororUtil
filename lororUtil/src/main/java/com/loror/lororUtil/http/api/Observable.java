@@ -1,8 +1,12 @@
 package com.loror.lororUtil.http.api;
 
 import com.loror.lororUtil.asynctask.AsyncUtil;
+import com.loror.lororUtil.flyweight.ObjectPool;
 import com.loror.lororUtil.http.ProgressListener;
 import com.loror.lororUtil.http.Responce;
+
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class Observable<T> {
 
@@ -10,6 +14,7 @@ public class Observable<T> {
     private ApiRequest apiRequest;
     private Observer<T> observer;
     protected ObservableManager observableManager;
+    private static final ExecutorService server = Executors.newFixedThreadPool(3);
 
     public void setApiTask(ApiTask apiTask) {
         this.apiTask = apiTask;
@@ -44,24 +49,37 @@ public class Observable<T> {
         if (observableManager != null) {
             observableManager.registerObservable(this);
         }
-        AsyncUtil.excute(new AsyncUtil.Excute<Responce>() {
+        server.execute(new Runnable() {
             @Override
-            public Responce doBack() {
-                return apiTask.request();
-            }
-
-            @Override
-            public void result(Responce responce) {
-                if (observableManager != null) {
-                    observableManager.unRegisterObservable(Observable.this);
-                }
-                if (responce != null) {
-                    Object result = apiTask.toResult(responce);
-                    if (result instanceof Throwable) {
-                        observer.failed(responce.getCode(), (Throwable) result);
-                    } else {
-                        observer.success((T) result);
-                    }
+            public void run() {
+                try {
+                    final Responce responce = apiTask.request();
+                    ObjectPool.getInstance().getHandler().post(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (observableManager != null) {
+                                observableManager.unRegisterObservable(Observable.this);
+                            }
+                            if (responce != null) {
+                                Object result = apiTask.toResult(responce);
+                                if (result instanceof Throwable) {
+                                    observer.failed(responce.getCode(), (Throwable) result);
+                                } else {
+                                    observer.success((T) result);
+                                }
+                            }
+                        }
+                    });
+                } catch (final Throwable t) {
+                    ObjectPool.getInstance().getHandler().post(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (observableManager != null) {
+                                observableManager.unRegisterObservable(Observable.this);
+                            }
+                            observer.failed(-1, t);
+                        }
+                    });
                 }
             }
         });

@@ -247,4 +247,8 @@ public class ApiTask {
     protected Observable<?> getObservable() {
         return observable;
     }
+
+    public Type getReturnType() {
+        return returnType;
+    }
 }

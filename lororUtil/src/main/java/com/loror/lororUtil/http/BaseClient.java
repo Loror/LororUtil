@@ -242,6 +242,7 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
                     conn.setUseCaches(false);
                     conn.setChunkedStreamingMode(fileReadLength);
                 }
+                HttpsClient.Config.httpsConfig(conn);
                 preparePostFile(conn, timeOut, readTimeOut, params);
                 OutputStream out = conn.getOutputStream();
                 if (params.isGzip()) {
@@ -379,6 +380,7 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
                     conn.setUseCaches(false);
                     conn.setChunkedStreamingMode(fileReadLength);
                 }
+                HttpsClient.Config.httpsConfig(conn);
                 preparePutFile(conn, timeOut, readTimeOut, params);
                 OutputStream out = conn.getOutputStream();
                 if (params.isGzip()) {
