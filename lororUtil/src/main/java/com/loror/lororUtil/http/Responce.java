@@ -26,6 +26,14 @@ public class Responce {
     protected HttpURLConnection connection;
     protected Throwable throwable;
 
+    public Responce() {
+
+    }
+
+    public Responce(int code) {
+        this.code = code;
+    }
+
     /**
      * 获取最终url路径
      */

@@ -18,15 +18,7 @@ import com.loror.lororUtil.http.DefaultAsyncClient;
 import com.loror.lororUtil.http.HttpClient;
 import com.loror.lororUtil.http.RequestParams;
 import com.loror.lororUtil.http.Responce;
-import com.loror.lororUtil.http.api.ApiClient;
-import com.loror.lororUtil.http.api.ApiRequest;
-import com.loror.lororUtil.http.api.ApiResult;
-import com.loror.lororUtil.http.api.ApiTask;
-import com.loror.lororUtil.http.api.JsonParser;
 import com.loror.lororUtil.http.api.Observer;
-import com.loror.lororUtil.http.api.OnRequestListener;
-import com.loror.lororUtil.http.api.ReturnAdapter;
-import com.loror.lororUtil.http.api.TypeInfo;
 import com.loror.lororUtil.sql.SQLiteUtil;
 import com.loror.lororUtil.sql.Where;
 import com.loror.lororUtil.view.Click;
@@ -36,17 +28,18 @@ import com.loror.lororUtil.view.ItemLongClick;
 import com.loror.lororUtil.view.LongClick;
 import com.loror.lororUtil.view.ViewUtil;
 
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
-import rx.Observable;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 
 public class MainActivity extends AppCompatActivity {
 
+    /**
+     * {@link R.id#list}
+     */
     @Find
     GridView list;
 
@@ -64,69 +57,20 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void connectNetByApi() {
-        TypeInfo.setRawType(rx.Observable.class);
-        ApiClient.setJsonParser(new JsonParser() {
+        final ApiTest apiTest = ApiCreator.getApiClient().create(ApiTest.class);
+        //内置异步请求方式
+        apiTest.test().subscribe(new Observer<String>() {
             @Override
-            public Object jsonToObject(String json, TypeInfo typeInfo) {
-                return JSON.parseObject(json, typeInfo.getType());
+            public void success(String data) {
+                Log.e("RESULT_1", data);
             }
 
             @Override
-            public String objectToJson(Object object) {
-                return JSON.toJSONString(object);
-            }
-        });
-        ApiClient.addReturnAdapter(new ReturnAdapter() {
-
-            @Override
-            public boolean filterType(Type type, Class<?> rawType) {
-                return rawType == rx.Observable.class;
-            }
-
-            @Override
-            public Object returnAdapter(final ApiTask apiTask) {
-                return rx.Observable.create(new Observable.OnSubscribe<Object>() {
-                    @Override
-                    public void call(Subscriber<? super Object> subscriber) {
-                        Object data = apiTask.execute();
-                        //无效请求
-                        if (data == null) {
-                            return;
-                        }
-                        if (data instanceof Throwable) {
-                            subscriber.onError((Throwable) data);
-                        } else {
-                            subscriber.onNext(data);
-                        }
-                    }
-                });
+            public void failed(int code, Throwable e) {
+                Log.e("RESULT_1", "err:" + code);
             }
         });
-        final ApiTest apiTest = new ApiClient()
-                .setOnRequestListener(new OnRequestListener() {
-                    @Override
-                    public void onRequestBegin(HttpClient client, ApiRequest request) {
-
-                    }
-
-                    @Override
-                    public void onRequestEnd(HttpClient client, ApiResult result) {
-
-                    }
-                })
-                .create(ApiTest.class);
-        apiTest.test()
-                .subscribe(new Observer<String>() {
-                    @Override
-                    public void success(String data) {
-                        Log.e("RESULT_1", data);
-                    }
-
-                    @Override
-                    public void failed(int code, Throwable e) {
-                        Log.e("RESULT_1", "err:" + code);
-                    }
-                });
+        //同步请求方式
         AsyncUtil.excute(new AsyncUtil.Excute<String>() {
             @Override
             public String doBack() {
@@ -138,6 +82,7 @@ public class MainActivity extends AppCompatActivity {
                 Log.e("RESULT_2", result);
             }
         });
+        //自定义异步请求方式
         apiTest.test2()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
