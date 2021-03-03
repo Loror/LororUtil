@@ -149,6 +149,9 @@ public class ApiTask {
         final TypeInfo typeInfo = new TypeInfo(returnType);
         ++apiRequest.useTimes;
         final HttpClient client = new HttpClient();
+        if (apiClient.onRequestListener != null) {
+            apiClient.onRequestListener.onRequestBegin(client, apiRequest);
+        }
         final RequestParams params = apiRequest.getParams();
         final String url = apiRequest.getUrl();
         if (apiRequest.isKeepStream() && typeInfo.getType() == Responce.class) {
@@ -156,9 +159,6 @@ public class ApiTask {
         }
         apiRequest.client = client;
         client.setProgressListener(apiRequest.progressListener);
-        if (apiClient.onRequestListener != null) {
-            apiClient.onRequestListener.onRequestBegin(client, apiRequest);
-        }
         int type = apiRequest.getType();
         Responce responce;
         if (type == 1) {
