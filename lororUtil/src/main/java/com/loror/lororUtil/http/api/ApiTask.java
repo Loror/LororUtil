@@ -221,16 +221,23 @@ public class ApiTask {
      * 处理返回结果
      */
     private Object result(Responce responce, TypeInfo typeInfo) {
+        Type classType = typeInfo.getType();
+        //Responce类型无需判断
+        if (classType == Responce.class) {
+            return responce;
+        }
+        //String类型优先拦截
+        if (classType == String.class) {
+            return apiClient.charset == null ? responce.toString() : new String(responce.result, apiClient.charset);
+        }
+        //包含异常抛出异常
         if (responce.getThrowable() != null) {
             return new ResultException(responce);
         }
-        Type classType = typeInfo.getType();
-        //优先外部筛选器通过尝试解析，否则200系列解析，返回类型Responce通过success返回
-        if (classType == Responce.class || (apiClient.codeFilter != null ? apiClient.codeFilter.isSuccessCode(responce.getCode()) : responce.getCode() / 100 == 2)) {
+        //优先外部筛选器通过尝试解析，否则200系列解析
+        if (apiClient.codeFilter != null ? apiClient.codeFilter.isSuccessCode(responce.getCode()) : responce.getCode() / 100 == 2) {
             try {
-                return classType == String.class ? (apiClient.charset == null ? responce.toString() : new String(responce.result, apiClient.charset)) :
-                        classType == Responce.class ? responce :
-                                ApiClient.jsonToObject((apiClient.charset == null ? responce.toString() : new String(responce.result, apiClient.charset)), typeInfo);
+                return ApiClient.jsonToObject((apiClient.charset == null ? responce.toString() : new String(responce.result, apiClient.charset)), typeInfo);
             } catch (Exception e) {
                 e.printStackTrace();
                 return e;
