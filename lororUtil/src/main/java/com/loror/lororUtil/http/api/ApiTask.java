@@ -226,16 +226,16 @@ public class ApiTask {
         if (classType == Responce.class) {
             return responce;
         }
-        //String类型优先拦截
-        if (classType == String.class) {
-            return apiClient.charset == null ? responce.toString() : new String(responce.result, apiClient.charset);
-        }
         //包含异常抛出异常
         if (responce.getThrowable() != null) {
             return new ResultException(responce);
         }
         //优先外部筛选器通过尝试解析，否则200系列解析
         if (apiClient.codeFilter != null ? apiClient.codeFilter.isSuccessCode(responce.getCode()) : responce.getCode() / 100 == 2) {
+             //String类型优先拦截
+            if (classType == String.class) {
+                return apiClient.charset == null ? responce.toString() : new String(responce.result, apiClient.charset);
+            }
             try {
                 return ApiClient.jsonToObject((apiClient.charset == null ? responce.toString() : new String(responce.result, apiClient.charset)), typeInfo);
             } catch (Exception e) {
