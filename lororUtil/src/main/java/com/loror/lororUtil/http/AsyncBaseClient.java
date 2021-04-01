@@ -4,7 +4,7 @@ import com.loror.lororUtil.flyweight.ObjectPool;
 
 import java.net.HttpURLConnection;
 
-public class AsyncBaseClient<T extends HttpURLConnection> extends BaseClient<T> {
+public class AsyncBaseClient extends BaseClient {
 
     /**
      * 设置回调主线程执行

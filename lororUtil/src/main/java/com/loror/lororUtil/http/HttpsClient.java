@@ -14,7 +14,61 @@ import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
-public class HttpsClient extends AsyncBaseClient<HttpsURLConnection> {
+public class HttpsClient extends HttpClient {
+    /*********************************以下为当前HttpsClient设置*******************************/
+
+    //hostName校验
+    private String[] singleHostName;
+    //是否为安卓4开启TSLv1.2
+    private boolean singleSuiteTSLAndroid4 = false;
+    private SSLSocketFactory singleSocketFactory;
+
+    @Override
+    protected void httpsConfig(HttpURLConnection conn) throws Exception {
+        if (singleSocketFactory != null) {
+            if (conn instanceof HttpsURLConnection) {
+                HttpsURLConnection httpsURLConnection = (HttpsURLConnection) conn;
+                httpsURLConnection.setHostnameVerifier(new HostnameVerifier() {
+                    public boolean verify(String s, SSLSession sslsession) {
+                        if (singleHostName == null) {
+                            System.out.println("warning: Hostname is setted not verify.");
+                            return true;
+                        }
+                        for (int i = 0; i < singleHostName.length; i++) {
+                            String host = singleHostName[i];
+                            if ((!TextUtil.isEmpty(host) && host.equals(s))) {
+                                return true;
+                            }
+                        }
+                        System.out.println("error: Hostname is not matched for cert.");
+                        return false;
+                    }
+                });
+                if (singleSuiteTSLAndroid4) {
+                    httpsURLConnection.setSSLSocketFactory(new SSLSocketFactoryCompat(singleSocketFactory));
+                } else {
+                    httpsURLConnection.setSSLSocketFactory(singleSocketFactory);
+                }
+            }
+            return;
+        }
+        super.httpsConfig(conn);
+    }
+
+    public void setSingleHostName(String... singleHostName) {
+        this.singleHostName = singleHostName;
+    }
+
+    public void setSingleSuiteTSLAndroid4(boolean singleSuiteTSLAndroid4) {
+        this.singleSuiteTSLAndroid4 = singleSuiteTSLAndroid4;
+    }
+
+    public void setSingleSocketFactory(SSLSocketFactory singleSocketFactory) {
+        this.singleSocketFactory = singleSocketFactory;
+    }
+
+    /*********************************以下为全局设置*******************************/
+
     //hostName校验
     private static String[] hostName;
     //是否为安卓4开启TSLv1.2
@@ -99,24 +153,7 @@ public class HttpsClient extends AsyncBaseClient<HttpsURLConnection> {
                         httpsURLConnection.setSSLSocketFactory(socketFactory);
                     }
                 } else if (trustAll) {
-                    TrustManager[] trustAllCerts = new TrustManager[]{new X509TrustManager() {
-                        public X509Certificate[] getAcceptedIssuers() {
-                            return new X509Certificate[0];
-                        }
-
-                        @Override
-                        public void checkClientTrusted(X509Certificate[] certs, String authType) {
-                        }
-
-                        @Override
-                        public void checkServerTrusted(X509Certificate[] certs, String authType) {
-                        }
-                    }};
-
-                    SSLContext sc = SSLContext.getInstance("TLS");
-                    // trustAllCerts信任所有的证书
-                    sc.init(null, trustAllCerts, new SecureRandom());
-                    SSLSocketFactory socketFactory = sc.getSocketFactory();
+                    SSLSocketFactory socketFactory = buildUnsafeSSLSocket();
                     if (suiteTSLAndroid4) {
                         httpsURLConnection.setSSLSocketFactory(new SSLSocketFactoryCompat(socketFactory));
                     } else {
@@ -125,6 +162,29 @@ public class HttpsClient extends AsyncBaseClient<HttpsURLConnection> {
                 }
             }
         }
+    }
+
+    /*********************************信任所有证书*******************************/
+
+    private static SSLSocketFactory buildUnsafeSSLSocket() throws Exception {
+        TrustManager[] trustAllCerts = new TrustManager[]{new X509TrustManager() {
+            public X509Certificate[] getAcceptedIssuers() {
+                return new X509Certificate[0];
+            }
+
+            @Override
+            public void checkClientTrusted(X509Certificate[] certs, String authType) {
+            }
+
+            @Override
+            public void checkServerTrusted(X509Certificate[] certs, String authType) {
+            }
+        }};
+
+        SSLContext sc = SSLContext.getInstance("TLS");
+        // trustAllCerts信任所有的证书
+        sc.init(null, trustAllCerts, new SecureRandom());
+        return sc.getSocketFactory();
     }
 
 }

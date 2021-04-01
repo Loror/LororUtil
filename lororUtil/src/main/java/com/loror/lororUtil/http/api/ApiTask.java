@@ -10,6 +10,7 @@ import com.loror.lororUtil.annotation.MOCK;
 import com.loror.lororUtil.annotation.POST;
 import com.loror.lororUtil.annotation.PUT;
 import com.loror.lororUtil.http.HttpClient;
+import com.loror.lororUtil.http.HttpsClient;
 import com.loror.lororUtil.http.RequestParams;
 import com.loror.lororUtil.http.Responce;
 
@@ -148,7 +149,7 @@ public class ApiTask {
     protected Responce connect() {
         final TypeInfo typeInfo = new TypeInfo(returnType);
         ++apiRequest.useTimes;
-        final HttpClient client = new HttpClient();
+        final HttpClient client = new HttpsClient();
         if (apiClient.onRequestListener != null) {
             apiClient.onRequestListener.onRequestBegin(client, apiRequest);
         }

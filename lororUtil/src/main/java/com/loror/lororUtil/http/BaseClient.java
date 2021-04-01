@@ -16,14 +16,14 @@ import java.util.List;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
-public abstract class BaseClient<T extends HttpURLConnection> extends Prepare implements Client {
+public abstract class BaseClient extends Prepare implements Client {
 
     private int timeOut = 10000;
     private int readTimeOut;
     private boolean followRedirects = true;
     private int fileReadLength = 1024 * 100;
     private boolean keepStream;
-    private T conn;
+    private HttpURLConnection conn;
     private ProgressListener progressListener;
     protected Actuator callbackActuator;
 
@@ -141,6 +141,13 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
         }
     }
 
+    /**
+     * https配置
+     */
+    protected void httpsConfig(HttpURLConnection conn) throws Exception {
+        HttpsClient.Config.httpsConfig(conn);
+    }
+
     @Override
     public Responce get(String urlStr, RequestParams params) {
         Responce responce = new Responce();
@@ -152,11 +159,11 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
                 }
             }
             URL url = new URL(urlStr);
-            conn = (T) url.openConnection();
+            conn = (HttpURLConnection) url.openConnection();
             if (followRedirects) {
                 conn.setInstanceFollowRedirects(true);
             }
-            HttpsClient.Config.httpsConfig(conn);
+            httpsConfig(conn);
             prepareGet(conn, timeOut, readTimeOut, params);
             responce.code = conn.getResponseCode();
             responce.contentType = conn.getContentType();
@@ -188,11 +195,11 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
                     }
                 }
                 URL url = new URL(urlStr);
-                conn = (T) url.openConnection();
+                conn = (HttpURLConnection) url.openConnection();
                 if (followRedirects) {
                     conn.setInstanceFollowRedirects(true);
                 }
-                HttpsClient.Config.httpsConfig(conn);
+                httpsConfig(conn);
                 preparePost(conn, timeOut, readTimeOut, params);
                 if (params != null) {
                     String strParams = params.packetOutParams("POST");
@@ -234,7 +241,7 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
                     }
                 }
                 URL url = new URL(urlStr);// 服务器的域名
-                conn = (T) url.openConnection();
+                conn = (HttpURLConnection) url.openConnection();
                 if (followRedirects) {
                     conn.setInstanceFollowRedirects(true);
                 }
@@ -242,7 +249,7 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
                     conn.setUseCaches(false);
                     conn.setChunkedStreamingMode(fileReadLength);
                 }
-                HttpsClient.Config.httpsConfig(conn);
+                httpsConfig(conn);
                 preparePostFile(conn, timeOut, readTimeOut, params);
                 OutputStream out = conn.getOutputStream();
                 if (params.isGzip()) {
@@ -326,11 +333,11 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
                     }
                 }
                 URL url = new URL(urlStr);
-                conn = (T) url.openConnection();
+                conn = (HttpURLConnection) url.openConnection();
                 if (followRedirects) {
                     conn.setInstanceFollowRedirects(true);
                 }
-                HttpsClient.Config.httpsConfig(conn);
+                httpsConfig(conn);
                 preparePut(conn, timeOut, readTimeOut, params);
                 if (params != null) {
                     String strParams = params.packetOutParams("POST");
@@ -372,7 +379,7 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
                     }
                 }
                 URL url = new URL(urlStr);// 服务器的域名
-                conn = (T) url.openConnection();
+                conn = (HttpURLConnection) url.openConnection();
                 if (followRedirects) {
                     conn.setInstanceFollowRedirects(true);
                 }
@@ -380,7 +387,7 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
                     conn.setUseCaches(false);
                     conn.setChunkedStreamingMode(fileReadLength);
                 }
-                HttpsClient.Config.httpsConfig(conn);
+                httpsConfig(conn);
                 preparePutFile(conn, timeOut, readTimeOut, params);
                 OutputStream out = conn.getOutputStream();
                 if (params.isGzip()) {
@@ -458,11 +465,11 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
                 }
             }
             URL url = new URL(urlStr);
-            conn = (T) url.openConnection();
+            conn = (HttpURLConnection) url.openConnection();
             if (followRedirects) {
                 conn.setInstanceFollowRedirects(true);
             }
-            HttpsClient.Config.httpsConfig(conn);
+            httpsConfig(conn);
             prepareDelete(conn, timeOut, readTimeOut, params);
             responce.code = conn.getResponseCode();
             responce.contentType = conn.getContentType();
@@ -658,10 +665,11 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
                 }
             }
             URL url = new URL(urlStr);
-            conn = (T) url.openConnection();
+            conn = (HttpURLConnection) url.openConnection();
             if (followRedirects) {
                 conn.setInstanceFollowRedirects(true);
             }
+            httpsConfig(conn);
             prepareGet(conn, timeOut, readTimeOut, params);
             conn.setRequestProperty("Accept-Encoding", "identity");
             File file = getFile(conn, path, urlStr);
@@ -732,10 +740,11 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
                 throw new IllegalArgumentException("no permission to visit file");
             }
             URL url = new URL(urlStr);// 服务器的域名
-            conn = (T) url.openConnection();
+            conn = (HttpURLConnection) url.openConnection();
             if (followRedirects) {
                 conn.setInstanceFollowRedirects(true);
             }
+            httpsConfig(conn);
             conn.setConnectTimeout(timeOut);
             conn.setRequestMethod("GET");
             conn.setRequestProperty("Range", "bytes=" + start + "-" + end);
@@ -806,7 +815,7 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
         long length = 0;
         try {
             URL url = new URL(urlStr);
-            T conn = (T) url.openConnection();
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             prepareGet(conn, timeOut, readTimeOut, null);
             conn.setRequestProperty("Accept-Encoding", "identity");
             length = length(conn);
@@ -817,7 +826,7 @@ public abstract class BaseClient<T extends HttpURLConnection> extends Prepare im
         return length;
     }
 
-    private long length(T conn) {
+    private long length(HttpURLConnection conn) {
         long length = 0;
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {

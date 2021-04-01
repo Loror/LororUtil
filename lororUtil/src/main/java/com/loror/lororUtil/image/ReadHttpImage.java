@@ -1,11 +1,6 @@
 package com.loror.lororUtil.image;
 
-import android.graphics.Bitmap;
-
 import com.loror.lororUtil.http.HttpClient;
-
-import java.io.File;
-import java.io.FileInputStream;
 
 /**
  * 读取SD卡图片
@@ -13,11 +8,11 @@ import java.io.FileInputStream;
 public class ReadHttpImage extends ReadImageUtil implements ReadImage {
 
     private ReadHttpImage() {
-        // TODO Auto-generated constructor stub
+
     }
 
     private static class SingletonFactory {
-        private static ReadHttpImage instance = new ReadHttpImage();
+        private static final ReadHttpImage instance = new ReadHttpImage();
     }
 
     public static ReadHttpImage getInstance() {
