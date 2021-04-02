@@ -210,7 +210,7 @@ public class EfficientImageUtil {
                     if (removeOldTask) {
                         tasks.put(tag, runnable);
                     }
-                    removeableThreadPool.excute(runnable, RemoveableThreadPool.EXCUTETYPE_ORDER);
+                    removeableThreadPool.excute(runnable);
                 }
             }
         } else {

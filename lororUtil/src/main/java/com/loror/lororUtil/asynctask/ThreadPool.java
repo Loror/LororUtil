@@ -5,7 +5,7 @@ import java.util.Vector;
 
 public class ThreadPool implements RemoveableThreadPool {
 
-    private int excuteType;// 执行模式
+    private int excuteType = EXCUTETYPE_ORDER;// 执行模式
     private Thread[] threads;// 线程组
     private boolean[] alive;// 线程活动状态
     private List<Runnable> tasks;// 任务池
@@ -112,11 +112,16 @@ public class ThreadPool implements RemoveableThreadPool {
         }
     }
 
+    @Override
+    public void setExcuteType(int excuteType) {
+        this.excuteType = excuteType;
+    }
+
     /**
      * 添加任务
      */
-    public synchronized void excute(Runnable task, int excuteType) {
-        this.excuteType = excuteType;
+    @Override
+    public synchronized void excute(Runnable task) {
         tasks.add(task);
         awakeThreads(tasks.size());
     }
@@ -124,6 +129,7 @@ public class ThreadPool implements RemoveableThreadPool {
     /**
      * 移除任务
      */
+    @Override
     public synchronized void removeTask(Runnable task) {
         tasks.remove(task);
     }
