@@ -1,14 +1,14 @@
 package com.loror.lororUtil.asynctask;
 
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Vector;
 
 public class ThreadPool implements RemoveableThreadPool {
 
     private int excuteType = EXCUTETYPE_ORDER;// 执行模式
-    private Thread[] threads;// 线程组
-    private boolean[] alive;// 线程活动状态
-    private List<Runnable> tasks;// 任务池
+    private final Thread[] threads;// 线程组
+    private final boolean[] alive;// 线程活动状态
+    private final List<Runnable> tasks = new LinkedList<>();// 任务池
 
     private int delay = 50;
 
@@ -18,7 +18,6 @@ public class ThreadPool implements RemoveableThreadPool {
     public ThreadPool(int threadNumber) {
         threads = new Thread[threadNumber];
         alive = new boolean[threadNumber];
-        tasks = new Vector<Runnable>();
     }
 
     /**
@@ -105,8 +104,8 @@ public class ThreadPool implements RemoveableThreadPool {
      * 设置延时
      */
     public void setDelay(int delay) {
-        if (delay < 50) {
-            this.delay = 50;
+        if (delay < 0) {
+            this.delay = 0;
         } else {
             this.delay = delay;
         }
@@ -137,7 +136,7 @@ public class ThreadPool implements RemoveableThreadPool {
     /**
      * 释放资源
      */
-    public void release() {
+    public synchronized void release() {
         tasks.clear();
     }
 }
