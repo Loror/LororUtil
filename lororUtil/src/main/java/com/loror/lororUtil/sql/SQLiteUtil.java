@@ -33,7 +33,7 @@ public class SQLiteUtil {
         void link(SQLiteDatabase database);
     }
 
-    protected interface OnClose {
+    public interface OnClose {
         void close(SQLiteUtil sqLiteUtil);
     }
 
