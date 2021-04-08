@@ -59,6 +59,9 @@ public class DataBus {
         }
 
         addStickEvent(new StickEvent(name, data));
+        if (context == null) {
+            return;
+        }
         try {
             if (data == null) {
                 data = new Intent();
