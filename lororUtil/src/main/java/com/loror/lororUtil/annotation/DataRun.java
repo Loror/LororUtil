@@ -12,4 +12,6 @@ public @interface DataRun {
     @RunThread int thread() default RunThread.LASTTHREAD;//运行线程
 
     boolean sticky() default false;//是否粘性
+    
+    String[] filter() default {};
 }
