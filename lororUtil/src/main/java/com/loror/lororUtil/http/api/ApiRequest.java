@@ -42,6 +42,7 @@ public class ApiRequest {
     protected String apiName;
     protected int mockType;
     protected String mockData;
+    protected boolean intercept;
     private List<UrlPath> querys;//Query注解指定的参数
     private List<UrlPath> paths;//Path注解指定的参数
     private String anoUrl;//Url指定的url地址
@@ -77,6 +78,10 @@ public class ApiRequest {
 
     public String getMethod() {
         return url;
+    }
+    
+    public void intercept() {
+        this.intercept = true;
     }
 
     /**
