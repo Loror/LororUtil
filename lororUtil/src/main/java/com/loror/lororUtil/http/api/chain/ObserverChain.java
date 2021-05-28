@@ -61,5 +61,11 @@ public class ObserverChain {
         }
         return this;
     }
+    
+    public void execute() {
+        if (chainNode != null) {
+            chainNode.load();
+        }
+    }
 
 }
