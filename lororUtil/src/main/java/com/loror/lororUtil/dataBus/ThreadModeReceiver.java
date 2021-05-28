@@ -14,6 +14,7 @@ public class ThreadModeReceiver {
     @RunThread
     private int thread = RunThread.LASTTHREAD;
     private boolean sticky;
+    private String[] filter;
 
     public ThreadModeReceiver(DataBusReceiver receiver) {
         this.receiver = receiver;
@@ -24,6 +25,7 @@ public class ThreadModeReceiver {
                 if (dataRun != null) {
                     this.thread = dataRun.thread();
                     this.sticky = dataRun.sticky();
+                    this.filter = dataRun.filter();
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -32,6 +34,18 @@ public class ThreadModeReceiver {
     }
 
     public void receiveData(final String name, final Intent data) {
+        if (this.filter.length > 0) {
+            boolean find = false;
+            for (String s : this.filter) {
+                if ((name == null && s == null) || (name != null && name.equals(s))) {
+                    find = true;
+                    break;
+                }
+            }
+            if (!find) {
+                return;
+            }
+        }
         if (receiver != null) {
             switch (thread) {
                 case RunThread.MAINTHREAD:
