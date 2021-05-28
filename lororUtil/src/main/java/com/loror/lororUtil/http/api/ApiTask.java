@@ -153,6 +153,9 @@ public class ApiTask {
         if (apiClient.onRequestListener != null) {
             apiClient.onRequestListener.onRequestBegin(client, apiRequest);
         }
+        if (apiRequest.intercept) {
+            return null;
+        }
         final RequestParams params = apiRequest.getParams();
         final String url = apiRequest.getUrl();
         if (apiRequest.isKeepStream() && typeInfo.getType() == Responce.class) {
