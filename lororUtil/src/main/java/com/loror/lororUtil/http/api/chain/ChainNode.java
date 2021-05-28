@@ -28,8 +28,8 @@ public class ChainNode<T> {
         return this;
     }
 
-    public <T> ChainNode<T> next(Observable<T> observable) {
-        ChainNode<T> chainNode = new ChainNode<T>(builder, observable);
+    public <T1> ChainNode<T1> next(Observable<T1> observable) {
+        ChainNode<T1> chainNode = new ChainNode<T1>(builder, observable);
         ChainNode<?> last = this;
         while (last.next != null) {
             last = last.next;
