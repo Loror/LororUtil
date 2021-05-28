@@ -50,5 +50,16 @@ public class ObserverChain {
     public <T> ChainNode<T> begin(Observable<T> observable) {
         return new ChainNode<T>(builder, observable);
     }
+    
+    private ChainNode<?> chainNode;
+
+    public <T> ObserverChain add(Observable<T> observable, ChainNode.OnResult<T> onResult) {
+        if (chainNode == null) {
+            chainNode = new ChainNode<T>(builder, observable).onResult(onResult);
+        } else {
+            chainNode = chainNode.next(observable).onResult(onResult);
+        }
+        return this;
+    }
 
 }
