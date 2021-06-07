@@ -34,7 +34,7 @@ public class ThreadModeReceiver {
     }
 
     public void receiveData(final String name, final Intent data) {
-        if (this.filter.length > 0) {
+        if (this.filter != null && this.filter.length > 0) {
             boolean find = false;
             for (String s : this.filter) {
                 if ((name == null && s == null) || (name != null && name.equals(s))) {
