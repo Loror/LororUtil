@@ -28,6 +28,7 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 public class ApiRequest {
 
@@ -188,7 +189,7 @@ public class ApiRequest {
         Class<?>[] types = method.getParameterTypes();
         for (int i = 0; i < types.length; i++) {
             if (types[i] == RequestParams.class) {
-                HashMap<String, Object> old = params.getParams();
+                Map<String, Object> old = params.getParams();
                 List<FileBody> oldFile = params.getFiles();
                 params = (RequestParams) args[i];
                 if (old.size() > 0) {
