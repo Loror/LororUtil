@@ -15,8 +15,8 @@ import java.util.Map;
  */
 public class RequestParams {
 
-    private HashMap<String, String> headers = new HashMap<String, String>();
-    private HashMap<String, Object> params = new HashMap<String, Object>();
+    private final Map<String, String> headers = new HashMap<String, String>();
+    private Map<String, Object> params = new HashMap<String, Object>();
     private List<FileBody> files;
     private String json;
 
@@ -189,7 +189,7 @@ public class RequestParams {
     /**
      * 获取所有header
      */
-    public HashMap<String, String> getHeaders() {
+    public Map<String, String> getHeaders() {
         return headers;
     }
 
@@ -381,8 +381,18 @@ public class RequestParams {
     /**
      * 获取所有参数
      */
-    public HashMap<String, Object> getParams() {
+    public Map<String, Object> getParams() {
         return params;
+    }
+
+    /**
+     * 替换所有参数
+     */
+    public void setParams(Map<String, Object> params) {
+        if (params == null) {
+            params = new HashMap<String, Object>();
+        }
+        this.params = params;
     }
 
     /**
@@ -480,7 +490,7 @@ public class RequestParams {
     /**
      * 创建json
      */
-    private final String getJson(HashMap<String, Object> params) {
+    public static String getJson(Map<String, Object> params) {
         StringBuilder builder = new StringBuilder("{");
         for (String key : params.keySet()) {
             Object value = params.get(key);
