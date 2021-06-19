@@ -1,9 +1,11 @@
 package com.loror.lororUtil.image;
 
 import android.graphics.Bitmap;
+import android.media.MediaMetadataRetriever;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.util.Locale;
 
 public class ReadImageUtil {
 
@@ -16,8 +18,8 @@ public class ReadImageUtil {
     }
 
     private ReadImageResult getReadImageResult(String path, byte[] resource, int widthLimit, boolean mutiCach) {
-        String type = mutiCach ? (resource != null ? BitmapUtil.getBitmapType(resource) : BitmapUtil.getBitmapType(path)) : null;
         ReadImageResult result = new ReadImageResult();
+        String type = mutiCach ? (resource != null ? BitmapUtil.getBitmapType(resource) : BitmapUtil.getBitmapType(path)) : null;
         if (type != null && type.contains("gif")) {
             try {
                 GifDecoder decoder = resource != null ? new GifDecoder(resource) : new GifDecoder(new FileInputStream(new File(path)));
@@ -44,6 +46,18 @@ public class ReadImageUtil {
     }
 
     private void addFirstFrame(ReadImageResult result, String path, byte[] resource, int widthLimit) {
+        if (path.toLowerCase(Locale.CHINA).endsWith(".mp4")) {
+            MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+            try {
+                retriever.setDataSource(path);
+                Bitmap bitmap = retriever.getFrameAtTime();
+                result.setErrorCode(0);
+                result.addFrame(new Frame(bitmap, 0, widthLimit));
+                return;
+            } catch (IllegalArgumentException e) {
+                e.printStackTrace();
+            }
+        }
         try {
             Bitmap bitmap = resource != null ?
                     BitmapUtil.compessBitmap(resource, widthLimit) :
