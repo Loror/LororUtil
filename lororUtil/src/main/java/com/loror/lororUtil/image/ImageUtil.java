@@ -4,6 +4,8 @@ import java.io.File;
 import java.lang.ref.WeakReference;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.loror.lororUtil.convert.MD5Util;
 import com.loror.lororUtil.flyweight.ObjectPool;
@@ -64,6 +66,18 @@ public class ImageUtil implements Cloneable {
             }
         }
         if (targetName == null) {
+            if (path != null) {
+                String finalPath = path;
+                int index = path.lastIndexOf("/");
+                if (index != -1) {
+                    finalPath = path.substring(index + 1);
+                }
+                String regEx = "[/\\\\：:*\"<>|?？]";
+                Pattern pattern = Pattern.compile(regEx);
+                Matcher matcher = pattern.matcher(finalPath);
+                targetName = matcher.replaceAll("");
+                return;
+            }
             targetName = MD5Util.MD5(path);
         }
     }
