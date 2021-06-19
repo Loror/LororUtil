@@ -376,6 +376,7 @@ public class ImageUtil implements Cloneable {
                                             result.addFrame(new Frame(bitmap, 0, widthLimit));
                                             result.setOriginPath(path);
                                             result.setPath(path);
+                                            ImageCache.pushToCache(path + widthLimit, result);//放入缓存
                                             return result;
                                         }
                                     } catch (IllegalArgumentException e) {
