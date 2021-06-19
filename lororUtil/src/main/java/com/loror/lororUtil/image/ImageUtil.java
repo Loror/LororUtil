@@ -84,6 +84,10 @@ public class ImageUtil implements Cloneable {
             targetName = MD5Util.MD5(path);
             if (path != null) {
                 String fix = path.toLowerCase(Locale.CHINA);
+                int index = fix.lastIndexOf("?");
+                if (index != -1) {
+                    fix = fix.substring(0, index);
+                }
                 if (fix.endsWith(".mp4")) {
                     targetName += ".mp4";
                 } else if (fix.endsWith(".gif")) {
@@ -364,7 +368,12 @@ public class ImageUtil implements Cloneable {
                         if (path.startsWith("http")) {
 
                             //视频不缓存下载，直接取第一帧
-                            if (path.toLowerCase(Locale.CHINA).endsWith(".mp4")) {
+                            String url = path;
+                            int index = url.lastIndexOf("?");
+                            if (index != -1) {
+                                url = path.substring(0, index);
+                            }
+                            if (url.toLowerCase(Locale.CHINA).endsWith(".mp4")) {
                                 result = ImageCache.getFromCache(path + widthLimit);
                                 if (result == null) {
                                     MediaMetadataRetriever retriever = new MediaMetadataRetriever();
