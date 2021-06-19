@@ -2,6 +2,8 @@ package com.loror.lororUtil.image;
 
 import java.io.File;
 import java.lang.ref.WeakReference;
+import java.util.HashMap;
+import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.regex.Matcher;
@@ -13,6 +15,7 @@ import com.loror.lororUtil.flyweight.ObjectPool;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.media.MediaMetadataRetriever;
 import android.os.Environment;
 import android.os.Handler;
 import android.view.View;
@@ -66,19 +69,27 @@ public class ImageUtil implements Cloneable {
             }
         }
         if (targetName == null) {
-            if (path != null) {
-                String finalPath = path;
-                int index = path.lastIndexOf("/");
-                if (index != -1) {
-                    finalPath = path.substring(index + 1);
-                }
-                String regEx = "[/\\\\：:*\"<>|?？]";
-                Pattern pattern = Pattern.compile(regEx);
-                Matcher matcher = pattern.matcher(finalPath);
-                targetName = matcher.replaceAll("");
-                return;
-            }
+//            if (path != null) {
+//                String finalPath = path;
+//                int index = path.lastIndexOf("/");
+//                if (index != -1) {
+//                    finalPath = path.substring(index + 1);
+//                }
+//                String regEx = "[/\\\\：:*\"<>|?？]";
+//                Pattern pattern = Pattern.compile(regEx);
+//                Matcher matcher = pattern.matcher(finalPath);
+//                targetName = matcher.replaceAll("");
+//                return;
+//            }
             targetName = MD5Util.MD5(path);
+            if (path != null) {
+                String fix = path.toLowerCase(Locale.CHINA);
+                if (fix.endsWith(".mp4")) {
+                    targetName += ".mp4";
+                } else if (fix.endsWith(".gif")) {
+                    targetName += ".gif";
+                }
+            }
         }
     }
 
@@ -337,6 +348,7 @@ public class ImageUtil implements Cloneable {
             @Override
             public ReadImageResult readImage(String path, int widthLimit, boolean mutiCache) {
                 ReadImage readImage = ImageUtil.this.readImage != null ? ImageUtil.this.readImage : ImageUtil.globalReadImage;
+                ReadImageResult result = null;
                 if (readImage == null) {
                     if (noSdCache) {
                         if (path.startsWith("http")) {
@@ -350,6 +362,30 @@ public class ImageUtil implements Cloneable {
                         String targetName = ImageUtil.this.targetName;
                         String targetFile;
                         if (path.startsWith("http")) {
+
+                            //视频不缓存下载，直接取第一帧
+                            if (path.toLowerCase(Locale.CHINA).endsWith(".mp4")) {
+                                result = ImageCache.getFromCache(path + widthLimit);
+                                if (result == null) {
+                                    MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+                                    try {
+                                        retriever.setDataSource(path, new HashMap<String, String>());
+                                        Bitmap bitmap = retriever.getFrameAtTime();
+                                        if (bitmap != null) {
+                                            result.setErrorCode(0);
+                                            result.addFrame(new Frame(bitmap, 0, widthLimit));
+                                            result.setOriginPath(path);
+                                            result.setPath(path);
+                                            return result;
+                                        }
+                                    } catch (IllegalArgumentException e) {
+                                        e.printStackTrace();
+                                    }
+                                } else {
+                                    return result;
+                                }
+                            }
+
                             File targetDir = new File(targetDirPath);
                             if (!targetDir.exists()) {
                                 targetDir.mkdirs();
@@ -362,7 +398,6 @@ public class ImageUtil implements Cloneable {
                         readImage = SmartReadImage.getInstance(context, targetFile);
                     }
                 }
-                ReadImageResult result = null;
                 LockMap.SingleLock lock = LockMap.getLock(path);//如出现加载同一张图片将获得同一把锁，只有一个任务去加载图片，其他任务只需等待加载完成即可
                 synchronized (lock) {
                     if (lock.mark == 0) {
