@@ -21,6 +21,9 @@ public class ReadHttpImage extends ReadImageUtil implements ReadImage {
 
     @Override
     public ReadImageResult readImage(String path, int widthLimit, boolean mutiCach) {
+        if (isNetMp4(path)) {
+            return getNetMp4ReadImageResult(path, widthLimit);
+        }
         HttpClient client = new HttpClient();
         return getReadImageResult(client.get(path, null).result, widthLimit, mutiCach);
     }
