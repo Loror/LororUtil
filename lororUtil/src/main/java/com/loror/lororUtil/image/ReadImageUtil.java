@@ -19,6 +19,20 @@ public class ReadImageUtil {
 
     private ReadImageResult getReadImageResult(String path, byte[] resource, int widthLimit, boolean mutiCach) {
         ReadImageResult result = new ReadImageResult();
+        if (path != null && path.toLowerCase(Locale.CHINA).endsWith(".mp4")) {
+            MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+            try {
+                retriever.setDataSource(path);
+                Bitmap bitmap = retriever.getFrameAtTime();
+                result.setErrorCode(0);
+                result.addFrame(new Frame(bitmap, 0, widthLimit));
+                return result;
+            } catch (IllegalArgumentException e) {
+                e.printStackTrace();
+            } finally {
+                retriever.release();
+            }
+        }
         String type = mutiCach ? (resource != null ? BitmapUtil.getBitmapType(resource) : BitmapUtil.getBitmapType(path)) : null;
         if (type != null && type.contains("gif")) {
             try {
@@ -46,18 +60,6 @@ public class ReadImageUtil {
     }
 
     private void addFirstFrame(ReadImageResult result, String path, byte[] resource, int widthLimit) {
-        if (path.toLowerCase(Locale.CHINA).endsWith(".mp4")) {
-            MediaMetadataRetriever retriever = new MediaMetadataRetriever();
-            try {
-                retriever.setDataSource(path);
-                Bitmap bitmap = retriever.getFrameAtTime();
-                result.setErrorCode(0);
-                result.addFrame(new Frame(bitmap, 0, widthLimit));
-                return;
-            } catch (IllegalArgumentException e) {
-                e.printStackTrace();
-            }
-        }
         try {
             Bitmap bitmap = resource != null ?
                     BitmapUtil.compessBitmap(resource, widthLimit) :
