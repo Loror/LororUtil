@@ -1,6 +1,7 @@
 package com.loror.lororUtil.image;
 
 import java.io.File;
+
 import android.content.Context;
 
 public class SmartReadImage extends ReadImageUtil implements ReadImage, Cloneable {
@@ -13,7 +14,7 @@ public class SmartReadImage extends ReadImageUtil implements ReadImage, Cloneabl
     }
 
     private static class SingletonFactory {
-        private static SmartReadImage instance = new SmartReadImage();
+        private static final SmartReadImage instance = new SmartReadImage();
     }
 
     public static SmartReadImage getInstance(Context context, String targetFilePath) {
@@ -34,6 +35,9 @@ public class SmartReadImage extends ReadImageUtil implements ReadImage, Cloneabl
         File f;
         ReadImageResult result;
         if (url.startsWith("http")) {
+            if (isNetMp4(url)) {
+                return getNetMp4ReadImageResult(url, widthLimit);
+            }
             f = new File(targetFilePath);
             if (!ImageDownloader.download(context, url, f.getAbsolutePath(), false, false)) {
                 result = new ReadImageResult();
