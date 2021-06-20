@@ -52,7 +52,7 @@ public class ImageUtil implements Cloneable {
     private static ExecutorService server;
 
     private static class SingletonFactory {
-        private static ImageUtil imageUtil = new ImageUtil(null);
+        private static final ImageUtil imageUtil = new ImageUtil(null);
     }
 
     private ImageUtil(Context context) {
@@ -366,36 +366,6 @@ public class ImageUtil implements Cloneable {
                         String targetName = ImageUtil.this.targetName;
                         String targetFile;
                         if (path.startsWith("http")) {
-
-                            //视频不缓存下载，直接取第一帧
-                            String url = path;
-                            int index = url.lastIndexOf("?");
-                            if (index != -1) {
-                                url = path.substring(0, index);
-                            }
-                            if (url.toLowerCase(Locale.CHINA).endsWith(".mp4")) {
-                                result = ImageCache.getFromCache(path + widthLimit);
-                                if (result == null) {
-                                    MediaMetadataRetriever retriever = new MediaMetadataRetriever();
-                                    try {
-                                        retriever.setDataSource(path, new HashMap<String, String>());
-                                        Bitmap bitmap = retriever.getFrameAtTime();
-                                        if (bitmap != null) {
-                                            result.setErrorCode(0);
-                                            result.addFrame(new Frame(bitmap, 0, widthLimit));
-                                            result.setOriginPath(path);
-                                            result.setPath(path);
-                                            ImageCache.pushToCache(path + widthLimit, result);//放入缓存
-                                            return result;
-                                        }
-                                    } catch (IllegalArgumentException e) {
-                                        e.printStackTrace();
-                                    }
-                                } else {
-                                    return result;
-                                }
-                            }
-
                             File targetDir = new File(targetDirPath);
                             if (!targetDir.exists()) {
                                 targetDir.mkdirs();
@@ -411,6 +381,42 @@ public class ImageUtil implements Cloneable {
                 LockMap.SingleLock lock = LockMap.getLock(path);//如出现加载同一张图片将获得同一把锁，只有一个任务去加载图片，其他任务只需等待加载完成即可
                 synchronized (lock) {
                     if (lock.mark == 0) {
+
+                        if (ImageUtil.this.readImage == null && path.startsWith("http")) {
+                            //视频不缓存下载，直接取第一帧
+                            String url = path;
+                            int index = url.lastIndexOf("?");
+                            if (index != -1) {
+                                url = path.substring(0, index);
+                            }
+                            if (url.toLowerCase(Locale.CHINA).endsWith(".mp4")) {
+                                result = ImageCache.getFromCache(path + widthLimit);
+                                if (result == null) {
+                                    MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+                                    try {
+                                        retriever.setDataSource(path, new HashMap<String, String>());
+                                        Bitmap bitmap = retriever.getFrameAtTime();
+                                        if (bitmap != null) {
+                                            result = new ReadImageResult();
+                                            result.setErrorCode(0);
+                                            result.addFrame(new Frame(bitmap, 0, widthLimit));
+                                            result.setOriginPath(path);
+                                            result.setPath(path);
+                                            lock.mark = 1;//加载成功，锁耗尽
+                                            ImageCache.pushToCache(path + widthLimit, result);//放入缓存
+                                            return result;
+                                        }
+                                    } catch (IllegalArgumentException e) {
+                                        e.printStackTrace();
+                                    } finally {
+                                        retriever.release();
+                                    }
+                                } else {
+                                    return result;
+                                }
+                            }
+                        }
+
                         result = readImage.readImage(path, widthLimit, isGif);
                         if (result == null) {
                             throw new IllegalStateException("自定义ReadImage不允许返回null，请返回ReadImageResult并指定errorCode");
