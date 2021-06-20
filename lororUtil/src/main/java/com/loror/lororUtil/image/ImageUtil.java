@@ -1,21 +1,8 @@
 package com.loror.lororUtil.image;
 
-import java.io.File;
-import java.lang.ref.WeakReference;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import com.loror.lororUtil.convert.MD5Util;
-import com.loror.lororUtil.flyweight.ObjectPool;
-
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.media.MediaMetadataRetriever;
 import android.os.Environment;
 import android.os.Handler;
 import android.view.View;
@@ -23,6 +10,15 @@ import android.view.ViewGroup;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.widget.ImageView;
+
+import com.loror.lororUtil.convert.MD5Util;
+import com.loror.lororUtil.flyweight.ObjectPool;
+
+import java.io.File;
+import java.lang.ref.WeakReference;
+import java.util.Locale;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class ImageUtil implements Cloneable {
 
@@ -381,42 +377,6 @@ public class ImageUtil implements Cloneable {
                 LockMap.SingleLock lock = LockMap.getLock(path);//如出现加载同一张图片将获得同一把锁，只有一个任务去加载图片，其他任务只需等待加载完成即可
                 synchronized (lock) {
                     if (lock.mark == 0) {
-
-                        if (ImageUtil.this.readImage == null && path.startsWith("http")) {
-                            //视频不缓存下载，直接取第一帧
-                            String url = path;
-                            int index = url.lastIndexOf("?");
-                            if (index != -1) {
-                                url = path.substring(0, index);
-                            }
-                            if (url.toLowerCase(Locale.CHINA).endsWith(".mp4")) {
-                                result = ImageCache.getFromCache(path + widthLimit);
-                                if (result == null) {
-                                    MediaMetadataRetriever retriever = new MediaMetadataRetriever();
-                                    try {
-                                        retriever.setDataSource(path, new HashMap<String, String>());
-                                        Bitmap bitmap = retriever.getFrameAtTime();
-                                        if (bitmap != null) {
-                                            result = new ReadImageResult();
-                                            result.setErrorCode(0);
-                                            result.addFrame(new Frame(bitmap, 0, widthLimit));
-                                            result.setOriginPath(path);
-                                            result.setPath(path);
-                                            lock.mark = 1;//加载成功，锁耗尽
-                                            ImageCache.pushToCache(path + widthLimit, result);//放入缓存
-                                            return result;
-                                        }
-                                    } catch (IllegalArgumentException e) {
-                                        e.printStackTrace();
-                                    } finally {
-                                        retriever.release();
-                                    }
-                                } else {
-                                    return result;
-                                }
-                            }
-                        }
-
                         result = readImage.readImage(path, widthLimit, isGif);
                         if (result == null) {
                             throw new IllegalStateException("自定义ReadImage不允许返回null，请返回ReadImageResult并指定errorCode");
