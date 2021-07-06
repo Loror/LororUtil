@@ -3,6 +3,7 @@ package com.loror.lororUtil.http.api;
 import com.loror.lororUtil.http.Cookies;
 import com.loror.lororUtil.http.FileBody;
 import com.loror.lororUtil.http.HttpClient;
+import com.loror.lororUtil.http.Primitive;
 import com.loror.lororUtil.http.ProgressListener;
 import com.loror.lororUtil.http.RequestParams;
 import com.loror.lororUtil.text.TextUtil;
@@ -80,7 +81,7 @@ public class ApiRequest {
     public String getMethod() {
         return url;
     }
-    
+
     public void intercept() {
         this.intercept = true;
     }
@@ -263,6 +264,8 @@ public class ApiRequest {
                         }
                         addArray(params, name, array, componentType);
                     }
+                } else if (arg instanceof Primitive) {
+                    params.addParams(name, (Primitive) arg);
                 } else {
                     params.addParams(name, arg == null ? null : String.valueOf(arg));
                 }
