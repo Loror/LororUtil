@@ -355,6 +355,16 @@ public class RequestParams {
     /**
      * 添加参数
      */
+    public RequestParams addParams(String key, Primitive value) {
+        if (key != null) {
+            params.put(key, value);
+        }
+        return this;
+    }
+
+    /**
+     * 添加参数
+     */
     public RequestParams addParams(String key, FileBody file) {
         file.setKey(key);
         if (files == null) {
@@ -500,7 +510,7 @@ public class RequestParams {
                         .append("\":null");
             } else if (value instanceof Integer || value instanceof Long
                     || value instanceof Float || value instanceof Double
-                    || value instanceof Boolean) {
+                    || value instanceof Boolean || value instanceof Primitive) {
                 builder.append("\"")
                         .append(key)
                         .append("\":")
