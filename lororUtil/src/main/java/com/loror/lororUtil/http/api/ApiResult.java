@@ -11,7 +11,6 @@ public class ApiResult {
     protected Responce responce;
 
     protected boolean accept;//是否已经重新请求
-    protected boolean isMock;//是否为mock数据
 
     //框架需使用的参数及拦截所需参数
     protected Object responceObject;
@@ -37,7 +36,11 @@ public class ApiResult {
     }
 
     public boolean isMock() {
-        return isMock;
+        return apiRequest.mockType != 0;
+    }
+
+    public int getMockType() {
+        return apiRequest.mockType;
     }
 
     public void setResponceObject(Object responce) {
