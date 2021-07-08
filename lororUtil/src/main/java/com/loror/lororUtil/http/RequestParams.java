@@ -226,9 +226,8 @@ public class RequestParams {
                     addParams(key.toString(), new FileBody(((File) value).getAbsolutePath(), ((File) value).getName()));
                 } else if (value instanceof FileBody) {
                     addParams(key.toString(), (FileBody) value);
-                } else if (value instanceof Integer || value instanceof Long
-                        || value instanceof Float || value instanceof Double
-                        || value instanceof Boolean) {
+                } else if (value instanceof Number || value instanceof Boolean ||
+                        value instanceof Primitive) {
                     params.put(key.toString(), value);
                 } else {
                     params.put(key.toString(), value == null ? null : String.valueOf(value));
@@ -252,9 +251,8 @@ public class RequestParams {
                         addParams(key, value == null ? new FileBody(null, key) : new FileBody(((File) object).getAbsolutePath(), ((File) object).getName()));
                     } else if (type == FileBody.class) {
                         addParams(key, value == null ? new FileBody(null, key) : (FileBody) value);
-                    } else if (type == Integer.class || type == Integer.TYPE || type == Long.class || type == Long.TYPE
-                            || type == Float.class || type == Float.TYPE || type == Double.class || type == Double.TYPE
-                            || type == Boolean.class || type == Boolean.TYPE || type == String.class) {
+                    } else if (type.isPrimitive() || type == String.class
+                            || value instanceof Primitive) {
                         params.put(key, value);
                     } else {
                         params.put(key, value == null ? null : String.valueOf(value));
@@ -508,9 +506,8 @@ public class RequestParams {
                 builder.append("\"")
                         .append(key)
                         .append("\":null");
-            } else if (value instanceof Integer || value instanceof Long
-                    || value instanceof Float || value instanceof Double
-                    || value instanceof Boolean || value instanceof Primitive) {
+            } else if (value instanceof Number || value instanceof Boolean ||
+                    value instanceof Primitive) {
                 builder.append("\"")
                         .append(key)
                         .append("\":")
@@ -524,33 +521,25 @@ public class RequestParams {
                     Object val = values[i];
                     if (val == null) {
                         builder.append("null");
-                    } else if (val instanceof Integer || val instanceof Long
-                            || val instanceof Float || val instanceof Double
-                            || val instanceof Boolean) {
+                    } else if (val instanceof Number || val instanceof Boolean ||
+                            val instanceof Primitive) {
                         builder.append(val);
-                    } else if (val instanceof CharSequence) {
+                    } else {
                         builder.append("\"")
                                 .append(val)
                                 .append("\"");
-                    } else {
-                        builder.append(val);
                     }
                     if (i != values.length - 1) {
                         builder.append(",");
                     }
                 }
                 builder.append("]");
-            } else if (value instanceof CharSequence) {
+            } else {
                 builder.append("\"")
                         .append(key)
                         .append("\":\"")
                         .append(value)
                         .append("\"");
-            } else {
-                builder.append("\"")
-                        .append(key)
-                        .append("\":")
-                        .append(value);
             }
             builder.append(",");
         }
