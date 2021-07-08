@@ -12,6 +12,11 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 public class DataBus {
 
+    /**
+     * RemoteDataBusReceiver需要注册该广播
+     */
+    public static final String BROADCAST_ACTION = "loror.RemoteDataBusReceiver";
+
     private static int stickCount = 10;
     private static final List<ThreadModeReceiver> receivers = new ArrayList<>();
     private static final List<StickEvent> stickEvents = new CopyOnWriteArrayList<>();//粘性事件，仅保留stickCount个
@@ -69,7 +74,7 @@ public class DataBus {
             } else {
                 data = new Intent(data);
             }
-            data.setAction("loror.RemoteDataBusReceiver");
+            data.setAction(BROADCAST_ACTION);
             data.setPackage(context.getPackageName());
             data.putExtra("loror.RemoteDataBusReceiver.name", name);
             context.sendBroadcast(data);
