@@ -264,6 +264,16 @@ public class ApiRequest {
                         }
                         addArray(params, name, array, componentType);
                     }
+                } else if (arg instanceof Integer) {
+                    params.addParams(name, (Integer) arg);
+                } else if (arg instanceof Long) {
+                    params.addParams(name, (Long) arg);
+                } else if (arg instanceof Float) {
+                    params.addParams(name, (Float) arg);
+                } else if (arg instanceof Double) {
+                    params.addParams(name, (Double) arg);
+                } else if (arg instanceof Boolean) {
+                    params.addParams(name, (Boolean) arg);
                 } else if (arg instanceof Primitive) {
                     params.addParams(name, (Primitive) arg);
                 } else {
