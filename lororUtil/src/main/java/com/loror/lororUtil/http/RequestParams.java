@@ -36,7 +36,7 @@ public class RequestParams {
     private static boolean defaultNullToEmpty = true;
     private static boolean defaultUseMultiForPost = false;
 
-    private static RequestConverter defaultConverter = new RequestConverter() {
+    private static final RequestConverter defaultConverter = new RequestConverter() {
         @Override
         public String convert(String key, String value) {
             return value == null ? null : UrlUtf8Util.toUrlString(value);
@@ -252,7 +252,7 @@ public class RequestParams {
                     } else if (type == FileBody.class) {
                         addParams(key, value == null ? new FileBody(null, key) : (FileBody) value);
                     } else if (type.isPrimitive() || type == String.class
-                            || value instanceof Primitive) {
+                            || value instanceof Number || value instanceof Primitive) {
                         params.put(key, value);
                     } else {
                         params.put(key, value == null ? null : String.valueOf(value));
