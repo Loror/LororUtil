@@ -159,8 +159,28 @@ public class ApiRequest {
         DefaultParams defaultParams = method.getAnnotation(DefaultParams.class);
         if (defaultParams != null) {
             int size = Math.min(defaultParams.keys().length, defaultParams.values().length);
+            Class<?>[] types = defaultParams.types();
             for (int i = 0; i < size; i++) {
-                params.addParams(defaultParams.keys()[i], defaultParams.values()[i]);
+                String key = defaultParams.keys()[i];
+                String value = defaultParams.values()[i];
+                if (i < types.length) {
+                    Class<?> type = types[i];
+                    if (type.isPrimitive()) {
+                        if (type == byte.class || type == short.class || type == int.class) {
+                            params.addParams(key, Integer.parseInt(value));
+                        } else if (type == long.class) {
+                            params.addParams(key, Long.parseLong(value));
+                        } else if (type == float.class) {
+                            params.addParams(key, Float.parseFloat(value));
+                        } else if (type == double.class) {
+                            params.addParams(key, Double.parseDouble(value));
+                        } else if (type == boolean.class) {
+                            params.addParams(key, Boolean.parseBoolean(value));
+                        }
+                        continue;
+                    }
+                }
+                params.addParams(key, value);
             }
         }
         DefaultHeaders defaultHeaders = method.getAnnotation(DefaultHeaders.class);
@@ -196,25 +216,9 @@ public class ApiRequest {
                 if (old.size() > 0) {
                     for (String key : old.keySet()) {
                         Object value = old.get(key);
-                        if (value != null) {
-                            if (value instanceof Integer) {
-                                params.addParams(key, (Integer) value);
-                            } else if (value instanceof Long) {
-                                params.addParams(key, (Long) value);
-                            } else if (value instanceof Float) {
-                                params.addParams(key, (Float) value);
-                            } else if (value instanceof Double) {
-                                params.addParams(key, (Double) value);
-                            } else if (value instanceof Boolean) {
-                                params.addParams(key, (Boolean) value);
-                            } else if (value.getClass().isArray()) {
-                                params.addParams(key, (Object[]) value);
-                            } else {
-                                params.addParams(key, String.valueOf(value));
-                            }
-                        } else {
-                            params.addParams(key, (String) null);
-                        }
+                        //部分map不支持value为空，出现错误为使用这替换了错误的map类型
+                        params.getParams().put(key, value);
+//                        addObject(params, key, value);
                     }
                 }
                 if (oldFile.size() > 0) {
@@ -264,20 +268,8 @@ public class ApiRequest {
                         }
                         addArray(params, name, array, componentType);
                     }
-                } else if (arg instanceof Integer) {
-                    params.addParams(name, (Integer) arg);
-                } else if (arg instanceof Long) {
-                    params.addParams(name, (Long) arg);
-                } else if (arg instanceof Float) {
-                    params.addParams(name, (Float) arg);
-                } else if (arg instanceof Double) {
-                    params.addParams(name, (Double) arg);
-                } else if (arg instanceof Boolean) {
-                    params.addParams(name, (Boolean) arg);
-                } else if (arg instanceof Primitive) {
-                    params.addParams(name, (Primitive) arg);
                 } else {
-                    params.addParams(name, arg == null ? null : String.valueOf(arg));
+                    addObject(params, name, arg);
                 }
                 break;
             } else if (annotations[i].annotationType() == Cookie.class) {
@@ -350,6 +342,29 @@ public class ApiRequest {
                 anoUrl = arg == null ? "" : String.valueOf(arg);
                 break;
             }
+        }
+    }
+
+    /**
+     * 添加参数到param
+     */
+    private void addObject(RequestParams params, String name, Object value) {
+        if (value == null) {
+            params.addParams(name, (String) null);
+        } else if (value instanceof Integer) {
+            params.addParams(name, (Integer) value);
+        } else if (value instanceof Long) {
+            params.addParams(name, (Long) value);
+        } else if (value instanceof Float) {
+            params.addParams(name, (Float) value);
+        } else if (value instanceof Double) {
+            params.addParams(name, (Double) value);
+        } else if (value instanceof Boolean) {
+            params.addParams(name, (Boolean) value);
+        } else if (value instanceof Primitive) {
+            params.addParams(name, (Primitive) value);
+        } else {
+            params.addParams(name, String.valueOf(value));
         }
     }
 
