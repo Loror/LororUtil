@@ -11,4 +11,6 @@ public @interface DefaultParams {
     String[] keys();
 
     String[] values();
+
+    Class<?>[] types() default {};
 }
