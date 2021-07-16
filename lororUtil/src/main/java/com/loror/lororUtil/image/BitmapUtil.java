@@ -137,6 +137,13 @@ public class BitmapUtil {
      * 旋转图片
      */
     public static Bitmap rotateBitmapByDegree(Bitmap bm, int degree) {
+        return rotateBitmapByDegree(bm, degree, true);
+    }
+
+    /**
+     * 旋转图片
+     */
+    public static Bitmap rotateBitmapByDegree(Bitmap bm, int degree, boolean recycleOld) {
         Bitmap returnBm = null;
         // 根据旋转角度，生成旋转矩阵
         Matrix matrix = new Matrix();
@@ -150,7 +157,7 @@ public class BitmapUtil {
         if (returnBm == null) {
             returnBm = bm;
         }
-        if (bm != returnBm) {
+        if (bm != returnBm && recycleOld) {
             bm.recycle();
         }
         return returnBm;
