@@ -318,7 +318,7 @@ public abstract class BaseClient extends Prepare implements Client {
 
     @Override
     public Responce put(String urlStr, RequestParams params) {
-        if (params == null || (params.getFiles().size() == 0 && !params.isUseMultiForPost())) {
+        if (params == null || params.getFiles().size() == 0) {
             Responce responce = new Responce();
             try {
                 boolean queryParam = false;
@@ -366,7 +366,7 @@ public abstract class BaseClient extends Prepare implements Client {
                 conn = null;
             }
             return responce;
-        } else {
+        } else if (params.isUseMultiForPost()) {
             final ProgressListener progressListener = this.progressListener;
             final Actuator callbackActuator = this.callbackActuator;
             List<FileBody> files = params.getFiles();
@@ -408,6 +408,78 @@ public abstract class BaseClient extends Prepare implements Client {
                 // 定义最后数据分隔线，即--加上BOUNDARY再加上--，写上结尾标识
                 byte[] end_data = (MultipartConfig.PREFIX + MultipartConfig.BOUNDARY + MultipartConfig.PREFIX + MultipartConfig.LINEEND).getBytes();
                 out.write(end_data);
+                out.flush();
+                out.close();
+                responce.url = conn.getURL();
+                responce.code = conn.getResponseCode();
+                responce.contentType = conn.getContentType();
+                responce.contentEncoding = conn.getContentEncoding();
+                initHeaders(conn, responce);
+                readResponce(conn, responce);
+            } catch (Throwable e) {
+                responce.setThrowable(e);
+            } finally {
+                conn = null;
+                if (progressListener != null) {
+                    if (responce.result == null) {
+                        Runnable runnable = new Runnable() {
+
+                            @Override
+                            public void run() {
+                                progressListener.failed();
+                            }
+                        };
+                        if (callbackActuator != null) {
+                            callbackActuator.run(runnable);
+                        } else {
+                            runnable.run();
+                        }
+                    } else {
+                        Runnable runnable = new Runnable() {
+
+                            @Override
+                            public void run() {
+                                progressListener.finish(responce.toString());
+                            }
+                        };
+                        if (callbackActuator != null) {
+                            callbackActuator.run(runnable);
+                        } else {
+                            runnable.run();
+                        }
+                    }
+                }
+            }
+            return responce;
+        } else {
+            //这种情况只会上传第一个文件，其余参数全部打包到url
+            final ProgressListener progressListener = this.progressListener;
+            final Actuator callbackActuator = this.callbackActuator;
+            List<FileBody> files = params.getFiles();
+            final Responce responce = new Responce();
+            try {
+                String strParams = params.packetOutParams("GET");
+                if (!TextUtil.isEmpty(strParams)) {
+                    urlStr += params.getSplicing(urlStr, 0) + strParams;
+                }
+                URL url = new URL(urlStr);// 服务器的域名
+                conn = (HttpURLConnection) url.openConnection();
+                if (followRedirects) {
+                    conn.setInstanceFollowRedirects(true);
+                }
+                if (progressListener != null) {
+                    conn.setUseCaches(false);
+                    conn.setChunkedStreamingMode(fileReadLength);
+                }
+                httpsConfig(conn);
+                preparePutSingleFile(conn, timeOut, readTimeOut, params);
+                OutputStream out = conn.getOutputStream();
+                if (params.isGzip()) {
+                    out = new GZIPOutputStream(out);
+                }
+                //上传第一个文件
+                FileBody file = files.get(0);
+                sendFile(file.getFile(), out, progressListener, callbackActuator);
                 out.flush();
                 out.close();
                 responce.url = conn.getURL();
