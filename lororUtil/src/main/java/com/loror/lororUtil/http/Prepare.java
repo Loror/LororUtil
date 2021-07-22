@@ -111,6 +111,31 @@ public class Prepare {
     }
 
     /**
+     * put文件准备
+     */
+    public void preparePutSingleFile(HttpURLConnection conn, int timeOut, int readTimeOut, RequestParams parmas)
+            throws Exception {
+        conn.setRequestMethod("PUT");// 设置为PUT情
+        conn.setConnectTimeout(timeOut);
+        if (readTimeOut != 0) {
+            conn.setReadTimeout(readTimeOut);
+        }
+        conn.setDoOutput(true);// 发送POST请求必须设置如下两行
+        conn.setDoInput(true);
+
+        conn.setRequestProperty("connection", "keep-alive");// 设置请求头参数
+        conn.setRequestProperty("Charset", "UTF-8");
+
+        FileBody body = parmas.getFiles().get(0);
+        conn.setRequestProperty("Content-Type", body.getContentType());
+        if (parmas.getHeaders().size() > 0) {
+            for (String name : parmas.getHeaders().keySet()) {
+                conn.setRequestProperty(name, parmas.getHeader(name));
+            }
+        }
+    }
+
+    /**
      * put参数准备
      */
     public void preparePut(HttpURLConnection conn, int timeOut, int readTimeOut, RequestParams parmas)
