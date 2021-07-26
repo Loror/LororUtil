@@ -231,7 +231,7 @@ public abstract class BaseClient extends Prepare implements Client {
         } else {
             final ProgressListener progressListener = this.progressListener;
             final Actuator callbackActuator = this.callbackActuator;
-            List<FileBody> files = params.getFiles();
+            List<StreamBody> files = params.getFiles();
             final Responce responce = new Responce();
             try {
                 if (params.isUseQueryForPost()) {
@@ -263,7 +263,7 @@ public abstract class BaseClient extends Prepare implements Client {
                 }
                 if (files != null) {
                     int index = 0;
-                    for (FileBody file : files) {
+                    for (StreamBody file : files) {
                         upLoadFile(file, index++, out, progressListener, callbackActuator);
                     }
                 } // 上传文件
@@ -369,7 +369,7 @@ public abstract class BaseClient extends Prepare implements Client {
         } else if (params.isUseMultiForPost()) {
             final ProgressListener progressListener = this.progressListener;
             final Actuator callbackActuator = this.callbackActuator;
-            List<FileBody> files = params.getFiles();
+            List<StreamBody> files = params.getFiles();
             final Responce responce = new Responce();
             try {
                 if (params.isUseQueryForPost()) {
@@ -401,7 +401,7 @@ public abstract class BaseClient extends Prepare implements Client {
                 }
                 if (files != null) {
                     int index = 0;
-                    for (FileBody file : files) {
+                    for (StreamBody file : files) {
                         upLoadFile(file, index++, out, progressListener, callbackActuator);
                     }
                 } // 上传文件
@@ -455,7 +455,7 @@ public abstract class BaseClient extends Prepare implements Client {
             //这种情况只会上传第一个文件，其余参数全部打包到url
             final ProgressListener progressListener = this.progressListener;
             final Actuator callbackActuator = this.callbackActuator;
-            List<FileBody> files = params.getFiles();
+            List<StreamBody> files = params.getFiles();
             final Responce responce = new Responce();
             try {
                 String strParams = params.packetOutParams("GET");
@@ -478,7 +478,7 @@ public abstract class BaseClient extends Prepare implements Client {
                     out = new GZIPOutputStream(out);
                 }
                 //上传第一个文件
-                FileBody file = files.get(0);
+                StreamBody file = files.get(0);
                 sendFile(file.getFile(), out, progressListener, callbackActuator);
                 out.flush();
                 out.close();
@@ -572,7 +572,7 @@ public abstract class BaseClient extends Prepare implements Client {
     /**
      * 上传一个文件
      */
-    private void upLoadFile(FileBody file, final int index, OutputStream out, final ProgressListener progressListener, Actuator actuator) throws Throwable {
+    private void upLoadFile(StreamBody file, final int index, OutputStream out, final ProgressListener progressListener, Actuator actuator) throws Throwable {
         if (file == null || file.getFile() == null) {
             return;
         }

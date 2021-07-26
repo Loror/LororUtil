@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/LororUtil.iml" filepath="$PROJECT_DIR$/LororUtil.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/LororUtil.iml" filepath="$PROJECT_DIR$/.idea/modules/LororUtil.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/LororUtil.app.iml" filepath="$PROJECT_DIR$/.idea/modules/app/LororUtil.app.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/lororUtil/LororUtil.lororUtil.iml" filepath="$PROJECT_DIR$/.idea/modules/lororUtil/LororUtil.lororUtil.iml" />
     </modules>

@@ -126,7 +126,7 @@ public class Prepare {
         conn.setRequestProperty("connection", "keep-alive");// 设置请求头参数
         conn.setRequestProperty("Charset", "UTF-8");
 
-        FileBody body = parmas.getFiles().get(0);
+        StreamBody body = parmas.getFiles().get(0);
         conn.setRequestProperty("Content-Type", body.getContentType());
         if (parmas.getHeaders().size() > 0) {
             for (String name : parmas.getHeaders().keySet()) {

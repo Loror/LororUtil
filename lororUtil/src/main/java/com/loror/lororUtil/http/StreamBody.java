@@ -4,21 +4,21 @@ import java.io.File;
 
 import com.loror.lororUtil.text.TextUtil;
 
-public class FileBody {
+public class StreamBody {
 	private String key;
 	private String fileName;
 	private String contentType;
 	private File file;
 
-	public FileBody(String filePath) {
+	public StreamBody(String filePath) {
 		this(filePath, null, null);
 	}
 
-	public FileBody(String filePath, String fileName) {
+	public StreamBody(String filePath, String fileName) {
 		this(filePath, fileName, null);
 	}
 
-	public FileBody(String filePath, String fileName, String contentType) {
+	public StreamBody(String filePath, String fileName, String contentType) {
 		this.key = "file";
 		setFile(TextUtil.isEmpty(filePath) ? null : new File(filePath));
 		setName(fileName);

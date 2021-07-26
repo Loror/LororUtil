@@ -17,7 +17,7 @@ public class RequestParams {
 
     private final Map<String, String> headers = new HashMap<String, String>();
     private Map<String, Object> params = new HashMap<String, Object>();
-    private List<FileBody> files;
+    private List<StreamBody> files;
     private String json;
 
     private RequestConverter getConverter, postConverter;
@@ -149,8 +149,8 @@ public class RequestParams {
     /**
      * 获取所有文件
      */
-    public List<FileBody> getFiles() {
-        return files == null ? new ArrayList<FileBody>() : files;
+    public List<StreamBody> getFiles() {
+        return files == null ? new ArrayList<StreamBody>() : files;
     }
 
     /**
@@ -223,9 +223,9 @@ public class RequestParams {
                 }
                 Object value = map.get(key);
                 if (value instanceof File) {
-                    addParams(key.toString(), new FileBody(((File) value).getAbsolutePath(), ((File) value).getName()));
-                } else if (value instanceof FileBody) {
-                    addParams(key.toString(), (FileBody) value);
+                    addParams(key.toString(), new StreamBody(((File) value).getAbsolutePath(), ((File) value).getName()));
+                } else if (value instanceof StreamBody) {
+                    addParams(key.toString(), (StreamBody) value);
                 } else if (value instanceof Number || value instanceof Boolean ||
                         value instanceof Primitive) {
                     params.put(key.toString(), value);
@@ -248,9 +248,9 @@ public class RequestParams {
                     Object value = field.get(object);
                     Class<?> type = field.getType();
                     if (type == File.class) {
-                        addParams(key, value == null ? new FileBody(null, key) : new FileBody(((File) object).getAbsolutePath(), ((File) object).getName()));
-                    } else if (type == FileBody.class) {
-                        addParams(key, value == null ? new FileBody(null, key) : (FileBody) value);
+                        addParams(key, value == null ? new StreamBody(null, key) : new StreamBody(((File) object).getAbsolutePath(), ((File) object).getName()));
+                    } else if (type == StreamBody.class) {
+                        addParams(key, value == null ? new StreamBody(null, key) : (StreamBody) value);
                     } else if (type.isPrimitive() || type == String.class
                             || value instanceof Number || value instanceof Primitive) {
                         params.put(key, value);
@@ -363,10 +363,10 @@ public class RequestParams {
     /**
      * 添加参数
      */
-    public RequestParams addParams(String key, FileBody file) {
+    public RequestParams addParams(String key, StreamBody file) {
         file.setKey(key);
         if (files == null) {
-            files = new ArrayList<FileBody>();
+            files = new ArrayList<StreamBody>();
         }
         files.add(file);
         return this;
@@ -640,10 +640,10 @@ public class RequestParams {
         }
         buffer.append("[files:");
         if (files != null && files.size() > 0) {
-            for (FileBody fileBody : files) {
-                buffer.append(fileBody.getKey())
+            for (StreamBody streamBody : files) {
+                buffer.append(streamBody.getKey())
                         .append("=")
-                        .append(fileBody.getName())
+                        .append(streamBody.getName())
                         .append(",");
             }
             buffer.deleteCharAt(buffer.length() - 1);

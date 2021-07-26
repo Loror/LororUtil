@@ -1,7 +1,7 @@
 package com.loror.lororUtil.http.api;
 
 import com.loror.lororUtil.http.Cookies;
-import com.loror.lororUtil.http.FileBody;
+import com.loror.lororUtil.http.StreamBody;
 import com.loror.lororUtil.http.HttpClient;
 import com.loror.lororUtil.http.Primitive;
 import com.loror.lororUtil.http.ProgressListener;
@@ -26,7 +26,6 @@ import com.loror.lororUtil.annotation.UrlEnCode;
 import java.io.File;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -211,7 +210,7 @@ public class ApiRequest {
         for (int i = 0; i < types.length; i++) {
             if (types[i] == RequestParams.class) {
                 Map<String, Object> old = params.getParams();
-                List<FileBody> oldFile = params.getFiles();
+                List<StreamBody> oldFile = params.getFiles();
                 params = (RequestParams) args[i];
                 if (old.size() > 0) {
                     for (String key : old.keySet()) {
@@ -222,7 +221,7 @@ public class ApiRequest {
                     }
                 }
                 if (oldFile.size() > 0) {
-                    for (FileBody file : oldFile) {
+                    for (StreamBody file : oldFile) {
                         params.addParams(file.getKey(), file);
                     }
                 }
@@ -242,10 +241,10 @@ public class ApiRequest {
         for (int i = 0; i < annotations.length; i++) {
             if (annotations[i].annotationType() == Param.class) {
                 String name = ((Param) annotations[i]).value();
-                if (type == FileBody.class) {
-                    params.addParams(name, (FileBody) arg);
+                if (type == StreamBody.class) {
+                    params.addParams(name, (StreamBody) arg);
                 } else if (type == File.class) {
-                    params.addParams(name, new FileBody(arg == null ? null : ((File) arg).getAbsolutePath()));
+                    params.addParams(name, new StreamBody(arg == null ? null : ((File) arg).getAbsolutePath()));
                 } else if (type.isArray()) {
                     if (arg != null) {
                         Object[] array = (Object[]) arg;
@@ -372,13 +371,13 @@ public class ApiRequest {
      * 添加数组形参数到param
      */
     private void addArray(RequestParams params, String name, Object[] array, Class<?> componentType) {
-        if (componentType == FileBody.class) {
+        if (componentType == StreamBody.class) {
             for (Object o : array) {
-                params.addParams(name, (FileBody) o);
+                params.addParams(name, (StreamBody) o);
             }
         } else if (componentType == File.class) {
             for (Object o : array) {
-                params.addParams(name, new FileBody(o == null ? null : ((File) o).getAbsolutePath()));
+                params.addParams(name, new StreamBody(o == null ? null : ((File) o).getAbsolutePath()));
             }
         } else {
             params.addParams(name, array);
