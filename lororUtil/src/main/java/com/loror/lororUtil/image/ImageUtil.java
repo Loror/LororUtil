@@ -39,6 +39,7 @@ public class ImageUtil implements Cloneable {
     private boolean removeOldTask = true;
     private boolean cachUseAnimation;
     private boolean isGif;
+    private boolean autoRotateIsDegree;
     private ImageUtilCallBack callback;
     private ImageUtilCallBack onLoadListener;
     private String targetDirPath;
@@ -209,6 +210,14 @@ public class ImageUtil implements Cloneable {
         return this;
     }
 
+    /**
+     * 设置是否自动旋转如果文件包含角度
+     */
+    public ImageUtil setAutoRotateIsDegree(boolean autoRotateIsDegree) {
+        this.autoRotateIsDegree = autoRotateIsDegree;
+        return this;
+    }
+
     @Deprecated
     public ImageUtil setCallback(ImageUtilCallBack callback) {
         this.callback = callback;
@@ -371,7 +380,7 @@ public class ImageUtil implements Cloneable {
                         } else {
                             targetFile = path;
                         }
-                        readImage = SmartReadImage.getInstance(context, targetFile);
+                        readImage = SmartReadImage.getInstance(context, targetFile, autoRotateIsDegree);
                     }
                 }
                 LockMap.SingleLock lock = LockMap.getLock(path);//如出现加载同一张图片将获得同一把锁，只有一个任务去加载图片，其他任务只需等待加载完成即可

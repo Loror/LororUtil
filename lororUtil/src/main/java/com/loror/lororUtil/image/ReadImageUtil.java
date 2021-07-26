@@ -3,12 +3,24 @@ package com.loror.lororUtil.image;
 import android.graphics.Bitmap;
 import android.media.MediaMetadataRetriever;
 
+import com.loror.lororUtil.text.TextUtil;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.HashMap;
 import java.util.Locale;
 
 public class ReadImageUtil {
+
+    protected boolean autoRotate;
+
+    public ReadImageUtil() {
+
+    }
+
+    public ReadImageUtil(boolean autoRotate) {
+        this.autoRotate = autoRotate;
+    }
 
     /**
      * 是否是网络mp4格式
@@ -106,6 +118,12 @@ public class ReadImageUtil {
                     BitmapUtil.compessBitmap(resource, widthLimit) :
                     BitmapUtil.compessBitmap(path, widthLimit);
             if (bitmap != null) {
+                if (autoRotate && !TextUtil.isEmpty(path)) {
+                    int degree = BitmapUtil.getBitmapDegree(path);
+                    if (degree != 0) {
+                        bitmap = BitmapUtil.rotateBitmapByDegree(bitmap, degree);
+                    }
+                }
                 result.setErrorCode(0);
                 result.addFrame(new Frame(bitmap, 0, widthLimit));
             } else {

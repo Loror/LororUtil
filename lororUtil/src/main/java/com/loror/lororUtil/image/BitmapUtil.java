@@ -110,6 +110,9 @@ public class BitmapUtil {
      */
     public static int getBitmapDegree(String path) {
         int degree = 0;
+        if (path == null) {
+            return degree;
+        }
         try {
             // 从指定路径下读取图片，并获取其EXIF信息
             ExifInterface exifInterface = new ExifInterface(path);

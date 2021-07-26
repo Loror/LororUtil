@@ -17,7 +17,7 @@ public class SmartReadImage extends ReadImageUtil implements ReadImage, Cloneabl
         private static final SmartReadImage instance = new SmartReadImage();
     }
 
-    public static SmartReadImage getInstance(Context context, String targetFilePath) {
+    public static SmartReadImage getInstance(Context context, String targetFilePath, boolean autoRotate) {
         SmartReadImage smartReadImage = null;
         try {
             smartReadImage = (SmartReadImage) SingletonFactory.instance.clone();
@@ -27,6 +27,7 @@ public class SmartReadImage extends ReadImageUtil implements ReadImage, Cloneabl
         }
         smartReadImage.context = context;
         smartReadImage.targetFilePath = targetFilePath;
+        smartReadImage.autoRotate = autoRotate;
         return smartReadImage;
     }
 
