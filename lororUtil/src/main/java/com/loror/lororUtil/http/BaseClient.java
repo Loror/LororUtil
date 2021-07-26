@@ -1,11 +1,8 @@
 package com.loror.lororUtil.http;
 
 import android.os.Build;
-
 import com.loror.lororUtil.text.TextUtil;
-
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -263,8 +260,8 @@ public abstract class BaseClient extends Prepare implements Client {
                 }
                 if (files != null) {
                     int index = 0;
-                    for (StreamBody file : files) {
-                        upLoadFile(file, index++, out, progressListener, callbackActuator);
+                    for (StreamBody body : files) {
+                        upLoadFile(body, index++, out, progressListener, callbackActuator);
                     }
                 } // 上传文件
                 // 定义最后数据分隔线，即--加上BOUNDARY再加上--，写上结尾标识
@@ -401,8 +398,8 @@ public abstract class BaseClient extends Prepare implements Client {
                 }
                 if (files != null) {
                     int index = 0;
-                    for (StreamBody file : files) {
-                        upLoadFile(file, index++, out, progressListener, callbackActuator);
+                    for (StreamBody body : files) {
+                        upLoadFile(body, index++, out, progressListener, callbackActuator);
                     }
                 } // 上传文件
                 // 定义最后数据分隔线，即--加上BOUNDARY再加上--，写上结尾标识
@@ -478,8 +475,8 @@ public abstract class BaseClient extends Prepare implements Client {
                     out = new GZIPOutputStream(out);
                 }
                 //上传第一个文件
-                StreamBody file = files.get(0);
-                sendFile(file.getFile(), out, progressListener, callbackActuator);
+                StreamBody body = files.get(0);
+                sendFile(body, out, progressListener, callbackActuator);
                 out.flush();
                 out.close();
                 responce.url = conn.getURL();
@@ -572,8 +569,8 @@ public abstract class BaseClient extends Prepare implements Client {
     /**
      * 上传一个文件
      */
-    private void upLoadFile(StreamBody file, final int index, OutputStream out, final ProgressListener progressListener, Actuator actuator) throws Throwable {
-        if (file == null || file.getFile() == null) {
+    private void upLoadFile(StreamBody body, final int index, OutputStream out, final ProgressListener progressListener, Actuator actuator) throws Throwable {
+        if (body == null || body.getInputStream() == null) {
             return;
         }
         if (progressListener instanceof DetailProgressListener) {
@@ -595,22 +592,22 @@ public abstract class BaseClient extends Prepare implements Client {
         sb.append(MultipartConfig.BOUNDARY);
         sb.append(MultipartConfig.LINEEND);
         // name是post中传参的键 filename是文件的名称
-        sb.append("Content-Disposition: form-data; name=\"").append(file.getKey() == null ? "file" : file.getKey())
-                .append("\"; filename=\"").append(file.getName()).append("\"" + MultipartConfig.LINEEND);
-        sb.append("Content-Type: ").append(file.getContentType()).append(MultipartConfig.LINEEND);
+        sb.append("Content-Disposition: form-data; name=\"").append(body.getKey() == null ? "file" : body.getKey())
+                .append("\"; filename=\"").append(body.getName()).append("\"" + MultipartConfig.LINEEND);
+        sb.append("Content-Type: ").append(body.getContentType()).append(MultipartConfig.LINEEND);
         sb.append(MultipartConfig.LINEEND);
         out.write(sb.toString().getBytes());
 
-        sendFile(file.getFile(), out, progressListener, actuator);
+        sendFile(body, out, progressListener, actuator);
         out.write(MultipartConfig.LINEEND.getBytes());
     }
 
     /**
      * 通过流发送文件
      */
-    private void sendFile(File file, OutputStream os, final ProgressListener progressListener, Actuator actuator) throws Throwable {
-        FileInputStream fis = new FileInputStream(file);
-        final long length = file.length();
+    private void sendFile(StreamBody body, OutputStream os, final ProgressListener progressListener, Actuator actuator) throws Throwable {
+        InputStream fis = body.getInputStream();
+        final long length = body.length();
         long lastTime = System.currentTimeMillis(), transed = 0;
         byte[] temp = new byte[fileReadLength > 0 ? fileReadLength : (1024 * 100)];
         int total = 0;
@@ -659,7 +656,7 @@ public abstract class BaseClient extends Prepare implements Client {
                 runnable.run();
             }
         }
-        fis.close();
+        body.close();
     }
 
     /**

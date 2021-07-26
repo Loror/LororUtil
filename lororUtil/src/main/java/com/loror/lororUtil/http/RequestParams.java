@@ -223,7 +223,7 @@ public class RequestParams {
                 }
                 Object value = map.get(key);
                 if (value instanceof File) {
-                    addParams(key.toString(), new StreamBody(((File) value).getAbsolutePath(), ((File) value).getName()));
+                    addParams(key.toString(), new FileBody(((File) value).getAbsolutePath(), ((File) value).getName()));
                 } else if (value instanceof StreamBody) {
                     addParams(key.toString(), (StreamBody) value);
                 } else if (value instanceof Number || value instanceof Boolean ||
@@ -248,9 +248,9 @@ public class RequestParams {
                     Object value = field.get(object);
                     Class<?> type = field.getType();
                     if (type == File.class) {
-                        addParams(key, value == null ? new StreamBody(null, key) : new StreamBody(((File) object).getAbsolutePath(), ((File) object).getName()));
+                        addParams(key, value == null ? new FileBody(null, key) : new FileBody(((File) object).getAbsolutePath(), ((File) object).getName()));
                     } else if (type == StreamBody.class) {
-                        addParams(key, value == null ? new StreamBody(null, key) : (StreamBody) value);
+                        addParams(key, value == null ? new FileBody(null, key) : (StreamBody) value);
                     } else if (type.isPrimitive() || type == String.class
                             || value instanceof Number || value instanceof Primitive) {
                         params.put(key, value);
@@ -363,12 +363,12 @@ public class RequestParams {
     /**
      * 添加参数
      */
-    public RequestParams addParams(String key, StreamBody file) {
-        file.setKey(key);
+    public RequestParams addParams(String key, StreamBody body) {
+        body.setKey(key);
         if (files == null) {
             files = new ArrayList<StreamBody>();
         }
-        files.add(file);
+        files.add(body);
         return this;
     }
 

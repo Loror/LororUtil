@@ -1,94 +1,113 @@
 package com.loror.lororUtil.http;
 
-import java.io.File;
-
 import com.loror.lororUtil.text.TextUtil;
 
+import java.io.InputStream;
+
 public class StreamBody {
-	private String key;
-	private String fileName;
-	private String contentType;
-	private File file;
 
-	public StreamBody(String filePath) {
-		this(filePath, null, null);
-	}
+    private String key;
+    private String name;
+    private String contentType;
+    private InputStream inputStream;
 
-	public StreamBody(String filePath, String fileName) {
-		this(filePath, fileName, null);
-	}
+    public StreamBody(InputStream inputStream) {
+        this(inputStream, null);
+    }
 
-	public StreamBody(String filePath, String fileName, String contentType) {
-		this.key = "file";
-		setFile(TextUtil.isEmpty(filePath) ? null : new File(filePath));
-		setName(fileName);
-		setContentType(contentType);
-	}
+    public StreamBody(InputStream inputStream, String contentType) {
+        this(null, inputStream, contentType);
+    }
 
-	/**
-	 * 设置键名
-	 */
-	public void setKey(String key) {
-		this.key = key;
-	}
+    public StreamBody(String name, InputStream inputStream, String contentType) {
+        setKey("file");
+        setName(name);
+        setContentType(contentType);
+        setInputStream(inputStream);
+    }
 
-	/**
-	 * 获取键名
-	 */
-	public String getKey() {
-		return key;
-	}
+    /**
+     * 设置键名
+     */
+    public void setKey(String key) {
+        this.key = key == null ? "file" : key;
+    }
 
-	/**
-	 * 设置类型
-	 */
-	public void setContentType(String contentType) {
-		if (TextUtil.isEmpty(contentType)) {
-			this.contentType = "application/octet-stream";
-		} else {
-			this.contentType = contentType;
-		}
-	}
+    /**
+     * 获取键名
+     */
+    public String getKey() {
+        return key;
+    }
 
-	/**
-	 * 获取类型
-	 */
-	public String getContentType() {
-		return contentType;
-	}
+    /**
+     * 设置类型
+     */
+    public void setContentType(String contentType) {
+        if (TextUtil.isEmpty(contentType)) {
+            this.contentType = "application/octet-stream";
+        } else {
+            this.contentType = contentType;
+        }
+    }
 
-	/**
-	 * 设置名字
-	 */
-	public void setName(String fileName) {
-		if (!TextUtil.isEmpty(fileName)) {
-			this.fileName = fileName;
-		}
-	}
+    /**
+     * 获取类型
+     */
+    public String getContentType() {
+        return contentType;
+    }
 
-	/**
-	 * 获取名字
-	 */
-	public String getName() {
-		return fileName;
-	}
+    /**
+     * 设置multipartName
+     */
+    public void setName(String name) {
+        if (!TextUtil.isEmpty(name)) {
+            this.name = name;
+        }
+    }
 
-	/**
-	 * 设置文件
-	 */
-	public void setFile(File file) {
-		if (file == null || !file.exists()) {
-			this.file = null;
-		} else {
-			this.file = file;
-			this.fileName = file.getName();
-		}
-	}
+    /**
+     * 获取multipartName
+     */
+    public String getName() {
+        return name == null ? "undefine" : name;
+    }
 
-	/**
-	 * 获取文件
-	 */
-	public File getFile() {
-		return file;
-	}
+    /**
+     * 设置流
+     */
+    public void setInputStream(InputStream inputStream) {
+        this.inputStream = inputStream;
+    }
+
+    /**
+     * 获取流
+     */
+    public InputStream getInputStream() {
+        return inputStream;
+    }
+
+    /**
+     * 长度
+     */
+    public long length() {
+        try {
+            return inputStream != null ? inputStream.available() : 0;
+        } catch (Exception e) {
+            return 0;
+        }
+    }
+
+    /**
+     * 关闭流
+     */
+    public void close() {
+        try {
+            inputStream.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        inputStream = null;
+    }
 }

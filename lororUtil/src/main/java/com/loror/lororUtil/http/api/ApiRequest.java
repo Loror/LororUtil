@@ -1,6 +1,7 @@
 package com.loror.lororUtil.http.api;
 
 import com.loror.lororUtil.http.Cookies;
+import com.loror.lororUtil.http.FileBody;
 import com.loror.lororUtil.http.StreamBody;
 import com.loror.lororUtil.http.HttpClient;
 import com.loror.lororUtil.http.Primitive;
@@ -244,7 +245,7 @@ public class ApiRequest {
                 if (type == StreamBody.class) {
                     params.addParams(name, (StreamBody) arg);
                 } else if (type == File.class) {
-                    params.addParams(name, new StreamBody(arg == null ? null : ((File) arg).getAbsolutePath()));
+                    params.addParams(name, new FileBody(arg == null ? null : ((File) arg).getAbsolutePath()));
                 } else if (type.isArray()) {
                     if (arg != null) {
                         Object[] array = (Object[]) arg;
@@ -377,7 +378,7 @@ public class ApiRequest {
             }
         } else if (componentType == File.class) {
             for (Object o : array) {
-                params.addParams(name, new StreamBody(o == null ? null : ((File) o).getAbsolutePath()));
+                params.addParams(name, new FileBody(o == null ? null : ((File) o).getAbsolutePath()));
             }
         } else {
             params.addParams(name, array);
