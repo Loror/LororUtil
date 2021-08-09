@@ -192,7 +192,7 @@ public class ApiRequest {
         }
         Multipart multipart = method.getAnnotation(Multipart.class);
         if (multipart != null) {
-            params.setUserMultiForPost(true);
+            params.setForceMultiForPostOrPut(true);
         }
         AsJson asJson = method.getAnnotation(AsJson.class);
         if (asJson != null) {
@@ -200,7 +200,7 @@ public class ApiRequest {
         }
         UrlEnCode urlEnCode = method.getAnnotation(UrlEnCode.class);
         if (urlEnCode != null) {
-            params.setUseDefaultConverterInPost(true);
+            params.setUrlEncodeForPostOrPut(true);
         }
         Gzip gzip = method.getAnnotation(Gzip.class);
         if (gzip != null) {

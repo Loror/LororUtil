@@ -25,17 +25,17 @@ public class RequestParams {
     private BodyConverter bodyConverter;
     private SpliceConverter spliceConverter;
 
-    private boolean userMultiForPost;
-    private boolean useDefaultConverterInPost;
-    private boolean asJson;
-    private boolean gzip;
-    private boolean useQueryForPost;
+    private boolean forceMultiForPostOrPut;//强制使用multipart提交参数
+    private boolean forceParamAsQueryForPostOrPut;//对post、put强制将参数放到url中
+    private boolean urlEncodeForPostOrPut;//对post、put参数进行url编码
+    private boolean asJson;//参数打包为json上传
+    private boolean gzip;//上传开启gzip
     private String contentTransferEncoding;
 
-    private static boolean defaultUseDefaultConverterInPost = false;
-    private static boolean defaultNullToEmpty = true;
-    private static boolean defaultUseMultiForPost = false;
+    private static boolean defaultUrlEncodeForPostOrPut = false;//对post、put参数进行url编码
+    private static boolean defaultNullToEmpty = true;//上传时将参数null转为空字符串
 
+    //urlencode转码器
     private static final RequestConverter defaultConverter = new RequestConverter() {
         @Override
         public String convert(String key, String value) {
@@ -51,31 +51,47 @@ public class RequestParams {
     }
 
     /**
-     * 设置是否post参数添加到url中提交
+     * 更换{@link RequestParams#setForceParamAsQueryForPostOrPut}
      */
+    @Deprecated
     public void setUseQueryForPost(boolean useQueryForPost) {
-        this.useQueryForPost = useQueryForPost;
+        setForceParamAsQueryForPostOrPut(useQueryForPost);
     }
 
     /**
-     * 是否post参数添加到url中提交
+     * 设置是否post/put参数添加到url中提交
      */
-    public boolean isUseQueryForPost() {
-        return useQueryForPost;
+    public void setForceParamAsQueryForPostOrPut(boolean forceParamAsQueryForPostOrPut) {
+        this.forceParamAsQueryForPostOrPut = forceParamAsQueryForPostOrPut;
+    }
+
+    /**
+     * 是否post/put参数添加到url中提交
+     */
+    public boolean isForceParamAsQueryForPostOrPut() {
+        return forceParamAsQueryForPostOrPut;
     }
 
     /**
      * 是否使用表单提交post
      */
-    public boolean isUseMultiForPost() {
-        return defaultUseMultiForPost || userMultiForPost;
+    public boolean isForceMultiparty() {
+        return forceMultiForPostOrPut;
     }
 
     /**
      * 设置是否使用表单提交post
      */
+    public void setForceMultiForPostOrPut(boolean forceMultiForPostOrPut) {
+        this.forceMultiForPostOrPut = forceMultiForPostOrPut;
+    }
+
+    /**
+     * 更换{@link RequestParams#setForceMultiForPostOrPut}
+     */
+    @Deprecated
     public void setUserMultiForPost(boolean userMultiForPost) {
-        this.userMultiForPost = userMultiForPost;
+        setForceMultiForPostOrPut(userMultiForPost);
     }
 
     /**
@@ -112,31 +128,40 @@ public class RequestParams {
     }
 
     /**
-     * 设置是否默认使用表单提交post
+     * 更换{@link RequestParams#setDefaultUrlEncodeForPostOrPut}
      */
-    public static void setDefaultUseMultiForPost(boolean defaultUseMultiForPost) {
-        RequestParams.defaultUseMultiForPost = defaultUseMultiForPost;
-    }
-
-    /**
-     * 设置是否对post请求参数url编码
-     */
+    @Deprecated
     public static void setDefaultUseDefaultConverterInPost(boolean defaultUseDefaultConverterInPost) {
-        RequestParams.defaultUseDefaultConverterInPost = defaultUseDefaultConverterInPost;
+        setDefaultUrlEncodeForPostOrPut(defaultUseDefaultConverterInPost);
     }
 
     /**
-     * 设置是否默认对post请求参数url编码
+     * 设置是否默认对post/put请求参数url编码
      */
+    public static void setDefaultUrlEncodeForPostOrPut(boolean defaultUrlEncodeForPostOrPut) {
+        RequestParams.defaultUrlEncodeForPostOrPut = defaultUrlEncodeForPostOrPut;
+    }
+
+    /**
+     * 设置是否对post/put请求参数url编码
+     */
+    public void setUrlEncodeForPostOrPut(boolean urlEncodeForPostOrPut) {
+        this.urlEncodeForPostOrPut = urlEncodeForPostOrPut;
+    }
+
+    /**
+     * 更换{@link RequestParams#setUrlEncodeForPostOrPut}
+     */
+    @Deprecated
     public void setUseDefaultConverterInPost(boolean useDefaultConverterInPost) {
-        this.useDefaultConverterInPost = useDefaultConverterInPost;
+        setUrlEncodeForPostOrPut(useDefaultConverterInPost);
     }
 
     /**
      * 是否为post开启默认转换器
      */
-    public boolean isUseDefaultConverterInPost() {
-        return defaultUseDefaultConverterInPost || useDefaultConverterInPost;
+    public boolean isUrlEncodeForPostOrPut() {
+        return defaultUrlEncodeForPostOrPut || urlEncodeForPostOrPut;
     }
 
     /**
@@ -567,14 +592,14 @@ public class RequestParams {
                         .append(getSplicing(null, 2));
                 break;
             case "POST":
-                contentValue = postConverter == null ? (isUseDefaultConverterInPost() ? defaultConverter.convert(key, value) : value) : postConverter.convert(key, value);
+                contentValue = postConverter == null ? (isUrlEncodeForPostOrPut() ? defaultConverter.convert(key, value) : value) : postConverter.convert(key, value);
                 sb.append(key)
                         .append("=")
                         .append(contentValue)
                         .append("&");
                 break;
             case "POST_MULTI":
-                contentValue = postConverter == null ? (isUseDefaultConverterInPost() ? defaultConverter.convert(key, value) : value) : postConverter.convert(key, value);
+                contentValue = postConverter == null ? (isUrlEncodeForPostOrPut() ? defaultConverter.convert(key, value) : value) : postConverter.convert(key, value);
                 sb.append(MultipartConfig.PREFIX);
                 sb.append(MultipartConfig.BOUNDARY);
                 sb.append(MultipartConfig.LINEEND);

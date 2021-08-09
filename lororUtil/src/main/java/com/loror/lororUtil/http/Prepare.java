@@ -57,7 +57,7 @@ public class Prepare {
         if (parmas != null) {
             if (parmas.isAsJson()) {
                 conn.setRequestProperty("Content-Type", "application/json");
-            } else if (parmas.isUseDefaultConverterInPost()) {
+            } else if (parmas.isUrlEncodeForPostOrPut()) {
                 conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
             }
             if (parmas.getHeaders().size() > 0) {
@@ -155,7 +155,7 @@ public class Prepare {
         if (parmas != null) {
             if (parmas.isAsJson()) {
                 conn.setRequestProperty("Content-Type", "application/json");
-            } else if (parmas.isUseDefaultConverterInPost()) {
+            } else if (parmas.isUrlEncodeForPostOrPut()) {
                 conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
             }
             if (parmas.getHeaders().size() > 0) {

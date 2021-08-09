@@ -177,13 +177,13 @@ public abstract class BaseClient extends Prepare implements Client {
 
     @Override
     public Responce post(String urlStr, RequestParams params) {
-        if (params == null || (params.getFiles().size() == 0 && !params.isUseMultiForPost())) {
+        if (params == null || (params.getFiles().size() == 0 && !params.isForceMultiparty())) {
             Responce responce = new Responce();
             try {
                 boolean queryParam = false;
                 if (params != null) {
                     if ((params.isAsJson() && params.getJson() != null)
-                            || params.isUseQueryForPost()) {
+                            || params.isForceParamAsQueryForPostOrPut()) {
                         String strParams = params.packetOutParams("GET");
                         if (!TextUtil.isEmpty(strParams)) {
                             urlStr += params.getSplicing(urlStr, 0) + strParams;
@@ -231,7 +231,7 @@ public abstract class BaseClient extends Prepare implements Client {
             List<StreamBody> files = params.getFiles();
             final Responce responce = new Responce();
             try {
-                if (params.isUseQueryForPost()) {
+                if (params.isForceParamAsQueryForPostOrPut()) {
                     String strParams = params.packetOutParams("GET");
                     if (!TextUtil.isEmpty(strParams)) {
                         urlStr += params.getSplicing(urlStr, 0) + strParams;
@@ -252,7 +252,7 @@ public abstract class BaseClient extends Prepare implements Client {
                 if (params.isGzip()) {
                     out = new GZIPOutputStream(out);
                 }
-                if (!params.isUseQueryForPost()) {
+                if (!params.isForceParamAsQueryForPostOrPut()) {
                     String strParams = params.packetOutParams("POST_MULTI");
                     if (!TextUtil.isEmpty(strParams)) {
                         out.write(strParams.getBytes());
@@ -321,7 +321,7 @@ public abstract class BaseClient extends Prepare implements Client {
                 boolean queryParam = false;
                 if (params != null) {
                     if ((params.isAsJson() && params.getJson() != null)
-                            || params.isUseQueryForPost()) {
+                            || params.isForceParamAsQueryForPostOrPut()) {
                         String strParams = params.packetOutParams("GET");
                         if (!TextUtil.isEmpty(strParams)) {
                             urlStr += params.getSplicing(urlStr, 0) + strParams;
@@ -363,13 +363,13 @@ public abstract class BaseClient extends Prepare implements Client {
                 conn = null;
             }
             return responce;
-        } else if (params.isUseMultiForPost()) {
+        } else if (params.isForceMultiparty()) {
             final ProgressListener progressListener = this.progressListener;
             final Actuator callbackActuator = this.callbackActuator;
             List<StreamBody> files = params.getFiles();
             final Responce responce = new Responce();
             try {
-                if (params.isUseQueryForPost()) {
+                if (params.isForceParamAsQueryForPostOrPut()) {
                     String strParams = params.packetOutParams("GET");
                     if (!TextUtil.isEmpty(strParams)) {
                         urlStr += params.getSplicing(urlStr, 0) + strParams;
@@ -390,7 +390,7 @@ public abstract class BaseClient extends Prepare implements Client {
                 if (params.isGzip()) {
                     out = new GZIPOutputStream(out);
                 }
-                if (!params.isUseQueryForPost()) {
+                if (!params.isForceParamAsQueryForPostOrPut()) {
                     String strParams = params.packetOutParams("POST_MULTI");
                     if (!TextUtil.isEmpty(strParams)) {
                         out.write(strParams.getBytes());
