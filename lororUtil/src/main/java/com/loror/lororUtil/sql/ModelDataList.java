@@ -6,6 +6,17 @@ import java.util.List;
 public class ModelDataList extends ArrayList<ModelData> {
 
     /**
+     * 获取查询首位
+     */
+    public ModelData first() {
+        ModelData modelData = null;
+        if (this.size() > 0) {
+            modelData = this.get(0);
+        }
+        return modelData != null ? modelData : new ModelData(true);
+    }
+
+    /**
      * 转对象List，@Table对象按照@Column赋值；普通对象按照变量名赋值
      */
     public <T> List<T> list(Class<T> type) {

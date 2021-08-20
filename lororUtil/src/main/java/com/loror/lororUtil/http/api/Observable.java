@@ -1,6 +1,5 @@
 package com.loror.lororUtil.http.api;
 
-import com.loror.lororUtil.asynctask.AsyncUtil;
 import com.loror.lororUtil.flyweight.ObjectPool;
 import com.loror.lororUtil.http.ProgressListener;
 import com.loror.lororUtil.http.Responce;
