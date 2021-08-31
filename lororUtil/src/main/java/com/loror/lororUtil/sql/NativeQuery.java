@@ -2,6 +2,9 @@ package com.loror.lororUtil.sql;
 
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteStatement;
+
+import java.lang.reflect.Constructor;
 
 public class NativeQuery {
 
@@ -12,8 +15,12 @@ public class NativeQuery {
     }
 
     public ModelDataList executeQuery(String sql) {
+        return executeQuery(sql, null);
+    }
+
+    public ModelDataList executeQuery(String sql, String[] selectionArgs) {
         ModelDataList list = new ModelDataList();
-        Cursor cursor = database.rawQuery(sql, null);
+        Cursor cursor = database.rawQuery(sql, selectionArgs);
         String[] names = cursor.getColumnNames();
         while (cursor.moveToNext()) {
             ModelData data = new ModelData();
@@ -28,6 +35,37 @@ public class NativeQuery {
     }
 
     public void executeUpdate(String sql) {
-        database.execSQL(sql);
+        executeUpdate(sql, null);
+    }
+
+    public void executeUpdate(String sql, Object[] bindArgs) {
+        if (bindArgs == null) {
+            database.execSQL(sql);
+        } else {
+            database.execSQL(sql, bindArgs);
+        }
+    }
+
+    public int executeUpdateStatement(String sql) {
+        return executeStatement(sql, null);
+    }
+
+    public int executeStatement(String sql, Object[] bindArgs) {
+        database.acquireReference();
+        try {
+            Constructor<SQLiteStatement> constructor = SQLiteStatement.class.getDeclaredConstructor(SQLiteDatabase.class, String.class, Object[].class);
+            SQLiteStatement statement = constructor.newInstance(database, sql, bindArgs);
+            try {
+                return statement.executeUpdateDelete();
+            } finally {
+                statement.close();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            database.releaseReference();
+        }
+        executeUpdate(sql, bindArgs);
+        return 1;
     }
 }

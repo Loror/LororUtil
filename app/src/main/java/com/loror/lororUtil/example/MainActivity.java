@@ -155,6 +155,8 @@ public class MainActivity extends AppCompatActivity {
         List<Image> list = util.nativeQuery().executeQuery("select * from Image").list(Image.class);
         Log.e("TAG_WHERE", "native:" + list);
 
+        Log.e("TAG_WHERE", "result:" + util.nativeQuery().executeUpdateStatement("update Image set flag = 0"));
+
         util.close();
         adapter.notifyDataSetChanged();
     }
