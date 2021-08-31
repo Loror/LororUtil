@@ -14,6 +14,7 @@ public class Model<T> implements Where {
     private final SQLiteUtil sqLiteUtil;
     private final ModelInfo modelInfo;
     private final ConditionBuilder conditionBuilder = ConditionBuilder.create();
+    private boolean returnInfluence;
 
     public Model(Class<T> table, SQLiteUtil sqLiteUtil, ModelInfo modelInfo) {
         this.table = table;
@@ -23,6 +24,14 @@ public class Model<T> implements Where {
 
     public ModelInfo getModelInfo() {
         return modelInfo;
+    }
+
+    /**
+     * 更新、删除操作是否返回影响行数
+     */
+    public Model<T> returnInfluence(boolean returnInfluence) {
+        this.returnInfluence = returnInfluence;
+        return this;
     }
 
     @Override
@@ -212,13 +221,19 @@ public class Model<T> implements Where {
     /**
      * 条件删除
      */
-    public void delete() {
+    public int delete() {
+        int influence = 0;
         if (conditionBuilder.getConditionCount() > 0) {
-            sqLiteUtil.getDatabase().execSQL("delete from " + modelInfo.getTableName() + conditionBuilder.getConditions(true));
+            if (returnInfluence) {
+                influence = sqLiteUtil.getDatabase().delete("delete from " + modelInfo.getTableName() + conditionBuilder.getConditions(true), null, null);
+            } else {
+                sqLiteUtil.getDatabase().execSQL("delete from " + modelInfo.getTableName() + conditionBuilder.getConditions(true), null);
+            }
             if (sqLiteUtil.mitiProgress) {
                 SQLiteDatabase.releaseMemory();
             }
         }
+        return influence;
     }
 
     /**
@@ -240,17 +255,45 @@ public class Model<T> implements Where {
     }
 
     /**
-     * 修改
+     * 更新
      */
-    public void update(T entity, boolean ignoreNull) {
-        if (entity == null) {
-            return;
+    public int update(ModelData values, boolean ignoreNull) {
+        int influence = 0;
+        if (values == null) {
+            return influence;
         }
-        sqLiteUtil.getDatabase().execSQL(TableFinder.getUpdateSqlNoWhere(entity, modelInfo, ignoreNull)
-                + conditionBuilder.getConditionsWithoutPage(true));
+        if (returnInfluence) {
+            influence = sqLiteUtil.getDatabase().delete(TableFinder.getUpdateSqlNoWhere(values, modelInfo, ignoreNull)
+                    + conditionBuilder.getConditionsWithoutPage(true), null, null);
+        } else {
+            sqLiteUtil.getDatabase().execSQL(TableFinder.getUpdateSqlNoWhere(values, modelInfo, ignoreNull)
+                    + conditionBuilder.getConditionsWithoutPage(true), null);
+        }
         if (sqLiteUtil.mitiProgress) {
             SQLiteDatabase.releaseMemory();
         }
+        return influence;
+    }
+
+    /**
+     * 更新
+     */
+    public int update(T entity, boolean ignoreNull) {
+        int influence = 0;
+        if (entity == null) {
+            return influence;
+        }
+        if (returnInfluence) {
+            influence = sqLiteUtil.getDatabase().delete(TableFinder.getUpdateSqlNoWhere(entity, modelInfo, ignoreNull)
+                    + conditionBuilder.getConditionsWithoutPage(true), null, null);
+        } else {
+            sqLiteUtil.getDatabase().execSQL(TableFinder.getUpdateSqlNoWhere(entity, modelInfo, ignoreNull)
+                    + conditionBuilder.getConditionsWithoutPage(true), null);
+        }
+        if (sqLiteUtil.mitiProgress) {
+            SQLiteDatabase.releaseMemory();
+        }
+        return influence;
     }
 
     /**

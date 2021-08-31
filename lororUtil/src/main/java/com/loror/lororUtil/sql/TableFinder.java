@@ -4,6 +4,7 @@ import android.database.Cursor;
 
 import java.lang.reflect.Field;
 import java.util.HashMap;
+import java.util.List;
 
 public class TableFinder {
 
@@ -80,21 +81,38 @@ public class TableFinder {
      */
     public static String getUpdateSqlNoWhere(Object entity, ModelInfo modelInfo, boolean ignoreNull) {
         String tableName = modelInfo.getTableName();
-        HashMap<String, String> columns = new HashMap<>();
-        for (ModelInfo.ColumnInfo columnInfo : modelInfo.getColumnInfos()) {
-            Field field = columnInfo.getField();
-            field.setAccessible(true);
-            try {
-                if (!columnInfo.isPrimaryKey()) {
-                    Object object = field.get(entity);
+        final HashMap<String, String> columns = new HashMap<>();
+        if (entity instanceof ModelData) {
+            ModelData modelData = ((ModelData) entity);
+            List<String> keys = modelData.keys();
+            for (ModelInfo.ColumnInfo columnInfo : modelInfo.getColumnInfos()) {
+                if (keys.contains(columnInfo.getName())) {
+                    Field field = columnInfo.getField();
+                    field.setAccessible(true);
+                    Object object = ((ModelData) entity).get(columnInfo.getName());
                     if (ignoreNull && object == null) {
                         continue;
                     }
                     Column column = (Column) field.getAnnotation(Column.class);
                     columns.put(columnInfo.getName(), ColumnFilter.getColumn(columnInfo.getName(), object, column));
                 }
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
+            }
+        } else {
+            for (ModelInfo.ColumnInfo columnInfo : modelInfo.getColumnInfos()) {
+                Field field = columnInfo.getField();
+                field.setAccessible(true);
+                try {
+                    if (!columnInfo.isPrimaryKey()) {
+                        Object object = field.get(entity);
+                        if (ignoreNull && object == null) {
+                            continue;
+                        }
+                        Column column = (Column) field.getAnnotation(Column.class);
+                        columns.put(columnInfo.getName(), ColumnFilter.getColumn(columnInfo.getName(), object, column));
+                    }
+                } catch (IllegalAccessException e) {
+                    e.printStackTrace();
+                }
             }
         }
         StringBuilder builder = new StringBuilder();
