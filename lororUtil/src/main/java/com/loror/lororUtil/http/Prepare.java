@@ -16,16 +16,16 @@ public class Prepare {
      */
     public void preparePostFile(HttpURLConnection conn, int timeOut, int readTimeOut, RequestParams parmas)
             throws Exception {
-        conn.setRequestMethod("POST");// 设置为POST情
+        conn.setRequestMethod("POST");
         conn.setConnectTimeout(timeOut);
         if (readTimeOut != 0) {
             conn.setReadTimeout(readTimeOut);
         }
-        conn.setDoOutput(true);// 发送POST请求必须设置如下两行
+        conn.setDoOutput(true);
         conn.setDoInput(true);
         conn.setUseCaches(false);
 
-        conn.setRequestProperty("connection", "keep-alive");// 设置请求头参数
+        conn.setRequestProperty("connection", "keep-alive");
         conn.setRequestProperty("Charset", "UTF-8");
         conn.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + MultipartConfig.BOUNDARY);
 
@@ -92,12 +92,12 @@ public class Prepare {
      */
     public void preparePutFile(HttpURLConnection conn, int timeOut, int readTimeOut, RequestParams parmas)
             throws Exception {
-        conn.setRequestMethod("PUT");// 设置为PUT情
+        conn.setRequestMethod("PUT");
         conn.setConnectTimeout(timeOut);
         if (readTimeOut != 0) {
             conn.setReadTimeout(readTimeOut);
         }
-        conn.setDoOutput(true);// 发送POST请求必须设置如下两行
+        conn.setDoOutput(true);
         conn.setDoInput(true);
 
         conn.setRequestProperty("connection", "keep-alive");// 设置请求头参数
@@ -115,15 +115,15 @@ public class Prepare {
      */
     public void preparePutSingleFile(HttpURLConnection conn, int timeOut, int readTimeOut, RequestParams parmas)
             throws Exception {
-        conn.setRequestMethod("PUT");// 设置为PUT情
+        conn.setRequestMethod("PUT");
         conn.setConnectTimeout(timeOut);
         if (readTimeOut != 0) {
             conn.setReadTimeout(readTimeOut);
         }
-        conn.setDoOutput(true);// 发送POST请求必须设置如下两行
+        conn.setDoOutput(true);
         conn.setDoInput(true);
 
-        conn.setRequestProperty("connection", "keep-alive");// 设置请求头参数
+        conn.setRequestProperty("connection", "keep-alive");
         conn.setRequestProperty("Charset", "UTF-8");
 
         StreamBody body = parmas.getFiles().get(0);

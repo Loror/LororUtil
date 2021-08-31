@@ -18,6 +18,9 @@ public class MD5Util {
         }
     }
 
+    /**
+     * MD5加密
+     */
     public static String md5(byte[] bytes) {
         try {
             MessageDigest md = MessageDigest.getInstance("md5");

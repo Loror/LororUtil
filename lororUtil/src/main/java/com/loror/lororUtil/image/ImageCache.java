@@ -4,7 +4,7 @@ public class ImageCache {
     /**
      * 图片缓存
      */
-    private static Cache<ReadImageResult> cache = new Cache<ReadImageResult>() {
+    private static final Cache<ReadImageResult> cache = new Cache<ReadImageResult>() {
 
         @Override
         protected int sizeOf(ReadImageResult value) {

@@ -13,7 +13,7 @@ import android.os.Handler;
 import android.provider.MediaStore;
 
 public class ScanUtil {
-    private Handler handler;
+    private final Handler handler;
 
     public interface ScanCallBack {
         void findOne(String path, int find, int scaned);
@@ -79,7 +79,7 @@ public class ScanUtil {
             public void run() {
                 total = 0;
                 count = 0;
-                inintPaths(rootFileDir.listFiles(), suffixs, callBack);
+                initPaths(rootFileDir.listFiles(), suffixs, callBack);
                 handler.post(new Runnable() {
 
                     @Override
@@ -94,13 +94,13 @@ public class ScanUtil {
     /**
      * 递归扫描
      */
-    private void inintPaths(final File[] files, String[] suffixs, final ScanCallBack callBack) {
+    private void initPaths(final File[] files, String[] suffixes, final ScanCallBack callBack) {
         if (files != null && files.length > 0) {
-            for (int i = 0; i < files.length; i++) {
+            for (int i = 0, length = files.length; i < length; i++) {
                 if (files[i].isFile()) {
                     final int index = i;
                     total++;
-                    if (contains(files[i].getName(), suffixs)) {
+                    if (contains(files[i].getName(), suffixes)) {
                         count++;
                         final int finalCount = count;
                         final int finalTotal = total;
@@ -116,7 +116,7 @@ public class ScanUtil {
                     try {
                         String get = files[i].getName();
                         if (!get.startsWith(".")) {
-                            inintPaths(files[i].listFiles(), suffixs, callBack);
+                            initPaths(files[i].listFiles(), suffixes, callBack);
                         }
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -130,9 +130,9 @@ public class ScanUtil {
      * 检查后缀
      */
     private boolean contains(String name, String[] suffixs) {
-        String uperName = name.toUpperCase(Locale.CHINA);
-        for (int i = 0; i < suffixs.length; i++) {
-            if (uperName.endsWith(suffixs[i].toUpperCase(Locale.CHINA))) {
+        String upperName = name.toUpperCase(Locale.CHINA);
+        for (int i = 0, length = suffixs.length; i < length; i++) {
+            if (upperName.endsWith(suffixs[i].toUpperCase(Locale.CHINA))) {
                 return true;
             }
         }

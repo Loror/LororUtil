@@ -174,8 +174,9 @@ public class ViewUtil {
         }
         Class<?> handlerType = handler.getClass();
         Field[] fields = handlerType.getDeclaredFields();
-        if (fields == null)
+        if (fields == null) {
             return false;
+        }
         boolean injected = false;
         for (int i = 0; i < fields.length; i++) {
             Field field = fields[i];
@@ -315,8 +316,9 @@ public class ViewUtil {
      */
     private static boolean injectClick(final Object holder, ViewFinder finder) {
         Method[] methods = holder.getClass().getDeclaredMethods();
-        if (methods == null)
+        if (methods == null) {
             return false;
+        }
         boolean injected = false;
         for (int i = 0; i < methods.length; i++) {
             final Method method = methods[i];

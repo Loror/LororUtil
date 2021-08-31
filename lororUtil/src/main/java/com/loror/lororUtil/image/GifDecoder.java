@@ -3,7 +3,6 @@ package com.loror.lororUtil.image;
 /**
  * Created by Loror on 2017/12/21.
  */
-
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 

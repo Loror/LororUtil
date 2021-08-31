@@ -1,7 +1,7 @@
 package com.loror.lororUtil.image;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
+import android.os.Build;
 import android.os.Environment;
 
 import com.loror.lororUtil.http.HttpsClient;
@@ -25,6 +25,9 @@ public class ImageDownloader {
         void beforeLoad(String url, HttpURLConnection connection);
     }
 
+    /**
+     * 设置请求预处理
+     */
     public static void setImageDownloaderConfig(ImageDownloaderConfig imageDownloaderConfig) {
         ImageDownloader.imageDownloaderConfig = imageDownloaderConfig;
     }
@@ -81,7 +84,6 @@ public class ImageDownloader {
     /**
      * 将网络图片存储到sd卡
      */
-    @SuppressLint("NewApi")
     public static boolean download(Context context, String urlStr, String path, boolean cover, boolean checkNet) {
         if (!Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
             return false;
@@ -106,7 +108,11 @@ public class ImageDownloader {
             }
             long length = 0;
             try {
-                length = conn.getContentLengthLong();
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                    length = conn.getContentLengthLong();
+                } else {
+                    length = conn.getContentLength();
+                }
             } catch (Throwable e) {
                 length = conn.getContentLength();
             }

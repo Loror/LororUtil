@@ -14,10 +14,16 @@ public class NativeQuery {
         this.database = database;
     }
 
+    /**
+     * 执行查询
+     */
     public ModelDataList executeQuery(String sql) {
         return executeQuery(sql, null);
     }
 
+    /**
+     * 执行查询
+     */
     public ModelDataList executeQuery(String sql, String[] selectionArgs) {
         ModelDataList list = new ModelDataList();
         Cursor cursor = database.rawQuery(sql, selectionArgs);
@@ -34,10 +40,16 @@ public class NativeQuery {
         return list;
     }
 
+    /**
+     * 执行更新/删除
+     */
     public void executeUpdate(String sql) {
         executeUpdate(sql, null);
     }
 
+    /**
+     * 执行更新/删除
+     */
     public void executeUpdate(String sql, Object[] bindArgs) {
         if (bindArgs == null) {
             database.execSQL(sql);
@@ -46,10 +58,16 @@ public class NativeQuery {
         }
     }
 
+    /**
+     * 执行更新/删除，并接收影响行数
+     */
     public int executeUpdateStatement(String sql) {
         return executeStatement(sql, null);
     }
 
+    /**
+     * 执行更新/删除，并接收影响行数
+     */
     public int executeStatement(String sql, Object[] bindArgs) {
         database.acquireReference();
         try {
