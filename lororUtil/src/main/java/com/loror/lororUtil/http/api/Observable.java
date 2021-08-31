@@ -38,6 +38,26 @@ public class Observable<T> {
     }
 
     /**
+     * 同步执行请求
+     */
+    public Call<T> call() {
+        Call<T> call = new Call<>();
+        final Responce responce = apiTask.request();
+        if (responce != null) {
+            call.responce = responce;
+            if (responce.getThrowable() == null) {
+                Object result = apiTask.toResult(responce);
+                if (result instanceof Throwable) {
+                    responce.setThrowable((Throwable) result);
+                } else {
+                    call.data = (T) result;
+                }
+            }
+        }
+        return call;
+    }
+
+    /**
      * 开始任务并提交监听
      */
     public Observable<T> subscribe(final Observer<T> observer) {
