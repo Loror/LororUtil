@@ -80,18 +80,18 @@ public class RequestParams {
     }
 
     /**
-     * 设置是否使用表单提交post
-     */
-    public void setForceMultiForPostOrPut(boolean forceMultiForPostOrPut) {
-        this.forceMultiForPostOrPut = forceMultiForPostOrPut;
-    }
-
-    /**
      * 更换{@link RequestParams#setForceMultiForPostOrPut}
      */
     @Deprecated
     public void setUserMultiForPost(boolean userMultiForPost) {
         setForceMultiForPostOrPut(userMultiForPost);
+    }
+
+    /**
+     * 设置是否使用表单提交post/put
+     */
+    public void setForceMultiForPostOrPut(boolean forceMultiForPostOrPut) {
+        this.forceMultiForPostOrPut = forceMultiForPostOrPut;
     }
 
     /**
