@@ -62,13 +62,13 @@ public class NativeQuery {
      * 执行更新/删除，并接收影响行数
      */
     public int executeUpdateStatement(String sql) {
-        return executeStatement(sql, null);
+        return executeUpdateStatement(sql, null);
     }
 
     /**
      * 执行更新/删除，并接收影响行数
      */
-    public int executeStatement(String sql, Object[] bindArgs) {
+    public int executeUpdateStatement(String sql, Object[] bindArgs) {
         database.acquireReference();
         try {
             Constructor<SQLiteStatement> constructor = SQLiteStatement.class.getDeclaredConstructor(SQLiteDatabase.class, String.class, Object[].class);

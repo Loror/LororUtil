@@ -224,10 +224,11 @@ public class Model<T> implements Where {
     public int delete() {
         int influence = 0;
         if (conditionBuilder.getConditionCount() > 0) {
+            String sql = "delete from " + modelInfo.getTableName() + conditionBuilder.getConditions(true);
             if (returnInfluence) {
-                influence = sqLiteUtil.getDatabase().delete("delete from " + modelInfo.getTableName() + conditionBuilder.getConditions(true), null, null);
+                influence = sqLiteUtil.nativeQuery().executeUpdateStatement(sql);
             } else {
-                sqLiteUtil.getDatabase().execSQL("delete from " + modelInfo.getTableName() + conditionBuilder.getConditions(true));
+                sqLiteUtil.getDatabase().execSQL(sql);
             }
             if (sqLiteUtil.mitiProgress) {
                 SQLiteDatabase.releaseMemory();
@@ -262,12 +263,12 @@ public class Model<T> implements Where {
         if (values == null) {
             return influence;
         }
+        String sql = TableFinder.getUpdateSqlNoWhere(values, modelInfo, ignoreNull)
+                + conditionBuilder.getConditionsWithoutPage(true);
         if (returnInfluence) {
-            influence = sqLiteUtil.getDatabase().delete(TableFinder.getUpdateSqlNoWhere(values, modelInfo, ignoreNull)
-                    + conditionBuilder.getConditionsWithoutPage(true), null, null);
+            influence = sqLiteUtil.nativeQuery().executeUpdateStatement(sql);
         } else {
-            sqLiteUtil.getDatabase().execSQL(TableFinder.getUpdateSqlNoWhere(values, modelInfo, ignoreNull)
-                    + conditionBuilder.getConditionsWithoutPage(true));
+            sqLiteUtil.getDatabase().execSQL(sql);
         }
         if (sqLiteUtil.mitiProgress) {
             SQLiteDatabase.releaseMemory();
@@ -283,12 +284,12 @@ public class Model<T> implements Where {
         if (entity == null) {
             return influence;
         }
+        String sql = TableFinder.getUpdateSqlNoWhere(entity, modelInfo, ignoreNull)
+                + conditionBuilder.getConditionsWithoutPage(true);
         if (returnInfluence) {
-            influence = sqLiteUtil.getDatabase().delete(TableFinder.getUpdateSqlNoWhere(entity, modelInfo, ignoreNull)
-                    + conditionBuilder.getConditionsWithoutPage(true), null, null);
+            influence = sqLiteUtil.nativeQuery().executeUpdateStatement(sql);
         } else {
-            sqLiteUtil.getDatabase().execSQL(TableFinder.getUpdateSqlNoWhere(entity, modelInfo, ignoreNull)
-                    + conditionBuilder.getConditionsWithoutPage(true));
+            sqLiteUtil.getDatabase().execSQL(sql);
         }
         if (sqLiteUtil.mitiProgress) {
             SQLiteDatabase.releaseMemory();
