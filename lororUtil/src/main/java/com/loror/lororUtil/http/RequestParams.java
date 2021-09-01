@@ -143,18 +143,18 @@ public class RequestParams {
     }
 
     /**
-     * 设置是否对post/put请求参数url编码
-     */
-    public void setUrlEncodeForPostOrPut(boolean urlEncodeForPostOrPut) {
-        this.urlEncodeForPostOrPut = urlEncodeForPostOrPut;
-    }
-
-    /**
      * 更换{@link RequestParams#setUrlEncodeForPostOrPut}
      */
     @Deprecated
     public void setUseDefaultConverterInPost(boolean useDefaultConverterInPost) {
         setUrlEncodeForPostOrPut(useDefaultConverterInPost);
+    }
+
+    /**
+     * 设置是否对post/put请求参数url编码
+     */
+    public void setUrlEncodeForPostOrPut(boolean urlEncodeForPostOrPut) {
+        this.urlEncodeForPostOrPut = urlEncodeForPostOrPut;
     }
 
     /**
@@ -165,14 +165,14 @@ public class RequestParams {
     }
 
     /**
-     * 设置是否默认将null转化成“”
+     * 设置是否默认将null转化成“”，默认为true
      */
     public static void setDefaultNullToEmpty(boolean defaultNullToEmpty) {
         RequestParams.defaultNullToEmpty = defaultNullToEmpty;
     }
 
     /**
-     * 获取所有文件
+     * 获取所有传输流
      */
     public List<StreamBody> getFiles() {
         return files == null ? new ArrayList<StreamBody>() : files;
@@ -386,7 +386,7 @@ public class RequestParams {
     }
 
     /**
-     * 添加参数
+     * 添加参数，已实现传输流{@link FileBody}
      */
     public RequestParams addParams(String key, StreamBody body) {
         body.setKey(key);
