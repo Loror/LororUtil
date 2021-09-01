@@ -227,7 +227,7 @@ public class Model<T> implements Where {
             if (returnInfluence) {
                 influence = sqLiteUtil.getDatabase().delete("delete from " + modelInfo.getTableName() + conditionBuilder.getConditions(true), null, null);
             } else {
-                sqLiteUtil.getDatabase().execSQL("delete from " + modelInfo.getTableName() + conditionBuilder.getConditions(true), null);
+                sqLiteUtil.getDatabase().execSQL("delete from " + modelInfo.getTableName() + conditionBuilder.getConditions(true));
             }
             if (sqLiteUtil.mitiProgress) {
                 SQLiteDatabase.releaseMemory();
@@ -267,7 +267,7 @@ public class Model<T> implements Where {
                     + conditionBuilder.getConditionsWithoutPage(true), null, null);
         } else {
             sqLiteUtil.getDatabase().execSQL(TableFinder.getUpdateSqlNoWhere(values, modelInfo, ignoreNull)
-                    + conditionBuilder.getConditionsWithoutPage(true), null);
+                    + conditionBuilder.getConditionsWithoutPage(true));
         }
         if (sqLiteUtil.mitiProgress) {
             SQLiteDatabase.releaseMemory();
@@ -288,7 +288,7 @@ public class Model<T> implements Where {
                     + conditionBuilder.getConditionsWithoutPage(true), null, null);
         } else {
             sqLiteUtil.getDatabase().execSQL(TableFinder.getUpdateSqlNoWhere(entity, modelInfo, ignoreNull)
-                    + conditionBuilder.getConditionsWithoutPage(true), null);
+                    + conditionBuilder.getConditionsWithoutPage(true));
         }
         if (sqLiteUtil.mitiProgress) {
             SQLiteDatabase.releaseMemory();
