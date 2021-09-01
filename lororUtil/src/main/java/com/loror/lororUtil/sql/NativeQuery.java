@@ -72,6 +72,7 @@ public class NativeQuery {
         database.acquireReference();
         try {
             Constructor<SQLiteStatement> constructor = SQLiteStatement.class.getDeclaredConstructor(SQLiteDatabase.class, String.class, Object[].class);
+            constructor.setAccessible(true);
             SQLiteStatement statement = constructor.newInstance(database, sql, bindArgs);
             try {
                 return statement.executeUpdateDelete();
