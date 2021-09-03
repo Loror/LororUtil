@@ -70,6 +70,38 @@ public class Responce {
     }
 
     /**
+     * 获取http头
+     */
+    public List<String> getHeaderList(String key) {
+        if (headers == null) {
+            return null;
+        }
+        for (Map.Entry<String, List<String>> item : headers.entrySet()) {
+            if (key == null) {
+                if (item.getKey() == null) {
+                    return item.getValue();
+                }
+            } else {
+                if (item.getKey() != null && key.equalsIgnoreCase(item.getKey())) {
+                    return item.getValue();
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * 获取http头
+     */
+    public String getHeader(String key) {
+        List<String> list = getHeaderList(key);
+        if (list != null && list.size() > 0) {
+            return list.get(0);
+        }
+        return null;
+    }
+
+    /**
      * 获取cookie
      */
     public List<SetCookie> getCookies() {
