@@ -1,8 +1,5 @@
 package com.loror.lororUtil.http;
-
 import com.loror.lororUtil.flyweight.ObjectPool;
-
-import java.net.HttpURLConnection;
 
 public class AsyncBaseClient extends BaseClient {
 
@@ -20,13 +17,13 @@ public class AsyncBaseClient extends BaseClient {
         }
     }
 
-    public void asyncPost(final String urlStr, final RequestParams parmas, final AsyncClient<Responce> asyncClient) {
+    public void asyncPost(final String urlStr, final RequestParams params, final AsyncClient<Responce> asyncClient) {
         initCallbackActuator();
         asyncClient.runBack(new Runnable() {
 
             @Override
             public void run() {
-                final Responce responce = post(urlStr, parmas);
+                final Responce responce = post(urlStr, params);
                 callbackActuator.run(new Runnable() {
 
                     @Override
@@ -38,13 +35,13 @@ public class AsyncBaseClient extends BaseClient {
         });
     }
 
-    public void asyncGet(final String urlStr, final RequestParams parmas, final AsyncClient<Responce> asyncClient) {
+    public void asyncGet(final String urlStr, final RequestParams params, final AsyncClient<Responce> asyncClient) {
         initCallbackActuator();
         asyncClient.runBack(new Runnable() {
 
             @Override
             public void run() {
-                final Responce responce = get(urlStr, parmas);
+                final Responce responce = get(urlStr, params);
                 callbackActuator.run(new Runnable() {
 
                     @Override
@@ -56,13 +53,13 @@ public class AsyncBaseClient extends BaseClient {
         });
     }
 
-    public void asyncPut(final String urlStr, final RequestParams parmas, final AsyncClient<Responce> asyncClient) {
+    public void asyncPut(final String urlStr, final RequestParams params, final AsyncClient<Responce> asyncClient) {
         initCallbackActuator();
         asyncClient.runBack(new Runnable() {
 
             @Override
             public void run() {
-                final Responce responce = put(urlStr, parmas);
+                final Responce responce = put(urlStr, params);
                 callbackActuator.run(new Runnable() {
 
                     @Override
@@ -74,13 +71,13 @@ public class AsyncBaseClient extends BaseClient {
         });
     }
 
-    public void asyncDelete(final String urlStr, final RequestParams parmas, final AsyncClient<Responce> asyncClient) {
+    public void asyncDelete(final String urlStr, final RequestParams params, final AsyncClient<Responce> asyncClient) {
         initCallbackActuator();
         asyncClient.runBack(new Runnable() {
 
             @Override
             public void run() {
-                final Responce responce = delete(urlStr, parmas);
+                final Responce responce = delete(urlStr, params);
                 callbackActuator.run(new Runnable() {
 
                     @Override
@@ -92,14 +89,14 @@ public class AsyncBaseClient extends BaseClient {
         });
     }
 
-    public void asyncDownload(final String urlStr, final RequestParams parmas, final String path, final boolean cover,
+    public void asyncDownload(final String urlStr, final RequestParams params, final String path, final boolean cover,
                               final AsyncClient<Responce> asyncClient) {
         initCallbackActuator();
         asyncClient.runBack(new Runnable() {
 
             @Override
             public void run() {
-                final Responce responce = download(urlStr, parmas, path, cover);
+                final Responce responce = download(urlStr, params, path, cover);
                 callbackActuator.run(new Runnable() {
 
                     @Override
@@ -111,22 +108,12 @@ public class AsyncBaseClient extends BaseClient {
         });
     }
 
+    @Deprecated
     public void asyncDownloadInPiece(final String urlStr, final String path, final long start,
                                      final long end, final AsyncClient<Responce> asyncClient) {
-        initCallbackActuator();
-        asyncClient.runBack(new Runnable() {
-
-            @Override
-            public void run() {
-                final Responce responce = downloadInPiece(urlStr, path, start, end);
-                callbackActuator.run(new Runnable() {
-
-                    @Override
-                    public void run() {
-                        asyncClient.callBack(responce);
-                    }
-                });
-            }
-        });
+        RequestParams params = new RequestParams();
+        params.addHeader("Range", "bytes=" + start + "-" + end);
+//        params.addHeader("Accept-Encoding", "identity");
+        asyncDownload(urlStr, params, path, false, asyncClient);
     }
 }

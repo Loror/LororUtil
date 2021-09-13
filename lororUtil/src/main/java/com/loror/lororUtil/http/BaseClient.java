@@ -1,7 +1,9 @@
 package com.loror.lororUtil.http;
 
 import android.os.Build;
+
 import com.loror.lororUtil.text.TextUtil;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
@@ -660,63 +662,6 @@ public abstract class BaseClient extends Prepare implements Client {
     }
 
     /**
-     * 通过流接受文件
-     */
-    private void downloadFile(File file, final long length, InputStream is, final ProgressListener progressListener, Actuator actuator) throws Throwable {
-        long last = System.currentTimeMillis(), transed = 0;
-        FileOutputStream fos = new FileOutputStream(file);
-        byte[] out = new byte[1024 * 100];
-        int total = 0;
-        int speed = 0;
-        while ((total = is.read(out)) != -1) {
-            fos.write(out, 0, total);
-            fos.flush();
-            transed += total;
-            speed += total;
-            long now = System.currentTimeMillis();
-            final long timeGo = now - last;
-            if (timeGo > 30) {
-                final float progress = (float) (transed * 1.0 / length * 100);
-                final int finalSpeed = speed;
-                if (progressListener != null) {
-                    Runnable runnable = new Runnable() {
-
-                        @Override
-                        public void run() {
-                            progressListener.transing(progress, (int) (finalSpeed * 1000L / timeGo), length);
-                        }
-                    };
-                    if (actuator != null) {
-                        actuator.run(runnable);
-                    } else {
-                        runnable.run();
-                    }
-                }
-                speed = 0;
-                last = now;
-            }
-        }
-        if (progressListener != null) {
-            final long timeGo = (System.currentTimeMillis() - last);
-            final int finalSpeed = speed;
-            Runnable runnable = new Runnable() {
-
-                @Override
-                public void run() {
-                    progressListener.transing(100, timeGo == 0 ? 0 : (int) (finalSpeed * 1000L / timeGo), length);
-                }
-            };
-            if (actuator != null) {
-                actuator.run(runnable);
-            } else {
-                runnable.run();
-            }
-        }
-        is.close();
-        fos.close();
-    }
-
-    /**
      * 下载文件
      */
     public Responce download(String urlStr, RequestParams params, String path, boolean cover) {
@@ -748,14 +693,14 @@ public abstract class BaseClient extends Prepare implements Client {
             initHeaders(conn, responce);
             if (responce.code == HttpURLConnection.HTTP_OK) {
                 long length = length(conn);
-                if (file.exists() && !cover && file.length() == length) {
+                if (file.exists() && file.length() == length) {
                     responce.result = "success".getBytes();
                 } else {
                     InputStream inputStream = conn.getInputStream();
                     if ("gzip".equals(responce.getContentEncoding())) {
                         inputStream = new GZIPInputStream(inputStream);
                     }
-                    downloadFile(file, length, inputStream, progressListener, callbackActuator);
+                    downloadFile(params, responce, file, length, inputStream, cover, progressListener, callbackActuator);
                     responce.result = "success".getBytes();
                 }
             }
@@ -798,83 +743,83 @@ public abstract class BaseClient extends Prepare implements Client {
     }
 
     /**
-     * 断点续传下载
+     * 通过流接受文件
      */
-    public Responce downloadInPiece(String urlStr, String path, long start, long end) {
-        final Responce responce = new Responce();
-        final ProgressListener progressListener = this.progressListener;
-        final Actuator callbackActuator = this.callbackActuator;
-        try {
-            if (!checkState()) {
-                throw new IllegalArgumentException("no permission to visit file");
-            }
-            URL url = new URL(urlStr);// 服务器的域名
-            conn = (HttpURLConnection) url.openConnection();
-            if (followRedirects) {
-                conn.setInstanceFollowRedirects(true);
-            }
-            httpsConfig(conn);
-            conn.setConnectTimeout(timeOut);
-            conn.setRequestMethod("GET");
-            conn.setRequestProperty("Range", "bytes=" + start + "-" + end);
-            conn.setRequestProperty("Accept-Encoding", "identity");
-            conn.setDoInput(true);
-            File file = getFile(conn, path, urlStr);
-            responce.url = conn.getURL();
-            responce.code = conn.getResponseCode();
-            responce.contentEncoding = conn.getContentEncoding();
-            initHeaders(conn, responce);
-            if (responce.code == HttpURLConnection.HTTP_OK || responce.code == HttpURLConnection.HTTP_PARTIAL) {
-                long length = length(conn);
-                InputStream inputStream = conn.getInputStream();
-                if ("gzip".equals(responce.getContentEncoding())) {
-                    inputStream = new GZIPInputStream(inputStream);
+    private void downloadFile(RequestParams params, Responce responce, File file, long length, InputStream is, boolean cover,
+                              final ProgressListener progressListener, Actuator actuator) throws Throwable {
+        long last = System.currentTimeMillis(), transed = 0;
+        FileOutputStream fos = null;
+        byte[] out = new byte[1024 * 100];
+        int total = 0;
+        int speed = 0;
+        long fileLength = length;
+        if (params != null) {
+            if (responce.getCode() == 206) {
+                String range = responce.getHeader("Content-Range");
+                if (!cover) {
+                    fos = new FileOutputStream(file, true);
                 }
-                downloadFile(file, length, inputStream, progressListener, callbackActuator);
-                if (responce.code == HttpURLConnection.HTTP_OK) {
-                    responce.result = "not support".getBytes();
-                } else {
-                    responce.result = "success".getBytes();
-                }
-            } else {
-                responce.result = null;
-            }
-            conn.disconnect();
-        } catch (Throwable e) {
-            e.printStackTrace();
-        } finally {
-            conn = null;
-            if (progressListener != null) {
-                if (responce.result == null) {
-                    Runnable runnable = new Runnable() {
-
-                        @Override
-                        public void run() {
-                            progressListener.failed();
+                if (!TextUtil.isEmpty(range)) {
+                    int index = range.lastIndexOf("/");
+                    if (index != -1) {
+                        String fileLengthString = range.substring(index + 1);
+                        if (TextUtil.isNumber(fileLengthString)) {
+                            fileLength = Integer.parseInt(fileLengthString);
                         }
-                    };
-                    if (callbackActuator != null) {
-                        callbackActuator.run(runnable);
-                    } else {
-                        runnable.run();
-                    }
-                } else {
-                    Runnable runnable = new Runnable() {
-
-                        @Override
-                        public void run() {
-                            progressListener.finish(responce.toString());
-                        }
-                    };
-                    if (callbackActuator != null) {
-                        callbackActuator.run(runnable);
-                    } else {
-                        runnable.run();
                     }
                 }
             }
         }
-        return responce;
+        if (fos == null) {
+            fos = new FileOutputStream(file);
+        }
+        final long finalFileLength = fileLength;
+        while ((total = is.read(out)) != -1) {
+            fos.write(out, 0, total);
+            fos.flush();
+            transed += total;
+            speed += total;
+            long now = System.currentTimeMillis();
+            final long timeGo = now - last;
+            if (timeGo > 30) {
+                final float progress = (float) (transed * 1.0 / length * 100);
+                final int finalSpeed = speed;
+                if (progressListener != null) {
+                    Runnable runnable = new Runnable() {
+
+                        @Override
+                        public void run() {
+                            progressListener.transing(progress, (int) (finalSpeed * 1000L / timeGo), finalFileLength);
+                        }
+                    };
+                    if (actuator != null) {
+                        actuator.run(runnable);
+                    } else {
+                        runnable.run();
+                    }
+                }
+                speed = 0;
+                last = now;
+            }
+        }
+        if (progressListener != null) {
+            final long timeGo = (System.currentTimeMillis() - last);
+            final int finalSpeed = speed;
+            Runnable runnable = new Runnable() {
+
+                @Override
+                public void run() {
+                    progressListener.transing(100, timeGo == 0 ? 0 : (int) (finalSpeed * 1000L / timeGo), finalFileLength);
+                }
+            };
+            if (actuator != null) {
+                actuator.run(runnable);
+            } else {
+                runnable.run();
+            }
+        }
+        is.close();
+        fos.close();
     }
 
     /**
