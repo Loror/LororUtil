@@ -691,7 +691,7 @@ public abstract class BaseClient extends Prepare implements Client {
             responce.code = conn.getResponseCode();
             responce.contentEncoding = conn.getContentEncoding();
             initHeaders(conn, responce);
-            if (responce.code == HttpURLConnection.HTTP_OK) {
+            if (responce.code == HttpURLConnection.HTTP_OK || responce.code == HttpURLConnection.HTTP_PARTIAL) {
                 long length = length(conn);
                 if (file.exists() && file.length() == length) {
                     responce.result = "success".getBytes();
@@ -754,7 +754,7 @@ public abstract class BaseClient extends Prepare implements Client {
         int speed = 0;
         long fileLength = length;
         if (params != null) {
-            if (responce.getCode() == 206) {
+            if (responce.getCode() == HttpURLConnection.HTTP_PARTIAL) {
                 String range = responce.getHeader("Content-Range");
                 if (!cover) {
                     fos = new FileOutputStream(file, true);
