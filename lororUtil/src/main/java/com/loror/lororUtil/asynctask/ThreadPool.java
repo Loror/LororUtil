@@ -11,6 +11,7 @@ public class ThreadPool implements RemoveableThreadPool {
     private final List<Runnable> tasks = new LinkedList<>();// 任务池
 
     private int delay = 50;
+    private Catcher catcher;
 
     /**
      * 初始化线程池
@@ -58,7 +59,11 @@ public class ThreadPool implements RemoveableThreadPool {
                                     runnable = null;
                                 }
                             } catch (Exception e) {
-                                e.printStackTrace();
+                                if (catcher != null) {
+                                    catcher.catchException(e);
+                                } else {
+                                    e.printStackTrace();
+                                }
                             }
                         } // 有任务，取出任务
                     }
@@ -109,6 +114,10 @@ public class ThreadPool implements RemoveableThreadPool {
         } else {
             this.delay = delay;
         }
+    }
+
+    public void setCatcher(Catcher catcher) {
+        this.catcher = catcher;
     }
 
     @Override

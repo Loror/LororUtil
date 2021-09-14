@@ -13,7 +13,11 @@ import android.widget.GridView;
 import android.widget.Toast;
 
 import com.alibaba.fastjson.JSON;
+import com.loror.lororUtil.asynctask.FlowTask;
 import com.loror.lororUtil.asynctask.AsyncUtil;
+import com.loror.lororUtil.asynctask.Func;
+import com.loror.lororUtil.asynctask.Func0;
+import com.loror.lororUtil.asynctask.Func1;
 import com.loror.lororUtil.http.DefaultAsyncClient;
 import com.loror.lororUtil.http.HttpClient;
 import com.loror.lororUtil.http.RequestParams;
@@ -54,6 +58,34 @@ public class MainActivity extends AppCompatActivity {
         requestPermission("android.permission.WRITE_EXTERNAL_STORAGE", 0);
 //        connectNet();
         connectNetByApi();
+        task();
+    }
+
+    private void task() {
+        new FlowTask()
+                .ioSchedule()
+                .create(new Func0<Integer>() {
+                    @Override
+                    public Integer func() {
+                        Log.e("Task", "1运行线程：" + (Looper.getMainLooper() == Looper.myLooper() ? "主线程" : "子线程"));
+                        return 1;
+                    }
+                })
+                .mainHandlerSchedule()
+                .map(new Func<Integer, String>() {
+                    @Override
+                    public String func(Integer it) {
+                        Log.e("Task", it + ":2运行线程：" + (Looper.getMainLooper() == Looper.myLooper() ? "主线程" : "子线程"));
+                        return "hello";
+                    }
+                })
+                .ioSchedule()
+                .call(new Func1<String>() {
+                    @Override
+                    public void func(String it) {
+                        Log.e("Task", it + ":3运行线程：" + (Looper.getMainLooper() == Looper.myLooper() ? "主线程" : "子线程"));
+                    }
+                });
     }
 
     private void connectNetByApi() {
