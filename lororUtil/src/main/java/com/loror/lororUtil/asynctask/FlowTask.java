@@ -42,4 +42,31 @@ public class FlowTask extends TaskSchedule {
         return new Task<T>(taskNodes);
     }
 
+    /**
+     * 执行任务
+     */
+    public void call(final Func1<Void> func) {
+        Schedule schedule = nextSchedule();
+        final Catcher catcher = catcher();
+        Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+                if (catcher == null) {
+                    func.func(null);
+                } else {
+                    try {
+                        func.func(null);
+                    } catch (Exception e) {
+                        catcher.catchException(e);
+                    }
+                }
+            }
+        };
+        if (schedule != null) {
+            schedule.schedule(runnable);
+        } else {
+            runnable.run();
+        }
+    }
+
 }
