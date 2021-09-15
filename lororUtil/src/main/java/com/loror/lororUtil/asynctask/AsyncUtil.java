@@ -1,7 +1,7 @@
 package com.loror.lororUtil.asynctask;
 
 /**
- * 请使用AsyncTask
+ * 请使用FlowTask
  */
 @Deprecated
 public class AsyncUtil {
