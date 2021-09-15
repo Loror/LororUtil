@@ -1,24 +1,22 @@
 package com.loror.lororUtil.asynctask;
 
-import java.util.LinkedList;
-
 public class TaskSchedule {
 
-    private final LinkedList<Schedule> schedules = new LinkedList<>();
+    private Schedule schedule;
     private Catcher catcher;
 
     public TaskSchedule schedule(Schedule schedule) {
-        schedules.add(schedule);
+        this.schedule = schedule;
         return this;
     }
 
     public TaskSchedule ioSchedule() {
-        schedules.add(new IoSchedule());
+        this.schedule = new IoSchedule();
         return this;
     }
 
     public TaskSchedule mainHandlerSchedule() {
-        schedules.add(new MainHandlerSchedule());
+        this.schedule = new MainHandlerSchedule();
         return this;
     }
 
@@ -28,10 +26,7 @@ public class TaskSchedule {
     }
 
     protected Schedule nextSchedule() {
-        if (schedules.size() > 0) {
-            return schedules.removeFirst();
-        }
-        return null;
+        return schedule;
     }
 
     protected Catcher catcher() {
