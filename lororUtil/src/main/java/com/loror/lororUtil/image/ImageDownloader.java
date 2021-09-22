@@ -35,7 +35,7 @@ public class ImageDownloader {
     /**
      * 删除sql缓存，files为保留路径
      */
-    public static void tryClearSqlCach(Context context, File[] files) {
+    public static void tryClearSqlCache(Context context, File[] files) {
         if (files == null || files.length == 0) {
             return;
         }
@@ -74,7 +74,7 @@ public class ImageDownloader {
     /**
      * 删除所有sql缓存
      */
-    public static void tryClearAllSqlCach(Context context) {
+    public static void tryClearAllSqlCache(Context context) {
         SQLiteUtil sqLiteUtil = new SQLiteUtil(context, "imageCompare");
         sqLiteUtil.createTableIfNotExists(Compare.class);
         sqLiteUtil.deleteAll(Compare.class);

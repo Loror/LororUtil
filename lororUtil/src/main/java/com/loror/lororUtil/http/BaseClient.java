@@ -282,32 +282,17 @@ public abstract class BaseClient extends Prepare implements Client {
             } finally {
                 conn = null;
                 if (progressListener != null) {
-                    if (responce.result == null) {
-                        Runnable runnable = new Runnable() {
+                    Runnable runnable = new Runnable() {
 
-                            @Override
-                            public void run() {
-                                progressListener.failed();
-                            }
-                        };
-                        if (callbackActuator != null) {
-                            callbackActuator.run(runnable);
-                        } else {
-                            runnable.run();
+                        @Override
+                        public void run() {
+                            progressListener.finish(responce.result != null);
                         }
+                    };
+                    if (callbackActuator != null) {
+                        callbackActuator.run(runnable);
                     } else {
-                        Runnable runnable = new Runnable() {
-
-                            @Override
-                            public void run() {
-                                progressListener.finish(responce.toString());
-                            }
-                        };
-                        if (callbackActuator != null) {
-                            callbackActuator.run(runnable);
-                        } else {
-                            runnable.run();
-                        }
+                        runnable.run();
                     }
                 }
             }
@@ -420,32 +405,17 @@ public abstract class BaseClient extends Prepare implements Client {
             } finally {
                 conn = null;
                 if (progressListener != null) {
-                    if (responce.result == null) {
-                        Runnable runnable = new Runnable() {
+                    Runnable runnable = new Runnable() {
 
-                            @Override
-                            public void run() {
-                                progressListener.failed();
-                            }
-                        };
-                        if (callbackActuator != null) {
-                            callbackActuator.run(runnable);
-                        } else {
-                            runnable.run();
+                        @Override
+                        public void run() {
+                            progressListener.finish(responce.result != null);
                         }
+                    };
+                    if (callbackActuator != null) {
+                        callbackActuator.run(runnable);
                     } else {
-                        Runnable runnable = new Runnable() {
-
-                            @Override
-                            public void run() {
-                                progressListener.finish(responce.toString());
-                            }
-                        };
-                        if (callbackActuator != null) {
-                            callbackActuator.run(runnable);
-                        } else {
-                            runnable.run();
-                        }
+                        runnable.run();
                     }
                 }
             }
@@ -492,32 +462,17 @@ public abstract class BaseClient extends Prepare implements Client {
             } finally {
                 conn = null;
                 if (progressListener != null) {
-                    if (responce.result == null) {
-                        Runnable runnable = new Runnable() {
+                    Runnable runnable = new Runnable() {
 
-                            @Override
-                            public void run() {
-                                progressListener.failed();
-                            }
-                        };
-                        if (callbackActuator != null) {
-                            callbackActuator.run(runnable);
-                        } else {
-                            runnable.run();
+                        @Override
+                        public void run() {
+                            progressListener.finish(responce.result != null);
                         }
+                    };
+                    if (callbackActuator != null) {
+                        callbackActuator.run(runnable);
                     } else {
-                        Runnable runnable = new Runnable() {
-
-                            @Override
-                            public void run() {
-                                progressListener.finish(responce.toString());
-                            }
-                        };
-                        if (callbackActuator != null) {
-                            callbackActuator.run(runnable);
-                        } else {
-                            runnable.run();
-                        }
+                        runnable.run();
                     }
                 }
             }
@@ -710,32 +665,17 @@ public abstract class BaseClient extends Prepare implements Client {
         } finally {
             conn = null;
             if (progressListener != null) {
-                if (responce.result == null) {
-                    Runnable runnable = new Runnable() {
+                Runnable runnable = new Runnable() {
 
-                        @Override
-                        public void run() {
-                            progressListener.failed();
-                        }
-                    };
-                    if (callbackActuator != null) {
-                        callbackActuator.run(runnable);
-                    } else {
-                        runnable.run();
+                    @Override
+                    public void run() {
+                        progressListener.finish(responce.result != null);
                     }
+                };
+                if (callbackActuator != null) {
+                    callbackActuator.run(runnable);
                 } else {
-                    Runnable runnable = new Runnable() {
-
-                        @Override
-                        public void run() {
-                            progressListener.finish(responce.toString());
-                        }
-                    };
-                    if (callbackActuator != null) {
-                        callbackActuator.run(runnable);
-                    } else {
-                        runnable.run();
-                    }
+                    runnable.run();
                 }
             }
         }
