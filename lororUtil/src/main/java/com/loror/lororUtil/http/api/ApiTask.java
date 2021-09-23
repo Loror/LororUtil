@@ -150,6 +150,7 @@ public class ApiTask {
         final TypeInfo typeInfo = new TypeInfo(returnType);
         ++apiRequest.useTimes;
         final HttpClient client = new HttpsClient();
+        apiRequest.client = client;
         if (apiClient.onRequestListener != null) {
             apiClient.onRequestListener.onRequestBegin(client, apiRequest);
         }
@@ -161,7 +162,6 @@ public class ApiTask {
         if (apiRequest.isKeepStream() && typeInfo.getType() == Responce.class) {
             client.setKeepStream(true);
         }
-        apiRequest.client = client;
         client.setProgressListener(apiRequest.progressListener);
         int type = apiRequest.getType();
         Responce responce;
@@ -236,7 +236,7 @@ public class ApiTask {
         }
         //优先外部筛选器通过尝试解析，否则200系列解析
         if (apiClient.codeFilter != null ? apiClient.codeFilter.isSuccessCode(responce.getCode()) : responce.getCode() / 100 == 2) {
-             //String类型优先拦截
+            //String类型优先拦截
             if (classType == String.class) {
                 return apiClient.charset == null ? responce.toString() : new String(responce.result, apiClient.charset);
             }

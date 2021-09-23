@@ -125,7 +125,7 @@ public class Observable<T> {
      */
     public void cancel() {
         unSubscribe();
-        if (apiRequest != null) {
+        if (apiRequest != null && apiRequest.client != null) {
             apiRequest.client.cancel();
         }
     }
