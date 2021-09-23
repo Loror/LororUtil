@@ -3,7 +3,9 @@ package com.loror.lororUtil.image;
 import android.content.Context;
 import android.os.Build;
 import android.os.Environment;
+import android.os.Handler;
 
+import com.loror.lororUtil.flyweight.ObjectPool;
 import com.loror.lororUtil.http.HttpsClient;
 import com.loror.lororUtil.sql.Model;
 import com.loror.lororUtil.sql.SQLiteUtil;
@@ -23,6 +25,8 @@ public class ImageDownloader {
 
     public interface ImageDownloaderConfig {
         void beforeLoad(String url, HttpURLConnection connection);
+
+        void whenLoading(String url, float progress, long length);
     }
 
     /**
@@ -84,10 +88,11 @@ public class ImageDownloader {
     /**
      * 将网络图片存储到sd卡
      */
-    public static boolean download(Context context, String urlStr, String path, boolean cover, boolean checkNet) {
+    public static boolean download(Context context, final String urlStr, String path, boolean cover, boolean checkNet) {
         if (!Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
             return false;
         }
+        Handler handler = ObjectPool.getInstance().getHandler();
         SQLiteUtil sqLiteUtil = new SQLiteUtil(context, "imageCompare");
         sqLiteUtil.createTableIfNotExists(Compare.class);
         try {
@@ -137,11 +142,30 @@ public class ImageDownloader {
                 is = new GZIPInputStream(is);
             }
             FileOutputStream fos = new FileOutputStream(file);
-            byte[] out = new byte[2048];
+            byte[] out = new byte[1024 * 10];
+            long last = System.currentTimeMillis(), transed = 0;
             int total = 0;
             while ((total = is.read(out)) != -1) {
                 fos.write(out, 0, total);
                 fos.flush();
+                transed += total;
+                if (imageDownloaderConfig != null) {
+                    long now = System.currentTimeMillis();
+                    final long timeGo = now - last;
+                    if (timeGo > 30) {
+                        final float progress = (float) (transed * 1.0 / length * 100);
+                        final long finalLength = length;
+                        Runnable runnable = new Runnable() {
+
+                            @Override
+                            public void run() {
+                                imageDownloaderConfig.whenLoading(urlStr, progress, finalLength);
+                            }
+                        };
+                        handler.post(runnable);
+                        last = now;
+                    }
+                }
             }
             is.close();
             fos.close();
@@ -153,9 +177,30 @@ public class ImageDownloader {
             } else {
                 sqLiteUtil.updateById(compare);
             }
+            if (imageDownloaderConfig != null) {
+                final long finalLength = length;
+                Runnable runnable = new Runnable() {
+
+                    @Override
+                    public void run() {
+                        imageDownloaderConfig.whenLoading(urlStr, 100f, finalLength);
+                    }
+                };
+                handler.post(runnable);
+            }
             return true;
         } catch (Exception e) {
             e.printStackTrace();
+            if (imageDownloaderConfig != null) {
+                Runnable runnable = new Runnable() {
+
+                    @Override
+                    public void run() {
+                        imageDownloaderConfig.whenLoading(urlStr, -1f, -1);
+                    }
+                };
+                handler.post(runnable);
+            }
         } finally {
             sqLiteUtil.close();
         }
