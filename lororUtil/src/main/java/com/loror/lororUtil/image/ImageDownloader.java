@@ -3,9 +3,7 @@ package com.loror.lororUtil.image;
 import android.content.Context;
 import android.os.Build;
 import android.os.Environment;
-import android.os.Handler;
 
-import com.loror.lororUtil.flyweight.ObjectPool;
 import com.loror.lororUtil.http.HttpsClient;
 import com.loror.lororUtil.sql.Model;
 import com.loror.lororUtil.sql.SQLiteUtil;
@@ -92,7 +90,6 @@ public class ImageDownloader {
         if (!Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
             return false;
         }
-        Handler handler = ObjectPool.getInstance().getHandler();
         SQLiteUtil sqLiteUtil = new SQLiteUtil(context, "imageCompare");
         sqLiteUtil.createTableIfNotExists(Compare.class);
         try {
@@ -154,15 +151,7 @@ public class ImageDownloader {
                     final long timeGo = now - last;
                     if (timeGo > 30) {
                         final float progress = (float) (transed * 1.0 / length * 100);
-                        final long finalLength = length;
-                        Runnable runnable = new Runnable() {
-
-                            @Override
-                            public void run() {
-                                imageDownloaderConfig.whenLoading(urlStr, progress, finalLength);
-                            }
-                        };
-                        handler.post(runnable);
+                        imageDownloaderConfig.whenLoading(urlStr, progress, length);
                         last = now;
                     }
                 }
@@ -178,28 +167,13 @@ public class ImageDownloader {
                 sqLiteUtil.updateById(compare);
             }
             if (imageDownloaderConfig != null) {
-                final long finalLength = length;
-                Runnable runnable = new Runnable() {
-
-                    @Override
-                    public void run() {
-                        imageDownloaderConfig.whenLoading(urlStr, 100f, finalLength);
-                    }
-                };
-                handler.post(runnable);
+                imageDownloaderConfig.whenLoading(urlStr, 100f, length);
             }
             return true;
         } catch (Exception e) {
             e.printStackTrace();
             if (imageDownloaderConfig != null) {
-                Runnable runnable = new Runnable() {
-
-                    @Override
-                    public void run() {
-                        imageDownloaderConfig.whenLoading(urlStr, -1f, -1);
-                    }
-                };
-                handler.post(runnable);
+                imageDownloaderConfig.whenLoading(urlStr, -1f, -1);
             }
         } finally {
             sqLiteUtil.close();
