@@ -166,6 +166,7 @@ public abstract class BaseClient extends Prepare implements Client {
             prepareGet(conn, timeOut, readTimeOut, params);
             responce.code = conn.getResponseCode();
             responce.contentType = conn.getContentType();
+            responce.contentLength = length(conn);
             responce.contentEncoding = conn.getContentEncoding();
             responce.url = conn.getURL();
             initHeaders(conn, responce);
@@ -218,6 +219,7 @@ public abstract class BaseClient extends Prepare implements Client {
                 responce.url = conn.getURL();
                 responce.code = conn.getResponseCode();
                 responce.contentType = conn.getContentType();
+                responce.contentLength = length(conn);
                 responce.contentEncoding = conn.getContentEncoding();
                 initHeaders(conn, responce);
                 readResponce(conn, responce);
@@ -274,6 +276,7 @@ public abstract class BaseClient extends Prepare implements Client {
                 responce.url = conn.getURL();
                 responce.code = conn.getResponseCode();
                 responce.contentType = conn.getContentType();
+                responce.contentLength = length(conn);
                 responce.contentEncoding = conn.getContentEncoding();
                 initHeaders(conn, responce);
                 readResponce(conn, responce);
@@ -341,6 +344,7 @@ public abstract class BaseClient extends Prepare implements Client {
                 responce.url = conn.getURL();
                 responce.code = conn.getResponseCode();
                 responce.contentType = conn.getContentType();
+                responce.contentLength = length(conn);
                 responce.contentEncoding = conn.getContentEncoding();
                 initHeaders(conn, responce);
                 readResponce(conn, responce);
@@ -397,6 +401,7 @@ public abstract class BaseClient extends Prepare implements Client {
                 responce.url = conn.getURL();
                 responce.code = conn.getResponseCode();
                 responce.contentType = conn.getContentType();
+                responce.contentLength = length(conn);
                 responce.contentEncoding = conn.getContentEncoding();
                 initHeaders(conn, responce);
                 readResponce(conn, responce);
@@ -454,6 +459,7 @@ public abstract class BaseClient extends Prepare implements Client {
                 responce.url = conn.getURL();
                 responce.code = conn.getResponseCode();
                 responce.contentType = conn.getContentType();
+                responce.contentLength = length(conn);
                 responce.contentEncoding = conn.getContentEncoding();
                 initHeaders(conn, responce);
                 readResponce(conn, responce);
@@ -499,6 +505,7 @@ public abstract class BaseClient extends Prepare implements Client {
             prepareDelete(conn, timeOut, readTimeOut, params);
             responce.code = conn.getResponseCode();
             responce.contentType = conn.getContentType();
+            responce.contentLength = length(conn);
             responce.contentEncoding = conn.getContentEncoding();
             responce.url = conn.getURL();
             initHeaders(conn, responce);
@@ -648,6 +655,7 @@ public abstract class BaseClient extends Prepare implements Client {
             initHeaders(conn, responce);
             if (responce.code == HttpURLConnection.HTTP_OK || responce.code == HttpURLConnection.HTTP_PARTIAL) {
                 long length = length(conn);
+                responce.contentLength = length;
                 if (!cover && responce.code == HttpURLConnection.HTTP_OK && (file.exists() && file.length() == length)) {
                     responce.result = "success".getBytes();
                 } else {

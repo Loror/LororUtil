@@ -1,7 +1,5 @@
 package com.loror.lororUtil.http;
 
-import android.os.Build;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -14,8 +12,10 @@ import java.util.List;
 import java.util.Map;
 
 public class Responce {
+
     protected URL url;
     protected int code;
+    protected long contentLength;
     public byte[] result;
     protected String contentEncoding;
     protected String contentType;
@@ -127,27 +127,24 @@ public class Responce {
      * 获取内容长度
      */
     public long getContentLength() {
-        long length = 0;
-        if (connection != null) {
-            try {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                    length = connection.getContentLengthLong();
-                } else {
-                    length = connection.getContentLength();
-                }
-            } catch (Throwable e) {
-                length = connection.getContentLength();
-            }
-        } else if (result != null) {
-            length = result.length;
+        if (contentLength == 0 && result != null) {
+            contentLength = result.length;
         }
-        return length;
+        return contentLength;
     }
 
     /**
      * 关闭连接
      */
     public void close() {
+        if (inputStream != null) {
+            try {
+                inputStream.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            inputStream = null;
+        }
         if (connection != null) {
             connection.disconnect();
             connection = null;
