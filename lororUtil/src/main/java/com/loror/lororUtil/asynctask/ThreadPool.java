@@ -59,19 +59,19 @@ public class ThreadPool implements RemoveableThreadPool {
                                     runnable = null;
                                 }
                             } catch (Exception e) {
-                                if (catcher != null) {
-                                    catcher.catchException(e);
-                                } else {
-                                    e.printStackTrace();
-                                }
+                                e.printStackTrace();
                             }
                         } // 有任务，取出任务
                     }
                     if (runnable != null) {
-                        try {
+                        if (catcher != null) {
+                            try {
+                                runnable.run();
+                            } catch (Exception e) {
+                                catcher.catchException(e);
+                            }
+                        } else {
                             runnable.run();
-                        } catch (Exception e) {
-                            e.printStackTrace();
                         }
                     }
                 }
