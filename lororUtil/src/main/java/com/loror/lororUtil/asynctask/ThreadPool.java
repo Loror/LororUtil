@@ -116,6 +116,9 @@ public class ThreadPool implements RemoveableThreadPool {
         }
     }
 
+    /**
+     * 设置异常捕获器
+     */
     public void setCatcher(Catcher catcher) {
         this.catcher = catcher;
     }
