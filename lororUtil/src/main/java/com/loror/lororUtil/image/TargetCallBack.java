@@ -93,13 +93,13 @@ public class TargetCallBack implements ImageUtilCallBack {
 
     @Override
     public void onStart(ImageView imageView) {
-        if (onLoadListener != null) {
-            onLoadListener.onStart(imageView);
-        }
         if (target instanceof BitmapTarget) {
             if (defaultImage != 0) {
                 ((BitmapTarget) target).target(BitmapUtil.drawableToBitmap(context.getResources().getDrawable(defaultImage)));
             }
+        }
+        if (onLoadListener != null) {
+            onLoadListener.onStart(imageView);
         }
     }
 
@@ -115,31 +115,31 @@ public class TargetCallBack implements ImageUtilCallBack {
 
     @Override
     public void onLoadCach(ImageView imageView, ReadImageResult result) {
+        result(result);
         if (onLoadListener != null) {
             onLoadListener.onLoadCach(imageView, result);
         }
-        result(result);
     }
 
     @Override
     public void onFinish(ImageView imageView, ReadImageResult result) {
+        result(result);
         if (onLoadListener != null) {
             onLoadListener.onFinish(imageView, result);
         }
-        result(result);
     }
 
     @Override
     public void onFailed(ImageView imageView, ReadImageResult result) {
-        if (onLoadListener != null) {
-            onLoadListener.onFailed(imageView, result);
-        }
         if (target instanceof BitmapTarget) {
             if (errorImage != 0) {
                 ((BitmapTarget) target).target(BitmapUtil.drawableToBitmap(context.getResources().getDrawable(errorImage)));
             }
         } else if (target instanceof ResultTarget) {
             ((ResultTarget) target).target(result);
+        }
+        if (onLoadListener != null) {
+            onLoadListener.onFailed(imageView, result);
         }
     }
 }
