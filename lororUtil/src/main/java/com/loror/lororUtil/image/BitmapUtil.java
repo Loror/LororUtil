@@ -18,10 +18,12 @@ import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.PixelFormat;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.graphics.drawable.Drawable;
 import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Environment;
@@ -37,7 +39,7 @@ public class BitmapUtil {
             int width = res.getWidth();
             int height = res.getHeight();
             double bl = width * 1.0 / height;
-            if (width > widthLimit) {
+            if (widthLimit > 0 && width > widthLimit) {
                 bmp = Bitmap.createScaledBitmap(res, widthLimit, (int) (widthLimit / bl), true);
                 if (recycleOld) {
                     res.recycle();
@@ -72,7 +74,9 @@ public class BitmapUtil {
         BitmapFactory.Options opt = new BitmapFactory.Options();
         opt.inJustDecodeBounds = true;
         BitmapFactory.decodeFile(path, opt);
-        opt.inSampleSize = opt.outWidth < widthLimit ? 1 : opt.outWidth / widthLimit;
+        if (widthLimit > 0) {
+            opt.inSampleSize = opt.outWidth < widthLimit ? 1 : opt.outWidth / widthLimit;
+        }
         opt.inJustDecodeBounds = false;
         return compessBitmap(BitmapFactory.decodeFile(path, opt), widthLimit, false);
     }
@@ -84,7 +88,9 @@ public class BitmapUtil {
         BitmapFactory.Options opt = new BitmapFactory.Options();
         opt.inJustDecodeBounds = true;
         BitmapFactory.decodeByteArray(source, 0, source.length, opt);
-        opt.inSampleSize = opt.outWidth < widthLimit ? 1 : opt.outWidth / widthLimit;
+        if (widthLimit > 0) {
+            opt.inSampleSize = opt.outWidth < widthLimit ? 1 : opt.outWidth / widthLimit;
+        }
         opt.inJustDecodeBounds = false;
         return compessBitmap(BitmapFactory.decodeByteArray(source, 0, source.length, opt), widthLimit, false);
     }
@@ -164,6 +170,18 @@ public class BitmapUtil {
             bm.recycle();
         }
         return returnBm;
+    }
+
+    /**
+     * Drawable转换成Bitmap
+     */
+    public static Bitmap drawableToBitmap(Drawable drawable) {
+        Bitmap bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(),
+                drawable.getOpacity() != PixelFormat.OPAQUE ? Bitmap.Config.ARGB_8888 : Bitmap.Config.RGB_565);
+        Canvas canvas = new Canvas(bitmap);
+        drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
+        drawable.draw(canvas);
+        return bitmap;
     }
 
     /**

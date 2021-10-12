@@ -9,10 +9,7 @@ public class Frame {
 
     public Frame(Bitmap bitmap, int delay, int widthLimit) {
         if (bitmap != null) {
-            if (bitmap.getWidth() > widthLimit) {
-                if (widthLimit <= 0) {
-                    widthLimit = EfficientImageUtil.DEFAULT_WIDTH;
-                }
+            if (widthLimit > 0 && bitmap.getWidth() > widthLimit) {
                 image = BitmapUtil.compessBitmap(bitmap, widthLimit, false);
             } else {
                 image = bitmap;

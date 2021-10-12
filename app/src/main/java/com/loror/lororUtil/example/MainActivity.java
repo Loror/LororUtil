@@ -13,8 +13,8 @@ import android.widget.GridView;
 import android.widget.Toast;
 
 import com.alibaba.fastjson.JSON;
-import com.loror.lororUtil.asynctask.FlowTask;
 import com.loror.lororUtil.asynctask.AsyncUtil;
+import com.loror.lororUtil.asynctask.FlowTask;
 import com.loror.lororUtil.asynctask.Func;
 import com.loror.lororUtil.asynctask.Func0;
 import com.loror.lororUtil.asynctask.Func1;
@@ -23,6 +23,8 @@ import com.loror.lororUtil.http.HttpClient;
 import com.loror.lororUtil.http.RequestParams;
 import com.loror.lororUtil.http.Responce;
 import com.loror.lororUtil.http.api.Observer;
+import com.loror.lororUtil.image.ImageUtil;
+import com.loror.lororUtil.image.PathTarget;
 import com.loror.lororUtil.sql.SQLiteUtil;
 import com.loror.lororUtil.sql.Where;
 import com.loror.lororUtil.view.Click;
@@ -59,6 +61,15 @@ public class MainActivity extends AppCompatActivity {
 //        connectNet();
         connectNetByApi();
         task();
+
+        ImageUtil.with(this)
+                .from("https://gimg2.baidu.com/image_search/src=http%3A%2F%2Fimg95.699pic.com%2Fphoto%2F40186%2F8162.gif_wh300.gif%21%2Fgifto%2Ftrue&refer=http%3A%2F%2Fimg95.699pic.com&app=2002&size=f9999,10000&q=a80&n=0&g=0n&fmt=jpeg?sec=1636616766&t=42380e2c11fecafa56a9be7288ee6184")
+                .loadTo(new PathTarget() {
+                    @Override
+                    public void target(String result) {
+                        Log.e("ImageUtil_Target", "下载完成：" + result);
+                    }
+                });
     }
 
     private void task() {

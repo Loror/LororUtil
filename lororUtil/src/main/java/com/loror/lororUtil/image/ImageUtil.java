@@ -1,10 +1,8 @@
 package com.loror.lororUtil.image;
 
-import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Environment;
-import android.os.Handler;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AlphaAnimation;
@@ -12,17 +10,12 @@ import android.view.animation.Animation;
 import android.widget.ImageView;
 
 import com.loror.lororUtil.convert.MD5Util;
-import com.loror.lororUtil.flyweight.ObjectPool;
 
 import java.io.File;
-import java.lang.ref.WeakReference;
 import java.util.Locale;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public class ImageUtil implements Cloneable {
 
-    private static final int tagKey = 3 << 24;
     private static int globalDefaultImage;
     private static int globalErrorImage;
     private static ReadImage globalReadImage;
@@ -31,6 +24,7 @@ public class ImageUtil implements Cloneable {
     private int defaultImage;
     private int errorImage;
     private ImageView imageView;
+    private Target target;
     private String path;
     private int widthLimit;
     private boolean noSdCache;
@@ -46,7 +40,6 @@ public class ImageUtil implements Cloneable {
     private String targetName;
     private Animation loadAnimation;
     private Context context;
-    private static ExecutorService server;
 
     private static class SingletonFactory {
         private static final ImageUtil imageUtil = new ImageUtil(null);
@@ -306,10 +299,55 @@ public class ImageUtil implements Cloneable {
     }
 
     /**
+     * 设置加载目标target
+     */
+    public ImageUtil to(BitmapTarget target) {
+        this.target = target;
+        return this;
+    }
+
+    /**
+     * 设置加载目标target
+     */
+    public ImageUtil to(ResultTarget target) {
+        this.target = target;
+        return this;
+    }
+
+    /**
+     * 设置加载目标target
+     */
+    public ImageUtil to(PathTarget target) {
+        this.target = target;
+        return this;
+    }
+
+    /**
      * 设置加载目标imageView并开始加载
      */
     public void loadTo(ImageView imageView) {
         to(imageView).loadImage();
+    }
+
+    /**
+     * 设置加载目标target并开始加载
+     */
+    public void loadTo(BitmapTarget target) {
+        to(target).loadImage();
+    }
+
+    /**
+     * 设置加载目标target并开始加载
+     */
+    public void loadTo(ResultTarget target) {
+        to(target).loadImage();
+    }
+
+    /**
+     * 设置加载目标target并开始加载
+     */
+    public void loadTo(PathTarget target) {
+        to(target).loadImage();
     }
 
     /**
@@ -343,14 +381,7 @@ public class ImageUtil implements Cloneable {
     public void loadImage() {
         final Context context = this.context;
         final int widthLimit = this.widthLimit > 0 ? this.widthLimit : getViewWidth(this.imageView);
-        final int defaultImage = this.defaultImage != 0 ? this.defaultImage : globalDefaultImage;
-        final int errorImage = this.errorImage != 0 ? this.errorImage : globalErrorImage;
         final boolean isGif = this.isGif;
-        final String path = this.path;
-        final boolean removeOldTask = this.removeOldTask;
-        final ImageUtilCallBack onLoadListener = this.onLoadListener;
-        final Animation loadAnimation = this.loadAnimation;
-        final BitmapConverter bitmapConverter = this.bitmapConverter != null ? this.bitmapConverter : globalBitmapConverter;
 
         ReadImage readImage = new ReadImage() {
 
@@ -414,153 +445,17 @@ public class ImageUtil implements Cloneable {
 
         ImageUtilCallBack callback = this.callback;
         if (callback == null) {
-            if (server == null) {
-                server = Executors.newFixedThreadPool(3);
+            if (target != null) {
+                TargetCallBack targetCallBack = new TargetCallBack(context, target, imageView, onLoadListener, defaultImage, errorImage);
+                targetCallBack.load(readImage, path, widthLimit, isGif);
+                return;
+            } else {
+                int defaultImage = this.defaultImage != 0 ? this.defaultImage : globalDefaultImage;
+                int errorImage = this.errorImage != 0 ? this.errorImage : globalErrorImage;
+                BitmapConverter bitmapConverter = this.bitmapConverter != null ? this.bitmapConverter : globalBitmapConverter;
+                callback = new GifAbleImageViewCallBack(context, imageView, onLoadListener, bitmapConverter, isGif,
+                        defaultImage, errorImage, cachUseAnimation, loadAnimation);
             }
-            callback = new ImageUtilCallBack() {
-
-                private String tag;
-                private int index;
-
-                @Override
-                public void onStart(ImageView imageView) {
-                    if (imageView != null) {
-                        tag = String.valueOf(imageView.getTag(tagKey));
-                        Animation animation = imageView.getAnimation();
-                        if (animation != null) {
-                            imageView.clearAnimation();
-                        }
-                        if (defaultImage != 0) {
-                            imageView.setImageResource(defaultImage);
-                        }
-                    }
-                    if (onLoadListener != null) {
-                        onLoadListener.onStart(imageView);
-                    }
-                }
-
-                private void loadGif(final Handler handler, final ReadImageResult readImageResult, final boolean local) {
-                    final int size = readImageResult.getCount();
-                    final boolean[] calledAnimation = {false};
-                    final WeakReference<Context> contextWeakReference = new WeakReference<Context>(context);
-                    final WeakReference<ImageView> weakReference = new WeakReference<ImageView>(imageView);
-                    Runnable runnable = new Runnable() {
-
-                        @Override
-                        public void run() {
-                            ImageView imageView = weakReference.get();
-                            Context context = contextWeakReference.get();
-                            if (imageView == null || context == null) {
-                                return;
-                            }
-                            boolean useful = tag.equals(imageView.getTag(tagKey));
-                            if (useful) {
-                                if (readImageResult.isPause()) {
-                                    long delay = readImageResult.getFrame(index % size).delay;
-                                    handler.postDelayed(this, delay != 0 ? delay : 100);
-                                } else {
-                                    if (context instanceof Activity) {
-                                        Activity activity = (Activity) context;
-                                        if (activity.isFinishing()) {
-                                            return;
-                                        }
-                                    }
-                                    if (index != 0 && index % size == 0 && !readImageResult.isRepeate()) {
-                                        return;
-                                    }
-                                    imageView.setImageBitmap(bitmapConverter == null ? readImageResult.getFrame(index % size).image : bitmapConverter.convert(context, readImageResult.getFrame(index % size).image));
-                                    if (index == 0 && (!local || cachUseAnimation) && !calledAnimation[0] && loadAnimation != null && imageView.getVisibility() == View.VISIBLE) {
-                                        calledAnimation[0] = true;
-                                        imageView.startAnimation(loadAnimation);
-                                    }
-                                    long delay = readImageResult.getFrame(index % size).delay;
-                                    handler.postDelayed(this, delay != 0 ? delay : 100);
-                                    index++;
-                                }
-                            }
-                        }
-                    };
-                    runnable.run();
-                }
-
-                @Override
-                public void onLoadCach(final ImageView imageView, final ReadImageResult readImageResult) {
-                    if (imageView != null) {
-                        if (readImageResult.getBitmap() == null) {
-                            if (errorImage != 0) {
-                                imageView.setImageResource(errorImage);
-                            }
-                            return;
-                        }
-                        if (!isGif) {
-                            if (cachUseAnimation && loadAnimation != null && imageView.getVisibility() == View.VISIBLE) {
-                                imageView.startAnimation(loadAnimation);
-                            }
-                            imageView.setImageBitmap(bitmapConverter == null ? readImageResult.getBitmap() : bitmapConverter.convert(context, readImageResult.getBitmap()));
-                        } else {
-                            final Handler handler = ObjectPool.getInstance().getHandler();
-                            if (readImageResult.getCount() > 0) {
-                                loadGif(handler, readImageResult, true);
-                            } else {
-                                handler.post(new Runnable() {
-
-                                    @Override
-                                    public void run() {
-                                        if (cachUseAnimation && loadAnimation != null && imageView.getVisibility() == View.VISIBLE) {
-                                            imageView.startAnimation(loadAnimation);
-                                        }
-                                        imageView.setImageBitmap(bitmapConverter == null ? readImageResult.getBitmap() : bitmapConverter.convert(context, readImageResult.getBitmap()));
-                                    }
-                                });
-                            }
-                        }
-                    }
-                    if (onLoadListener != null) {
-                        onLoadListener.onLoadCach(imageView, readImageResult);
-                    }
-                }
-
-                @Override
-                public void onFinish(final ImageView imageView, final ReadImageResult readImageResult) {
-                    if (imageView != null) {
-                        if (!isGif) {
-                            if (loadAnimation != null && imageView.getVisibility() == View.VISIBLE) {
-                                imageView.startAnimation(loadAnimation);
-                            }
-                            imageView.setImageBitmap(bitmapConverter == null ? readImageResult.getBitmap() : bitmapConverter.convert(context, readImageResult.getBitmap()));
-                        } else {
-                            final Handler handler = ObjectPool.getInstance().getHandler();
-                            if (readImageResult.getCount() > 0) {
-                                loadGif(handler, readImageResult, false);
-                            } else {
-                                handler.post(new Runnable() {
-
-                                    @Override
-                                    public void run() {
-                                        if (loadAnimation != null && imageView.getVisibility() == View.VISIBLE) {
-                                            imageView.startAnimation(loadAnimation);
-                                        }
-                                        imageView.setImageBitmap(bitmapConverter == null ? readImageResult.getBitmap() : bitmapConverter.convert(context, readImageResult.getBitmap()));
-                                    }
-                                });
-                            }
-                        }
-                    }
-                    if (onLoadListener != null) {
-                        onLoadListener.onFinish(imageView, readImageResult);
-                    }
-                }
-
-                @Override
-                public void onFailed(ImageView imageView, ReadImageResult result) {
-                    if (imageView != null && errorImage != 0) {
-                        imageView.setImageResource(errorImage);
-                    }
-                    if (onLoadListener != null) {
-                        onLoadListener.onFailed(imageView, result);
-                    }
-                }
-            };
         }
 
         EfficientImageUtil.loadImage(imageView, path, widthLimit, readImage, callback, null, removeOldTask, isGif);
