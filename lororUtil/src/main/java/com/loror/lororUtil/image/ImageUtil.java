@@ -446,7 +446,7 @@ public class ImageUtil implements Cloneable {
         ImageUtilCallBack callback = this.callback;
         if (callback == null) {
             if (target != null) {
-                TargetCallBack targetCallBack = new TargetCallBack(context, target, imageView, onLoadListener, defaultImage, errorImage);
+                TargetCallBack targetCallBack = new TargetCallBack(context, target, imageView, bitmapConverter, onLoadListener, defaultImage, errorImage);
                 targetCallBack.load(readImage, path, widthLimit, isGif);
                 return;
             } else {

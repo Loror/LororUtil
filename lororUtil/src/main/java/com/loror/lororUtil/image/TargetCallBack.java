@@ -19,14 +19,16 @@ public class TargetCallBack implements ImageUtilCallBack {
     private final Context context;
     private final Target target;
     private final ImageView imageView;
+    private final BitmapConverter bitmapConverter;
     private final ImageUtilCallBack onLoadListener;
     private final int defaultImage, errorImage;
     private final int screenWidth;
 
-    TargetCallBack(Context context, Target target, ImageView imageView, ImageUtilCallBack onLoadListener, int defaultImage, int errorImage) {
+    TargetCallBack(Context context, Target target, ImageView imageView, BitmapConverter bitmapConverter, ImageUtilCallBack onLoadListener, int defaultImage, int errorImage) {
         this.context = context;
         this.target = target;
         this.imageView = imageView;
+        this.bitmapConverter = bitmapConverter;
         this.onLoadListener = onLoadListener;
         this.defaultImage = defaultImage;
         this.errorImage = errorImage;
@@ -103,7 +105,7 @@ public class TargetCallBack implements ImageUtilCallBack {
 
     void result(ReadImageResult result) {
         if (target instanceof BitmapTarget) {
-            ((BitmapTarget) target).target(result.getBitmap());
+            ((BitmapTarget) target).target(bitmapConverter == null ? result.getBitmap() : bitmapConverter.convert(context, result.getBitmap()));
         } else if (target instanceof ResultTarget) {
             ((ResultTarget) target).target(result);
         } else if (target instanceof PathTarget) {
