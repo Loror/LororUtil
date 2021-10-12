@@ -3,7 +3,7 @@ package com.loror.lororUtil.image;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class LockMap {
-    private static ConcurrentHashMap<String, SingleLock> locks = new ConcurrentHashMap<String, SingleLock>();
+    private static final ConcurrentHashMap<String, SingleLock> locks = new ConcurrentHashMap<String, SingleLock>();
 
     public static synchronized SingleLock getLock(String key) {
         SingleLock lock = locks.get(key);

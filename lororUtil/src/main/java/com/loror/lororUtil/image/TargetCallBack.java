@@ -3,6 +3,7 @@ package com.loror.lororUtil.image;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.DisplayMetrics;
 import android.widget.ImageView;
 
 import com.loror.lororUtil.flyweight.ObjectPool;
@@ -20,6 +21,7 @@ public class TargetCallBack implements ImageUtilCallBack {
     private final ImageView imageView;
     private final ImageUtilCallBack onLoadListener;
     private final int defaultImage, errorImage;
+    private final int screenWidth;
 
     TargetCallBack(Context context, Target target, ImageView imageView, ImageUtilCallBack onLoadListener, int defaultImage, int errorImage) {
         this.context = context;
@@ -28,9 +30,11 @@ public class TargetCallBack implements ImageUtilCallBack {
         this.onLoadListener = onLoadListener;
         this.defaultImage = defaultImage;
         this.errorImage = errorImage;
+        DisplayMetrics displayMetrics = context.getResources().getDisplayMetrics();
+        this.screenWidth = displayMetrics.widthPixels;
     }
 
-    void load(final ReadImage readImage, final String path, final int widthLimit, final boolean gif) {
+    void load(final ReadImage readImage, final String path, int widthLimit, final boolean gif) {
         if (server == null) {
             synchronized (TargetCallBack.class) {
                 if (server == null) {
@@ -39,6 +43,9 @@ public class TargetCallBack implements ImageUtilCallBack {
             }
         }
 
+        if (widthLimit == 0) {
+            widthLimit = screenWidth;
+        }
         final String cachKey = path + widthLimit;
         runOnUiThread(new Runnable() {
             @Override
@@ -51,10 +58,11 @@ public class TargetCallBack implements ImageUtilCallBack {
             onLoadCach(imageView, result);
             return;
         }
+        final int finalWidthLimit = widthLimit;
         server.execute(new Runnable() {
             @Override
             public void run() {
-                final ReadImageResult result = readImage.readImage(path, widthLimit, gif);
+                final ReadImageResult result = readImage.readImage(path, finalWidthLimit, gif);
                 result.setOriginPath(path);
                 runOnUiThread(new Runnable() {
                     @Override
