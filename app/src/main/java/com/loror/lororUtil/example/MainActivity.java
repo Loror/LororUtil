@@ -63,7 +63,7 @@ public class MainActivity extends AppCompatActivity {
         task();
 
         ImageUtil.with(this)
-                .from("https://gimg2.baidu.com/image_search/src=http%3A%2F%2Fimg95.699pic.com%2Fphoto%2F40186%2F8162.gif_wh300.gif%21%2Fgifto%2Ftrue&refer=http%3A%2F%2Fimg95.699pic.com&app=2002&size=f9999,10000&q=a80&n=0&g=0n&fmt=jpeg?sec=1636616766&t=42380e2c11fecafa56a9be7288ee6184")
+                .from("https://iconfont.alicdn.com/t/083f67b8-b930-4a31-8f42-060ce61942f0.png")
                 .loadTo(new PathTarget() {
                     @Override
                     public void target(String result) {
@@ -167,9 +167,9 @@ public class MainActivity extends AppCompatActivity {
         images.clear();
         SQLiteUtil util = new SQLiteUtil(this, "images", 1);
         if (util.model(Image.class).count() == 0) {
-            String[] imgs = {"https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1537525921287&di=df51a86f3e7acc579f4fbd47c67f64cc&imgtype=0&src=http%3A%2F%2Fimg.zcool.cn%2Fcommunity%2F0117e2571b8b246ac72538120dd8a4.jpg%401280w_1l_2o_100sh.jpg",
-                    "https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1537525937402&di=9bf7c32cca7ab124c762805933c1acb7&imgtype=0&src=http%3A%2F%2Fimg.zcool.cn%2Fcommunity%2F01690955496f930000019ae92f3a4e.jpg%402o.jpg",
-                    "https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1537525951939&di=b2b701ef7948dd58ba8c3f8821734cc5&imgtype=0&src=http%3A%2F%2Fimg12.3lian.com%2Fgaoqing02%2F01%2F58%2F85.jpg"};
+            String[] imgs = {"https://iconfont.alicdn.com/t/cf6a71ea-63a7-40b1-87bc-2ee3e8de093f.png",
+                    "https://iconfont.alicdn.com/t/79f02d6e-8e40-4c7f-bbc3-fa4c91be459c.png",
+                    "https://iconfont.alicdn.com/t/ea972552-5433-4fa4-a8d6-f97268a016fd.png"};
             List<Image> images = new ArrayList<>();
             for (int i = 0; i < 20; i++) {
                 Image image = new Image();
