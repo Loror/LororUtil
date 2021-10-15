@@ -7,7 +7,7 @@ import android.content.Context;
 import android.view.View;
 
 public class ViewFinder {
-    private Object source;
+    private final Object source;
 
     public ViewFinder(Object source) {
         this.source = source;
@@ -26,8 +26,8 @@ public class ViewFinder {
             view = ((Activity) source).findViewById(id);
         } else if (source instanceof Fragment) {
             view = ((Fragment) source).getView().findViewById(id);
-        } else if (source instanceof android.support.v4.app.Fragment) {
-            view = ((android.support.v4.app.Fragment) source).getView().findViewById(id);
+//        } else if (source instanceof android.support.v4.app.Fragment) {
+//            view = ((android.support.v4.app.Fragment) source).getView().findViewById(id);
         } else if (source instanceof Dialog) {
             view = ((Dialog) source).findViewById(id);
         } else if (source instanceof View) {
@@ -45,8 +45,8 @@ public class ViewFinder {
             context = ((Activity) source);
         } else if (source instanceof Fragment) {
             context = ((Fragment) source).getActivity();
-        } else if (source instanceof android.support.v4.app.Fragment) {
-            context = ((android.support.v4.app.Fragment) source).getActivity();
+//        } else if (source instanceof android.support.v4.app.Fragment) {
+//            context = ((android.support.v4.app.Fragment) source).getActivity();
         } else if (source instanceof Dialog) {
             context = ((Dialog) source).getContext();
         } else if (source instanceof View) {
