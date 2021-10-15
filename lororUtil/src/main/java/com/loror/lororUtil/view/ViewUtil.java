@@ -73,16 +73,16 @@ public class ViewUtil {
     /**
      * 抽取控件
      */
-    public static void find(android.support.v4.app.Fragment fragment, Class<?> idClass) {
-        find((Object) fragment, idClass);
-    }
+//    public static void find(android.support.v4.app.Fragment fragment, Class<?> idClass) {
+//        find((Object) fragment, idClass);
+//    }
 
     /**
      * 抽取控件
      */
-    public static void find(android.support.v4.app.Fragment fragment) {
-        find((Object) fragment, (Class<?>) null);
-    }
+//    public static void find(android.support.v4.app.Fragment fragment) {
+//        find((Object) fragment, (Class<?>) null);
+//    }
 
     /**
      * 抽取控件
@@ -250,9 +250,9 @@ public class ViewUtil {
     /**
      * 抽取控件
      */
-    public static void click(android.support.v4.app.Fragment fragment) {
-        click((Object) fragment);
-    }
+//    public static void click(android.support.v4.app.Fragment fragment) {
+//        click((Object) fragment);
+//    }
 
     /**
      * 抽取控件
