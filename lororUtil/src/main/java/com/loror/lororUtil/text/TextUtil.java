@@ -104,7 +104,7 @@ public class TextUtil {
     }
 
     /**
-     * 驼峰转_小写
+     * _小写转驼峰
      */
     public static String underlineLowercaseToHump(String underlineLowercase) {
         if (isEmpty(underlineLowercase)) {
@@ -114,9 +114,9 @@ public class TextUtil {
         StringBuilder stringBuffer = new StringBuilder();
         for (int i = 0; i < chars.length; i++) {
             char c = chars[i];
-            if (c == '_' && i != chars.length - 1) {
+            if (c == '_' && i != chars.length - 1 && Character.isLowerCase(chars[i + 1])) {
                 i++;
-                stringBuffer.append(Character.toUpperCase(chars[i]));
+                stringBuffer.append(Character.toUpperCase(chars[i + 1]));
             } else {
                 stringBuffer.append(c);
             }
