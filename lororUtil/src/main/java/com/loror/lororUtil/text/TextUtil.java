@@ -115,8 +115,8 @@ public class TextUtil {
         for (int i = 0; i < chars.length; i++) {
             char c = chars[i];
             if (c == '_' && i != chars.length - 1 && Character.isLowerCase(chars[i + 1])) {
-                i++;
                 stringBuffer.append(Character.toUpperCase(chars[i + 1]));
+                i++;
             } else {
                 stringBuffer.append(c);
             }
