@@ -48,7 +48,7 @@ public abstract class BaseClient extends Prepare implements Client {
      * 设置超时时间
      */
     public void setTimeOut(int timeOut) {
-        if (timeOut > 1000 && timeOut < 60000) {
+        if (timeOut > 1000 && timeOut <= 180000) {
             this.timeOut = timeOut;
         }
     }
@@ -61,7 +61,9 @@ public abstract class BaseClient extends Prepare implements Client {
      * 设置读取超时时间
      */
     public void setReadTimeOut(int readTimeOut) {
-        this.readTimeOut = readTimeOut;
+        if (readTimeOut > 0) {
+            this.readTimeOut = readTimeOut;
+        }
     }
 
     public int getReadTimeOut() {
