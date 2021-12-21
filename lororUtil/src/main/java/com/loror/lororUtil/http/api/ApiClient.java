@@ -41,6 +41,19 @@ public class ApiClient {
         return this;
     }
 
+    public ApiClient addOnRequestListener(OnRequestListener onRequestListener) {
+        if (this.onRequestListener instanceof MultiOnRequestListener) {
+            ((MultiOnRequestListener) this.onRequestListener).addOnRequestListener(onRequestListener);
+        } else if (this.onRequestListener == null) {
+            this.onRequestListener = onRequestListener;
+        } else {
+            this.onRequestListener = new MultiOnRequestListener().
+                    addOnRequestListener(this.onRequestListener).
+                    addOnRequestListener(onRequestListener);
+        }
+        return this;
+    }
+
     public ApiClient setCodeFilter(CodeFilter codeFilter) {
         this.codeFilter = codeFilter;
         return this;
