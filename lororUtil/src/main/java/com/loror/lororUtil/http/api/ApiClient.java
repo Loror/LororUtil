@@ -42,16 +42,22 @@ public class ApiClient {
     }
 
     public ApiClient addOnRequestListener(OnRequestListener onRequestListener) {
-        if (this.onRequestListener instanceof MultiOnRequestListener) {
-            ((MultiOnRequestListener) this.onRequestListener).addOnRequestListener(onRequestListener);
-        } else if (this.onRequestListener == null) {
-            this.onRequestListener = onRequestListener;
-        } else {
-            this.onRequestListener = new MultiOnRequestListener().
-                    addOnRequestListener(this.onRequestListener).
-                    addOnRequestListener(onRequestListener);
+        if (onRequestListener != null) {
+            if (this.onRequestListener instanceof MultiOnRequestListener) {
+                ((MultiOnRequestListener) this.onRequestListener).addOnRequestListener(onRequestListener);
+            } else if (this.onRequestListener == null) {
+                this.onRequestListener = onRequestListener;
+            } else {
+                this.onRequestListener = new MultiOnRequestListener().
+                        addOnRequestListener(this.onRequestListener).
+                        addOnRequestListener(onRequestListener);
+            }
         }
         return this;
+    }
+
+    public boolean hasOnRequestListener() {
+        return onRequestListener != null;
     }
 
     public ApiClient setCodeFilter(CodeFilter codeFilter) {
