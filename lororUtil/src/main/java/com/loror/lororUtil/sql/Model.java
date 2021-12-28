@@ -359,7 +359,7 @@ public class Model<T> implements Where {
         T entity = null;
         Cursor cursor = sqLiteUtil.getDatabase().rawQuery(
                 "select * from " + modelInfo.getTableName()
-                        + conditionBuilder.getConditionsWithoutPage(true) + " limit 0,2",
+                        + conditionBuilder.getConditionsWithoutPage(true) + " limit 0,1",
                 null);
         if (cursor.moveToNext()) {
             try {
