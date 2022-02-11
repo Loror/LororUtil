@@ -198,7 +198,7 @@ public class ViewUtil {
                                     annotations = finder.findViewById(getResourceId(name, idClass));
                                 }
                             } else {
-                                annotations = finder.findViewById(getResourceId(TextUtil.humpToUnderlineLowercase(name), idClass));
+                                annotations = finder.findViewById(getResourceId(name, idClass));
                                 if (annotations == null) {
                                     annotations = finder.findViewById(getResourceId(TextUtil.humpToUnderlineLowercase(name), idClass));
                                 }
