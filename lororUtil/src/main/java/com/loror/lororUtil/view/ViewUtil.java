@@ -17,7 +17,7 @@ import android.widget.AdapterView;
 
 public class ViewUtil {
     private static Class<?> globalIdClass;
-    private static boolean suiteHump;
+    private static boolean suiteHump = true;
     private static boolean notClassAnnotation;
     private static int humpPriority;
 

@@ -4,9 +4,10 @@ import com.loror.lororUtil.http.Responce;
 
 public class ResultException extends RuntimeException {
 
-    private Responce responce;
+    private final Responce responce;
 
     public ResultException(Responce responce) {
+        super(responce.getThrowable() != null ? responce.getThrowable().getMessage() : null);
         this.responce = responce;
     }
 
