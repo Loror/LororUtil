@@ -179,30 +179,40 @@ public class SQLiteUtil {
             throw new IllegalStateException("cannot reduce column at this function:" + builder.toString());
         }
         database.beginTransaction();
-        for (i = 0; i < newColumnNames.size(); i++) {
-            String newColumnName = newColumnNames.get(i);
-            String type = "text";
-            Class<?> objectType = objectHashMap.get(newColumnName);
-            if (objectType == Integer.class || objectType == int.class || objectType == Long.class || objectType == long.class) {
-                type = "int";
-            } else if (objectType == Float.class || objectType == float.class || objectType == Double.class || objectType == double.class) {
-                type = "real";
-            } else if (objectType == String.class) {
-                type = "text";
+        try {
+            for (i = 0; i < newColumnNames.size(); i++) {
+                String newColumnName = newColumnNames.get(i);
+                String type = "text";
+                Class<?> objectType = objectHashMap.get(newColumnName);
+                if (objectType == Integer.class || objectType == int.class || objectType == Long.class || objectType == long.class) {
+                    type = "int";
+                } else if (objectType == Float.class || objectType == float.class || objectType == Double.class || objectType == double.class) {
+                    type = "real";
+                } else if (objectType == String.class) {
+                    type = "text";
+                } else {
+                    throw new IllegalArgumentException("unsupported column type " + (objectType == null ? null : objectType.getSimpleName()) + " :" + newColumnNames.get(i));
+                }
+                Column column = columnHashMap.get(newColumnName);
+                String defaultValue = column.defaultValue();
+                defaultValue = ColumnFilter.getColumn(newColumnName, defaultValue, column);
+                database.execSQL("alter table " + modelInfo.getTableName() + " add column " + newColumnName + " " + type);
+                if (defaultValue != null && defaultValue.length() > 0) {
+                    database.execSQL("update " + modelInfo.getTableName() + " set " + newColumnName +
+                            " = '" + ColumnFilter.safeColumn(defaultValue) + "'");
+                }
+            }
+            database.setTransactionSuccessful();
+        } catch (Exception e) {
+            if (e instanceof IllegalArgumentException) {
+                throw ((IllegalArgumentException) e);
             } else {
-                throw new IllegalArgumentException("unsupported column type " + (objectType == null ? null : objectType.getSimpleName()) + " :" + newColumnNames.get(i));
+                e.printStackTrace();
             }
-            Column column = columnHashMap.get(newColumnName);
-            String defaultValue = column.defaultValue();
-            defaultValue = ColumnFilter.getColumn(newColumnName, defaultValue, column);
-            database.execSQL("alter table " + modelInfo.getTableName() + " add column " + newColumnName + " " + type);
-            if (defaultValue != null && defaultValue.length() > 0) {
-                database.execSQL("update " + modelInfo.getTableName() + " set " + newColumnName +
-                        " = '" + ColumnFilter.safeColumn(defaultValue) + "'");
-            }
+        } finally {
+            database.endTransaction();
         }
-        database.setTransactionSuccessful();
-        database.endTransaction();
+
         if (mitiProgress) {
             SQLiteDatabase.releaseMemory();
         }
