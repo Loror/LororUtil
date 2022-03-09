@@ -7,6 +7,7 @@ import android.os.Handler;
 import android.os.Looper;
 
 public class RecordUtil {
+
     private MediaRecorder recorder;// 录音
     private final Handler handler;
     private Thread thread;// 监听线程
@@ -49,7 +50,7 @@ public class RecordUtil {
     /**
      * 开始录音
      */
-    public void start(String path, final OnVolumeListener listenser) {
+    public void start(String path, final OnVolumeListener listener) {
         if (isRecording) {
             throw new IllegalStateException("you must call stop before you call another start");
         }
@@ -71,7 +72,7 @@ public class RecordUtil {
         recorder.start();
         startTime = System.currentTimeMillis();
         isRecording = true;
-        if (listenser != null) {
+        if (listener != null) {
             thread = new Thread() {
                 public void run() {
                     while (isRecording) {
@@ -80,7 +81,7 @@ public class RecordUtil {
                             @Override
                             public void run() {
                                 try {
-                                    listenser.onVolume(getAmplitude());
+                                    listener.onVolume(getAmplitude());
                                 } catch (Exception e) {
                                     e.printStackTrace();
                                 }

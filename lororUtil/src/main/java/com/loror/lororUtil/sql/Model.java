@@ -302,7 +302,7 @@ public class Model<T> implements Where {
      */
     public int count() {
         int count = 0;
-        Cursor cursor = null;
+        Cursor cursor;
         if (conditionBuilder.getConditionCount() == 0) {
             cursor = sqLiteUtil.getDatabase().rawQuery("select count(1) from " + modelInfo.getTableName(), null);
         } else {

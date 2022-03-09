@@ -6,6 +6,7 @@ import android.content.Context;
 import android.os.Environment;
 
 public class DataCleanManager {
+
     /**
      * 清除本应用内部缓存(/data/data/com.xxx.xxx/cache)
      */
@@ -77,7 +78,9 @@ public class DataCleanManager {
     private static void deleteFilesByDirectory(File directory) {
         if (directory != null && directory.exists() && directory.isDirectory()) {
             for (File item : directory.listFiles()) {
-                item.delete();
+                if (item.isFile()) {
+                    item.delete();
+                }
             }
         }
     }

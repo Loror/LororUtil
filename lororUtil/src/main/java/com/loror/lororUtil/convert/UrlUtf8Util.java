@@ -13,7 +13,7 @@ public class UrlUtf8Util {
 
     // 转换为%E4%BD%A0形式
     public static String toUrlString(String s, String enc) {
-        String urlStr = null;
+        String urlStr;
         try {
             urlStr = URLEncoder.encode(s, enc);
         } catch (Exception e) {

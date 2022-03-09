@@ -6,7 +6,7 @@ import java.util.regex.Pattern;
 public class TextUtil {
 
     private TextUtil() {
-        // TODO Auto-generated constructor stub
+
     }
 
     /**
@@ -36,7 +36,7 @@ public class TextUtil {
     }
 
     /**
-     * 验证字符串是否为纯数字
+     * 验证字符串是否为纯数字(int)
      */
     public static boolean isNumber(String number) {
         if (isEmpty(number)) {

@@ -13,16 +13,13 @@ import android.os.Handler;
 import android.provider.MediaStore;
 
 public class ScanUtil {
-    private final Handler handler;
+
+    private final Handler handler = ObjectPool.getInstance().getHandler();
 
     public interface ScanCallBack {
-        void findOne(String path, int find, int scaned);
+        void findOne(String path, int find, int scanned);
 
         void finish();
-    }
-
-    public ScanUtil() {
-        handler = ObjectPool.getInstance().getHandler();
     }
 
     /**
@@ -74,6 +71,7 @@ public class ScanUtil {
     /**
      * 扫描sd卡，传入参数，1，起点目录，2，需扫描后缀数组，3，回调接口
      */
+    @Deprecated
     public void scanSDCard(final File rootFileDir, final String[] suffixs, final ScanCallBack callBack) {
         new Thread() {
             public void run() {
@@ -131,8 +129,8 @@ public class ScanUtil {
      */
     private boolean contains(String name, String[] suffixs) {
         String upperName = name.toUpperCase(Locale.CHINA);
-        for (int i = 0, length = suffixs.length; i < length; i++) {
-            if (upperName.endsWith(suffixs[i].toUpperCase(Locale.CHINA))) {
+        for (String suffix : suffixs) {
+            if (upperName.endsWith(suffix.toUpperCase(Locale.CHINA))) {
                 return true;
             }
         }

@@ -12,18 +12,20 @@ import android.text.SpannableStringBuilder;
 import android.text.style.ImageSpan;
 
 public class SmileyParser {
+
 	private static SmileyParser sInstance;
-	private Context mContext;
-	private Pattern mPattern;
-	private HashMap<String, String> mSmileyTextToId;
-	private String[] mSmileyArrays;
+	private final Context mContext;
+	private final Pattern mPattern;
+	private final HashMap<String, String> mSmileyTextToId;
+	private final String[] mSmileyArrays;
+	private final Class<?> drawableClass;
+
 	private String[] mSmileyIds;
 	private String[] mSmileyTexts;
-	private Class<?> drawableClass;
 
 	public static SmileyParser getInstance(Context context, String[] mSmileyArrays, Class<?> drawableClass) {
 		if (sInstance == null) {
-			sInstance = new SmileyParser(context, mSmileyArrays, drawableClass);
+			sInstance = new SmileyParser(context.getApplicationContext(), mSmileyArrays, drawableClass);
 		}
 		return sInstance;
 	}

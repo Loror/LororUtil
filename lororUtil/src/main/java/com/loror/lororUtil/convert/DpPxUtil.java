@@ -4,7 +4,7 @@ import android.content.Context;
 
 public class DpPxUtil {
 	/**
-	 * DP转תPX
+	 * DP转PX
 	 */
 	public static int Dp2Px(Context context, float dp) {
 		final float scale = context.getResources().getDisplayMetrics().density;
@@ -12,7 +12,7 @@ public class DpPxUtil {
 	}
 
 	/**
-	 * PX转תDP
+	 * PXתDP
 	 */
 	public static int Px2Dp(Context context, float px) {
 		final float scale = context.getResources().getDisplayMetrics().density;
