@@ -61,12 +61,19 @@ public class ModelData {
     }
 
     /**
-     * 获取所有键，不同名
+     * 检查空
      */
-    public List<String> keys() {
+    private void assertNull() {
         if (isNull) {
             throw new NullPointerException("this result is null");
         }
+    }
+
+    /**
+     * 获取所有键，不同名
+     */
+    public List<String> keys() {
+        assertNull();
         List<String> keys = new ArrayList<>(data.size());
         for (IdentityNode item : data) {
             if (!keys.contains(item.key)) {
@@ -77,9 +84,7 @@ public class ModelData {
     }
 
     public ModelData addAll(ModelData modelResult) {
-        if (isNull) {
-            throw new NullPointerException("this result is null");
-        }
+        assertNull();
         if (modelResult != null) {
             data.addAll(modelResult.data);
         }
@@ -90,9 +95,7 @@ public class ModelData {
      * 添加元素
      */
     public ModelData add(String name, Object value) {
-        if (isNull) {
-            throw new NullPointerException("this result is null");
-        }
+        assertNull();
         if (name != null) {
             data.add(new IdentityNode(name.intern(), value));
         }
@@ -103,9 +106,7 @@ public class ModelData {
      * 设置元素，移除同名键
      */
     public ModelData set(String name, Object value) {
-        if (isNull) {
-            throw new NullPointerException("this result is null");
-        }
+        assertNull();
         if (name != null) {
             remove(name);
             data.add(new IdentityNode(name, value));
@@ -117,9 +118,7 @@ public class ModelData {
      * 移除
      */
     public ModelData remove(String name) {
-        if (isNull) {
-            throw new NullPointerException("this result is null");
-        }
+        assertNull();
         if (name != null) {
             Iterator<IdentityNode> iterator = data.iterator();
             while (iterator.hasNext()) {
@@ -136,9 +135,7 @@ public class ModelData {
      * 获取该键所有元素
      */
     public List<Object> values(String name) {
-        if (isNull) {
-            throw new NullPointerException("this result is null");
-        }
+        assertNull();
         List<Object> values = new ArrayList<>(data.size());
         if (name != null) {
             for (IdentityNode item : data) {
@@ -154,9 +151,7 @@ public class ModelData {
      * 获取该键首个元素
      */
     public Object get(String name) {
-        if (isNull) {
-            throw new NullPointerException("this result is null");
-        }
+        assertNull();
         if (name != null) {
             for (IdentityNode item : data) {
                 if (name.equals(item.key)) {
@@ -180,6 +175,16 @@ public class ModelData {
     public long getLong(String name, long defaultValue) {
         String value = getString(name);
         return value == null ? defaultValue : Long.parseLong(value);
+    }
+
+    public float getFloat(String name, float defaultValue) {
+        String value = getString(name);
+        return value == null ? defaultValue : Float.parseFloat(value);
+    }
+
+    public double getDouble(String name, double defaultValue) {
+        String value = getString(name);
+        return value == null ? defaultValue : Double.parseDouble(value);
     }
 
     private Object getObject(Class<?> type) throws Exception {
@@ -224,7 +229,6 @@ public class ModelData {
                 if (column != null) {
                     value = ColumnFilter.decodeColumn(value, column);
                 }
-                field.setAccessible(true);
                 setField(entity, field, value);
             }
         }
@@ -238,6 +242,7 @@ public class ModelData {
         if (var != null) {
             String value = String.valueOf(var);
             Class<?> fieldType = field.getType();
+            field.setAccessible(true);
             try {
                 if (fieldType == int.class || fieldType == Integer.class) {
                     field.set(obj, Integer.parseInt(value));
