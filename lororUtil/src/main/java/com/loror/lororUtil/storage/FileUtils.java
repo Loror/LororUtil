@@ -5,7 +5,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
@@ -18,9 +20,23 @@ public class FileUtils {
      * 保存文本到文件
      */
     public static boolean save(File file, String text) {
+        if (text != null) {
+            try {
+                return save(file, text.getBytes("utf-8"));
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+        }
+        return false;
+    }
+
+    /**
+     * 保存data到文件
+     */
+    public static boolean save(File file, byte[] data) {
         try {
             FileOutputStream outputStream = new FileOutputStream(file);
-            outputStream.write(text.getBytes("utf-8"));
+            outputStream.write(data);
             outputStream.close();
         } catch (IOException e) {
             e.printStackTrace();
