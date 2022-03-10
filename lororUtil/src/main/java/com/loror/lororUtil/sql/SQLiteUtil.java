@@ -203,12 +203,6 @@ public class SQLiteUtil {
                 }
             }
             database.setTransactionSuccessful();
-        } catch (Exception e) {
-            if (e instanceof IllegalArgumentException) {
-                throw ((IllegalArgumentException) e);
-            } else {
-                e.printStackTrace();
-            }
         } finally {
             database.endTransaction();
         }
