@@ -3,6 +3,8 @@ package com.loror.lororUtil.sql;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
+import com.loror.lororUtil.text.TextUtil;
+
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -11,13 +13,15 @@ import java.util.List;
 public class Model<T> implements Where {
 
     private final Class<T> table;
+    private final String tableName;
     private final SQLiteUtil sqLiteUtil;
     private final ModelInfo modelInfo;
     private final ConditionBuilder conditionBuilder = ConditionBuilder.create();
     private boolean returnInfluence;
 
-    public Model(Class<T> table, SQLiteUtil sqLiteUtil, ModelInfo modelInfo) {
+    public Model(Class<T> table, String tableName, SQLiteUtil sqLiteUtil, ModelInfo modelInfo) {
         this.table = table;
+        this.tableName = tableName;
         this.sqLiteUtil = sqLiteUtil;
         this.modelInfo = modelInfo;
     }
@@ -122,7 +126,7 @@ public class Model<T> implements Where {
 
     private Model<T> where(OnWhere onWhere, int type) {
         if (onWhere != null) {
-            Model<T> model = new Model<T>(table, sqLiteUtil, modelInfo);
+            Model<T> model = new Model<T>(table, tableName, sqLiteUtil, modelInfo);
             onWhere.where(model);
             List<Condition> conditions = model.conditionBuilder.getConditionList();
             if (conditions.size() > 0) {
@@ -177,9 +181,9 @@ public class Model<T> implements Where {
                     e.printStackTrace();
                 }
                 if (id == 0) {
-                    sqLiteUtil.insert(entity);
+                    sqLiteUtil.insert(entity, tableName);
                 } else {
-                    sqLiteUtil.updateById(entity);
+                    sqLiteUtil.updateById(entity, tableName);
                 }
             }
         }
@@ -224,7 +228,7 @@ public class Model<T> implements Where {
     public int delete() {
         int influence = 0;
         if (conditionBuilder.getConditionCount() > 0) {
-            String sql = "delete from " + modelInfo.getTableName() + conditionBuilder.getConditions(true);
+            String sql = "delete from " + TextUtil.notEmptyOr(tableName, modelInfo.getTableName()) + conditionBuilder.getConditions(true);
             if (returnInfluence) {
                 influence = sqLiteUtil.nativeQuery().executeUpdateStatement(sql);
             } else {
@@ -241,15 +245,18 @@ public class Model<T> implements Where {
      * 清空表
      */
     public void clear() {
-        sqLiteUtil.deleteAll(table);
+        sqLiteUtil.getDatabase().execSQL("delete from " + TextUtil.notEmptyOr(tableName, modelInfo.getTableName()));
+        if (sqLiteUtil.mitiProgress) {
+            SQLiteDatabase.releaseMemory();
+        }
     }
 
     /**
      * 截断表
      */
     public void truncate() {
-        sqLiteUtil.deleteAll(table);
-        sqLiteUtil.getDatabase().execSQL("delete from sqlite_sequence WHERE name = " + modelInfo.getTableName());
+        clear();
+        sqLiteUtil.getDatabase().execSQL("delete from sqlite_sequence WHERE name = " + TextUtil.notEmptyOr(tableName, modelInfo.getTableName()));
         if (sqLiteUtil.mitiProgress) {
             SQLiteDatabase.releaseMemory();
         }
@@ -263,7 +270,7 @@ public class Model<T> implements Where {
         if (values == null) {
             return influence;
         }
-        String sql = TableFinder.getUpdateSqlNoWhere(values, modelInfo, ignoreNull)
+        String sql = TableFinder.getUpdateSqlNoWhere(values, modelInfo, tableName, ignoreNull)
                 + conditionBuilder.getConditionsWithoutPage(true);
         if (returnInfluence) {
             influence = sqLiteUtil.nativeQuery().executeUpdateStatement(sql);
@@ -284,7 +291,7 @@ public class Model<T> implements Where {
         if (entity == null) {
             return influence;
         }
-        String sql = TableFinder.getUpdateSqlNoWhere(entity, modelInfo, ignoreNull)
+        String sql = TableFinder.getUpdateSqlNoWhere(entity, modelInfo, tableName, ignoreNull)
                 + conditionBuilder.getConditionsWithoutPage(true);
         if (returnInfluence) {
             influence = sqLiteUtil.nativeQuery().executeUpdateStatement(sql);
@@ -304,10 +311,11 @@ public class Model<T> implements Where {
         int count = 0;
         Cursor cursor;
         if (conditionBuilder.getConditionCount() == 0) {
-            cursor = sqLiteUtil.getDatabase().rawQuery("select count(1) from " + modelInfo.getTableName(), null);
+            cursor = sqLiteUtil.getDatabase().rawQuery("select count(1) from " + TextUtil.notEmptyOr(tableName, modelInfo.getTableName()), null);
         } else {
             cursor = sqLiteUtil.getDatabase().rawQuery(
-                    "select count(1) from " + modelInfo.getTableName() + conditionBuilder.getConditionsWithoutPage(true),
+                    "select count(1) from " + TextUtil.notEmptyOr(tableName, modelInfo.getTableName())
+                            + conditionBuilder.getConditionsWithoutPage(true),
                     null);
         }
         if (cursor.moveToNext()) {
@@ -330,7 +338,8 @@ public class Model<T> implements Where {
     public List<T> get() {
         List<T> entitys = new ArrayList<>();
         Cursor cursor = sqLiteUtil.getDatabase().rawQuery(
-                "select * from " + modelInfo.getTableName() + conditionBuilder.getConditions(true),
+                "select * from " + TextUtil.notEmptyOr(tableName, modelInfo.getTableName())
+                        + conditionBuilder.getConditions(true),
                 null);
         while (cursor.moveToNext()) {
             T entity = null;
@@ -358,7 +367,7 @@ public class Model<T> implements Where {
     public T first() {
         T entity = null;
         Cursor cursor = sqLiteUtil.getDatabase().rawQuery(
-                "select * from " + modelInfo.getTableName()
+                "select * from " + TextUtil.notEmptyOr(tableName, modelInfo.getTableName())
                         + conditionBuilder.getConditionsWithoutPage(true) + " limit 0,1",
                 null);
         if (cursor.moveToNext()) {

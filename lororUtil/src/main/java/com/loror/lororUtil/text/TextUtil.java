@@ -123,4 +123,18 @@ public class TextUtil {
         }
         return stringBuffer.toString();
     }
+
+    /**
+     * 不为null返回text，否则or
+     */
+    public static String notNullOr(String text, String or) {
+        return text != null ? text : or;
+    }
+
+    /**
+     * 不为空返回text，否则or
+     */
+    public static String notEmptyOr(String text, String or) {
+        return !isEmpty(text) ? text : or;
+    }
 }

@@ -5,6 +5,8 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
+import com.loror.lororUtil.text.TextUtil;
+
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -116,11 +118,18 @@ public class SQLiteUtil {
      * 创建表
      */
     public void createTableIfNotExists(Class<?> table) {
+        createTableIfNotExists(table, null);
+    }
+
+    /**
+     * 创建表
+     */
+    private void createTableIfNotExists(Class<?> table, String tableName) {
         if (execTableCreated.contains(table)) {
             return;
         }
         execTableCreated.add(table);
-        database.execSQL(TableFinder.getCreateSql(getModel(table)));
+        database.execSQL(TableFinder.getCreateSql(getModel(table), tableName));
         if (mitiProgress) {
             SQLiteDatabase.releaseMemory();
         }
@@ -131,11 +140,19 @@ public class SQLiteUtil {
      * 注意：执行更新表后，可能表未及时变化，下次执行会再次执行更新表而报错，需保证close之前只执行一次
      */
     public void changeTableIfColumnAdd(Class<?> table) {
+        changeTableIfColumnAdd(table, null);
+    }
+
+    /**
+     * 表字段增加
+     */
+    private void changeTableIfColumnAdd(Class<?> table, String tableName) {
         if (execTableUpdated.contains(table)) {
             return;
         }
         execTableUpdated.add(table);
-        Cursor cursor = database.rawQuery("select * from " + getModel(table).getTableName() + " where 0", null);
+        ModelInfo modelInfo = getModel(table);
+        Cursor cursor = database.rawQuery("select * from " + TextUtil.notEmptyOr(tableName, modelInfo.getTableName()) + " where 0", null);
         String[] columnNames = cursor.getColumnNames();
         cursor.close();
 
@@ -143,7 +160,6 @@ public class SQLiteUtil {
         List<String> newColumnNames = new ArrayList<>();
         HashMap<String, Class<?>> objectHashMap = new HashMap<>();
         HashMap<String, Column> columnHashMap = new HashMap<>();
-        ModelInfo modelInfo = getModel(table);
         for (ModelInfo.ColumnInfo columnInfo : modelInfo.getColumnInfos()) {
             Field field = columnInfo.getField();
             if (columnInfo.isPrimaryKey()) {
@@ -182,7 +198,7 @@ public class SQLiteUtil {
         try {
             for (i = 0; i < newColumnNames.size(); i++) {
                 String newColumnName = newColumnNames.get(i);
-                String type = "text";
+                String type;
                 Class<?> objectType = objectHashMap.get(newColumnName);
                 if (objectType == Integer.class || objectType == int.class || objectType == Long.class || objectType == long.class) {
                     type = "int";
@@ -196,9 +212,9 @@ public class SQLiteUtil {
                 Column column = columnHashMap.get(newColumnName);
                 String defaultValue = column.defaultValue();
                 defaultValue = ColumnFilter.getColumn(newColumnName, defaultValue, column);
-                database.execSQL("alter table " + modelInfo.getTableName() + " add column " + newColumnName + " " + type);
+                database.execSQL("alter table " + TextUtil.notEmptyOr(tableName, modelInfo.getTableName()) + " add column " + newColumnName + " " + type);
                 if (defaultValue != null && defaultValue.length() > 0) {
-                    database.execSQL("update " + modelInfo.getTableName() + " set " + newColumnName +
+                    database.execSQL("update " + TextUtil.notEmptyOr(tableName, modelInfo.getTableName()) + " set " + newColumnName +
                             " = '" + ColumnFilter.safeColumn(defaultValue) + "'");
                 }
             }
@@ -216,22 +232,29 @@ public class SQLiteUtil {
      * 获取条件处理model
      */
     public <T> Model<T> model(Class<T> table) {
-        return model(table, true);
+        return model(table, null, true);
     }
 
     /**
      * 获取条件处理model
      */
     public <T> Model<T> model(Class<T> table, boolean checkTable) {
+        return model(table, null, checkTable);
+    }
+
+    /**
+     * 获取条件处理model
+     */
+    public <T> Model<T> model(Class<T> table, String tableName, boolean checkTable) {
         if (checkTable) {
-            createTableIfNotExists(table);
+            createTableIfNotExists(table, tableName);
             try {
-                changeTableIfColumnAdd(table);
+                changeTableIfColumnAdd(table, tableName);
             } catch (Exception e) {
                 Log.e("SQLiteUtil", "changeTable failed:", e);
             }
         }
-        return new Model<>(table, this, getModel(table));
+        return new Model<>(table, tableName, this, getModel(table));
     }
 
     /**
@@ -268,10 +291,17 @@ public class SQLiteUtil {
      * 插入数据
      */
     public void insert(Object entity) {
+        insert(entity, null);
+    }
+
+    /**
+     * 插入数据
+     */
+    protected void insert(Object entity, String tableName) {
         if (entity == null) {
             return;
         }
-        database.execSQL(TableFinder.getInsertSql(entity, getModel(entity.getClass())));
+        database.execSQL(TableFinder.getInsertSql(entity, getModel(entity.getClass()), tableName));
         if (mitiProgress) {
             SQLiteDatabase.releaseMemory();
         }
@@ -330,10 +360,17 @@ public class SQLiteUtil {
      * 根据id更新数据
      */
     public void updateById(Object entity) {
+        updateById(entity, null);
+    }
+
+    /**
+     * 根据id更新数据
+     */
+    protected void updateById(Object entity, String tableName) {
         if (entity == null) {
             return;
         }
-        database.execSQL(TableFinder.getUpdateSql(entity, getModel(entity.getClass())));
+        database.execSQL(TableFinder.getUpdateSql(entity, getModel(entity.getClass()), tableName));
         if (mitiProgress) {
             SQLiteDatabase.releaseMemory();
         }

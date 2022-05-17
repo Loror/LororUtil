@@ -2,6 +2,8 @@ package com.loror.lororUtil.sql;
 
 import android.database.Cursor;
 
+import com.loror.lororUtil.text.TextUtil;
+
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.List;
@@ -11,10 +13,10 @@ public class TableFinder {
     /**
      * 获得创建语句
      */
-    public static String getCreateSql(ModelInfo modelInfo) {
+    public static String getCreateSql(ModelInfo modelInfo, String tableName) {
         StringBuilder builder = new StringBuilder();
         builder.append("create table if not exists ")
-                .append(modelInfo.getTableName())
+                .append(TextUtil.notEmptyOr(tableName, modelInfo.getTableName()))
                 .append("(");
         for (ModelInfo.ColumnInfo columnInfo : modelInfo.getColumnInfos()) {
             if (columnInfo.isPrimaryKey()) {
@@ -49,7 +51,7 @@ public class TableFinder {
     /**
      * 获得更新语句
      */
-    public static String getUpdateSql(Object entity, ModelInfo modelInfo) {
+    public static String getUpdateSql(Object entity, ModelInfo modelInfo, String tableName) {
         String idName = "id";
         String idVolume = "0";
         ModelInfo.ColumnInfo columnInfo = modelInfo.getId();
@@ -68,7 +70,7 @@ public class TableFinder {
         }
 
         StringBuilder builder = new StringBuilder();
-        builder.append(getUpdateSqlNoWhere(entity, modelInfo, false));
+        builder.append(getUpdateSqlNoWhere(entity, modelInfo, tableName, false));
         builder.append(" where ")
                 .append(idName)
                 .append(" = ")
@@ -79,8 +81,7 @@ public class TableFinder {
     /**
      * 获得更新语句
      */
-    public static String getUpdateSqlNoWhere(Object entity, ModelInfo modelInfo, boolean ignoreNull) {
-        String tableName = modelInfo.getTableName();
+    public static String getUpdateSqlNoWhere(Object entity, ModelInfo modelInfo, String tableName, boolean ignoreNull) {
         final HashMap<String, String> columns = new HashMap<>();
         if (entity instanceof ModelData) {
             ModelData modelData = ((ModelData) entity);
@@ -117,7 +118,7 @@ public class TableFinder {
         }
         StringBuilder builder = new StringBuilder();
         builder.append("update ")
-                .append(tableName)
+                .append(TextUtil.notEmptyOr(tableName, modelInfo.getTableName()))
                 .append(" set ");
         for (String o : columns.keySet()) {
             if (columns.get(o) == null) {
@@ -137,8 +138,7 @@ public class TableFinder {
     /**
      * 获得插入语句
      */
-    public static String getInsertSql(Object entity, ModelInfo modelInfo) {
-        String tableName = modelInfo.getTableName();
+    public static String getInsertSql(Object entity, ModelInfo modelInfo, String tableName) {
         HashMap<String, String> columns = new HashMap<>();
         for (ModelInfo.ColumnInfo columnInfo : modelInfo.getColumnInfos()) {
             Field field = columnInfo.getField();
@@ -175,7 +175,7 @@ public class TableFinder {
         }
         keys.deleteCharAt(keys.length() - 1);
         values.deleteCharAt(values.length() - 1);
-        return "insert into " + tableName + "(" + keys.toString() + ")" + " values " + "(" + values.toString() + ")";
+        return "insert into " + TextUtil.notEmptyOr(tableName, modelInfo.getTableName()) + "(" + keys + ")" + " values " + "(" + values.toString() + ")";
     }
 
     /**
