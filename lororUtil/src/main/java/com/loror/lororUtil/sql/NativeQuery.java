@@ -43,14 +43,14 @@ public class NativeQuery {
     /**
      * 执行更新/删除
      */
-    public void executeUpdate(String sql) {
-        executeUpdate(sql, null);
+    public void executeUpdateDelete(String sql) {
+        executeUpdateDelete(sql, null);
     }
 
     /**
      * 执行更新/删除
      */
-    public void executeUpdate(String sql, Object[] bindArgs) {
+    public void executeUpdateDelete(String sql, Object[] bindArgs) {
         if (bindArgs == null) {
             database.execSQL(sql);
         } else {
@@ -61,14 +61,14 @@ public class NativeQuery {
     /**
      * 执行更新/删除，并接收影响行数
      */
-    public int executeUpdateStatement(String sql) {
-        return executeUpdateStatement(sql, null);
+    public int executeUpdateDeleteStatement(String sql) {
+        return executeUpdateDeleteStatement(sql, null);
     }
 
     /**
      * 执行更新/删除，并接收影响行数
      */
-    public int executeUpdateStatement(String sql, Object[] bindArgs) {
+    public int executeUpdateDeleteStatement(String sql, Object[] bindArgs) {
         database.acquireReference();
         try {
             Constructor<SQLiteStatement> constructor = SQLiteStatement.class.getDeclaredConstructor(SQLiteDatabase.class, String.class, Object[].class);
@@ -84,7 +84,7 @@ public class NativeQuery {
         } finally {
             database.releaseReference();
         }
-        executeUpdate(sql, bindArgs);
+        executeUpdateDelete(sql, bindArgs);
         return 1;
     }
 }

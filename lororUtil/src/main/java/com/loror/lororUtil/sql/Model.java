@@ -152,11 +152,27 @@ public class Model<T> implements Where {
         return this;
     }
 
+    public Model<T> orderBy(String key) {
+        conditionBuilder.withOrder(key, Order.ORDER_ASC);
+        return this;
+    }
+
+    public Model<T> orderByDesc(String key) {
+        conditionBuilder.withOrder(key, Order.ORDER_DESC);
+        return this;
+    }
+
+    /**
+     * 排序
+     */
     public Model<T> orderBy(String key, int order) {
         conditionBuilder.withOrder(key, order);
         return this;
     }
 
+    /**
+     * 分页
+     */
     public Model<T> page(int page, int size) {
         conditionBuilder.withPagination(page, size);
         return this;
@@ -169,7 +185,7 @@ public class Model<T> implements Where {
         if (entity != null) {
             ModelInfo.ColumnInfo idColumn = modelInfo.getId();
             if (idColumn == null) {
-                sqLiteUtil.insert(entity);
+                sqLiteUtil.insert(entity, tableName);
             } else {
                 long id = 0;
                 Field field = idColumn.getField();
@@ -230,7 +246,7 @@ public class Model<T> implements Where {
         if (conditionBuilder.getConditionCount() > 0) {
             String sql = "delete from " + TextUtil.notEmptyOr(tableName, modelInfo.getTableName()) + conditionBuilder.getConditions(true);
             if (returnInfluence) {
-                influence = sqLiteUtil.nativeQuery().executeUpdateStatement(sql);
+                influence = sqLiteUtil.nativeQuery().executeUpdateDeleteStatement(sql);
             } else {
                 sqLiteUtil.getDatabase().execSQL(sql);
             }
@@ -273,7 +289,7 @@ public class Model<T> implements Where {
         String sql = TableFinder.getUpdateSqlNoWhere(values, modelInfo, tableName, ignoreNull)
                 + conditionBuilder.getConditionsWithoutPage(true);
         if (returnInfluence) {
-            influence = sqLiteUtil.nativeQuery().executeUpdateStatement(sql);
+            influence = sqLiteUtil.nativeQuery().executeUpdateDeleteStatement(sql);
         } else {
             sqLiteUtil.getDatabase().execSQL(sql);
         }
@@ -294,7 +310,7 @@ public class Model<T> implements Where {
         String sql = TableFinder.getUpdateSqlNoWhere(entity, modelInfo, tableName, ignoreNull)
                 + conditionBuilder.getConditionsWithoutPage(true);
         if (returnInfluence) {
-            influence = sqLiteUtil.nativeQuery().executeUpdateStatement(sql);
+            influence = sqLiteUtil.nativeQuery().executeUpdateDeleteStatement(sql);
         } else {
             sqLiteUtil.getDatabase().execSQL(sql);
         }

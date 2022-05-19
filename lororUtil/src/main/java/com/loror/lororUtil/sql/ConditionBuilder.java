@@ -9,8 +9,8 @@ import java.util.List;
 
 public class ConditionBuilder {
 
-    private List<Condition> conditions = new ArrayList<>();
-    private List<Order> orders = new ArrayList<>();
+    private final List<Condition> conditions = new ArrayList<>();
+    private final List<Order> orders = new ArrayList<>();
     private Page page;
     private boolean hasNull;
 
@@ -166,7 +166,7 @@ public class ConditionBuilder {
      * 获取条件语句
      */
     public String getConditions(boolean withColumn) {
-        return getConditionsWithoutPage(withColumn) + (page == null ? "" : " " + page.toString());
+        return getConditionsWithoutPage(withColumn) + (page == null ? "" : (" " + page));
     }
 
     /**
@@ -204,7 +204,9 @@ public class ConditionBuilder {
     private void add(List<String> array, List<Condition> conditions) {
         for (int i = 0; i < conditions.size(); i++) {
             Condition condition = conditions.get(i);
-            array.add(condition.getColumn());
+            if (condition.getColumn() != null) {
+                array.add(condition.getColumn());
+            }
             if (condition.getConditions() != null) {
                 add(array, condition.getConditions());
             }

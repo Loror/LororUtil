@@ -264,14 +264,17 @@ public class SQLiteUtil {
         return new NativeQuery(database);
     }
 
+    public boolean inTransaction() {
+        return database != null && database.inTransaction();
+    }
+
     public boolean transaction(Runnable runnable) {
         if (runnable == null) {
             return false;
         }
 
         if (database.inTransaction()) {
-            runnable.run();
-            return true;
+            return false;
         }
 
         database.beginTransaction();

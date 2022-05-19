@@ -12,7 +12,7 @@ public class Condition {
     private String operator;
     private String column;
     private int type;//0,and.1,or
-    private boolean quotation;
+    private final boolean quotation;
     private List<Condition> conditions;
 
     public Condition(String key, String operator, Object column) {
@@ -106,7 +106,11 @@ public class Condition {
                 }
             }
         } else {
-            builder.append(" ?");
+            if (column == null) {
+                builder.append(" null");
+            } else {
+                builder.append(" ?");
+            }
         }
         if (conditions != null) {
             int size = conditions.size();
