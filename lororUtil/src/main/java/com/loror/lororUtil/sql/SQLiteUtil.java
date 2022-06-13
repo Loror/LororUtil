@@ -314,7 +314,14 @@ public class SQLiteUtil {
      * 获取最后插入数据id
      */
     public long lastInsertId(Class<?> table) {
-        Cursor cursor = database.rawQuery(TableFinder.getLastIdSql(getModel(table)), null);
+        return lastInsertId(getModel(table).getTableName());
+    }
+
+    /**
+     * 获取最后插入数据id
+     */
+    protected long lastInsertId(String tableName) {
+        Cursor cursor = database.rawQuery(TableFinder.getLastIdSql(tableName), null);
         long id = -1;
         if (cursor.moveToFirst()) {
             id = cursor.getLong(0);
