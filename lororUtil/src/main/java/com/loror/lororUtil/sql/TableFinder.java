@@ -44,8 +44,8 @@ public class TableFinder {
     /**
      * 获取最后自增id语句
      */
-    public static String getLastIdSql(ModelInfo modelInfo) {
-        return "select last_insert_rowid() from " + modelInfo.getTableName();
+    public static String getLastIdSql(String tableName) {
+        return "select last_insert_rowid() from " + tableName;
     }
 
     /**
