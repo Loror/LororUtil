@@ -177,6 +177,13 @@ public class Model<T> implements Where {
         conditionBuilder.withPagination(page, size);
         return this;
     }
+    
+    /**
+     * 获取最后插入数据id
+     */
+    public long lastInsertId() {
+        return sqLiteUtil.lastInsertId(TextUtil.notEmptyOr(tableName, modelInfo.getTableName()));
+    }
 
     /**
      * 保存
