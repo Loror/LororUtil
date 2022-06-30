@@ -192,6 +192,9 @@ public class ApiTask {
                     Object acceptObject = apiResult.responceObject;
                     //设置了拦截返回数据则返回
                     if (acceptObject != null) {
+                        if (acceptObject instanceof Responce) {
+                            return (Responce) acceptObject;
+                        }
                         String result = ApiClient.objectToString(acceptObject);
                         responce = new Responce();
                         try {
