@@ -71,10 +71,6 @@ public class ApiTask {
         if (observable != null) {
             apiResult.accept = true;
             observable.subscribe(observable.getObserver());
-        } else if (ApiClient.returnAdapters.size() == 0) {
-            apiResult.accept = true;
-            Responce responce = request();
-            apiResult.responceObject = toResult(responce);
         }
     }
 
