@@ -8,10 +8,10 @@ import com.loror.lororUtil.sql.Table;
 public class Compare {
     @Id
     int id;
-    @Column
+    @Column(name = "url")
     String url;
-    @Column
+    @Column(name = "path")
     String path;
-    @Column
+    @Column(name = "length")
     long length;
 }
