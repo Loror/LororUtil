@@ -79,8 +79,19 @@ public class ImageDownloader {
     public static void tryClearAllSqlCache(Context context) {
         SQLiteUtil sqLiteUtil = new SQLiteUtil(context, "imageCompare");
         sqLiteUtil.createTableIfNotExists(Compare.class);
+        List<Compare> compares = sqLiteUtil.getAll(Compare.class);
         sqLiteUtil.deleteAll(Compare.class);
         sqLiteUtil.close();
+        for (Compare compare : compares) {
+            try {
+                File file = new File(compare.path);
+                if (file.exists()) {
+                    file.delete();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     /**

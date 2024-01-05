@@ -493,4 +493,12 @@ public class ImageUtil implements Cloneable {
     public static void clearCaches() {
         EfficientImageUtil.clearCaches();
     }
+
+    /**
+     * 清除缓存
+     */
+    public static void clearCachesWithDisk(Context context) {
+        EfficientImageUtil.clearCaches();
+        ImageDownloader.tryClearAllSqlCache(context);
+    }
 }
