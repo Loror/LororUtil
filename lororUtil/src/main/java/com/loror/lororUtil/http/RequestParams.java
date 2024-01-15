@@ -291,6 +291,41 @@ public class RequestParams {
     }
 
     /**
+     * 添加headers
+     */
+    public RequestParams fromHeaderObject(Object object) {
+        if (object instanceof Map) {
+            Map map = (Map) object;
+            for (Object key : map.keySet()) {
+                if (key == null) {
+                    continue;
+                }
+                Object value = map.get(key);
+                headers.put(key.toString(), value == null ? "" : String.valueOf(value));
+            }
+        } else if (object != null) {
+            Class<?> handlerType = object.getClass();
+            Field[] fields = handlerType.getDeclaredFields();
+            for (int i = 0; i < fields.length; i++) {
+                Field field = fields[i];
+                field.setAccessible(true);
+                //transient|static修饰(10001000)字段，放弃
+                if ((field.getModifiers() & 136) != 0) {
+                    continue;
+                }
+                try {
+                    String key = field.getName();
+                    Object value = field.get(object);
+                    headers.put(key, value == null ? "" : String.valueOf(value));
+                } catch (IllegalAccessException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return this;
+    }
+
+    /**
      * 设置提交json数据，设置后将使用json方式提交该json，param参数将失效
      */
     public void setJson(String json) {

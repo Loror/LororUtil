@@ -1,5 +1,6 @@
 package com.loror.lororUtil.http.api;
 
+import com.loror.lororUtil.annotation.HeaderObject;
 import com.loror.lororUtil.http.Cookies;
 import com.loror.lororUtil.http.FileBody;
 import com.loror.lororUtil.http.StreamBody;
@@ -298,6 +299,11 @@ public class ApiRequest {
             } else if (annotations[i].annotationType() == Header.class) {
                 String name = ((Header) annotations[i]).value();
                 params.addHeader(name, arg == null ? "" : String.valueOf(arg));
+                break;
+            } else if (annotations[i].annotationType() == HeaderObject.class) {
+                if (arg != null) {
+                    params.fromHeaderObject(arg);
+                }
                 break;
             } else if (annotations[i].annotationType() == Query.class) {
                 String name = ((Query) annotations[i]).value();
