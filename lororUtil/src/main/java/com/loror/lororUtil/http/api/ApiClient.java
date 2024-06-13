@@ -1,6 +1,6 @@
 package com.loror.lororUtil.http.api;
 
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;

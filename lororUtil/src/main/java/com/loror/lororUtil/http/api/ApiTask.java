@@ -1,6 +1,6 @@
 package com.loror.lororUtil.http.api;
 
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 import com.loror.lororUtil.annotation.BaseUrl;
 import com.loror.lororUtil.annotation.DELETE;

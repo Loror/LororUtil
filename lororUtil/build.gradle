@@ -1,9 +1,8 @@
 apply plugin: 'com.android.library'
+apply plugin: 'maven-publish'
 
 android {
     compileSdkVersion 28
-
-
 
     defaultConfig {
         minSdkVersion 14
@@ -25,5 +24,22 @@ android {
 }
 
 dependencies {
-    compileOnly fileTree(include: ['*.jar'], dir: 'libs')
+    compileOnly 'androidx.annotation:annotation:1.2.0'
+}
+
+publishing {
+    publications {
+        plugin(MavenPublication) {
+            groupId = 'com.loror'
+            artifactId = 'LororUtil'
+            version = '1.9.38'
+            afterEvaluate { artifact(tasks.getByName("bundleReleaseAar")) }
+        }
+    }
+    repositories {
+        maven {
+            name = 'repo'
+            url = layout.buildDirectory.dir("repo")
+        }
+    }
 }
