@@ -2,6 +2,7 @@ package com.loror.lororUtil.http;
 
 import com.loror.lororUtil.text.TextUtil;
 
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 
 public class StreamBody {
@@ -86,6 +87,25 @@ public class StreamBody {
      */
     public InputStream getInputStream() {
         return inputStream;
+    }
+
+    public byte[] getBytes() {
+        try {
+            if (inputStream != null) {
+                ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                byte[] data = new byte[1024 * 1024];
+                int read = 0;
+                while ((inputStream.read(data)) != -1) {
+                    outputStream.write(data, 0, read);
+                }
+                return outputStream.toByteArray();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            close();
+        }
+        return null;
     }
 
     /**

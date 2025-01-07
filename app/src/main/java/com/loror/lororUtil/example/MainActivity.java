@@ -1,5 +1,6 @@
 package com.loror.lororUtil.example;
 
+import android.Manifest;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Looper;
@@ -58,55 +59,41 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initView();
-        requestPermission("android.permission.WRITE_EXTERNAL_STORAGE", 0);
+        requestPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, 0);
 //        connectNet();
         connectNetByApi();
         task();
 
-        ImageUtil.with(this)
-                .from("https://iconfont.alicdn.com/t/083f67b8-b930-4a31-8f42-060ce61942f0.png")
-                .loadTo(new PathTarget() {
-                    @Override
-                    public void target(String result) {
-                        Log.e("ImageUtil_Target", "下载完成：" + result);
-                    }
-                });
+//        ImageUtil.with(this)
+//                .from("https://iconfont.alicdn.com/t/083f67b8-b930-4a31-8f42-060ce61942f0.png")
+//                .loadTo((PathTarget) result -> Log.e("ImageUtil_Target", "下载完成：" + result));
     }
 
     private void task() {
         new FlowTask()
                 .ioSchedule()
-                .create(new Func0<Integer>() {
-                    @Override
-                    public Integer func() {
-                        Log.e("Task", "1运行线程：" + (Looper.getMainLooper() == Looper.myLooper() ? "主线程" : "子线程"));
-                        return 1;
-                    }
+                .create(() -> {
+                    Log.e("Task", "1运行线程：" + (Looper.getMainLooper() == Looper.myLooper() ? "主线程" : "子线程"));
+                    return 1;
                 })
                 .mainHandlerSchedule()
-                .map(new Func<Integer, String>() {
-                    @Override
-                    public String func(Integer it) {
-                        Log.e("Task", it + ":2运行线程：" + (Looper.getMainLooper() == Looper.myLooper() ? "主线程" : "子线程"));
-                        return "hello";
-                    }
+                .map(it -> {
+                    Log.e("Task", it + ":2运行线程：" + (Looper.getMainLooper() == Looper.myLooper() ? "主线程" : "子线程"));
+                    return "hello";
                 })
                 .ioSchedule()
-                .call(new Func1<String>() {
-                    @Override
-                    public void func(String it) {
-                        Log.e("Task", it + ":3运行线程：" + (Looper.getMainLooper() == Looper.myLooper() ? "主线程" : "子线程"));
-                    }
+                .call(it -> {
+                    Log.e("Task", it + ":3运行线程：" + (Looper.getMainLooper() == Looper.myLooper() ? "主线程" : "子线程"));
                 });
     }
 
     private void connectNetByApi() {
         final ApiTest apiTest = ApiCreator.getApiClient().create(ApiTest.class);
         //内置异步请求方式
-        apiTest.test().subscribe(new Observer<String>() {
+        apiTest.test().subscribe(new Observer<>() {
             @Override
             public void success(String data) {
-                Log.e("RESULT_1", data);
+                Log.e("RESULT_1", "data->" + data);
             }
 
             @Override
@@ -123,7 +110,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void result(String result) {
-                Log.e("RESULT_2", result);
+                Log.e("RESULT_2", "data->" + result);
             }
         });
         //自定义异步请求方式
@@ -143,7 +130,7 @@ public class MainActivity extends AppCompatActivity {
 
                     @Override
                     public void onNext(String s) {
-                        Log.e("RESULT_3", s);
+                        Log.e("RESULT_3", "data->" + s);
                     }
                 });
     }

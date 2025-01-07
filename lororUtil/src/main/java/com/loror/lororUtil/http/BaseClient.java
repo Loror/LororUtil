@@ -6,14 +6,28 @@ import com.loror.lororUtil.text.TextUtil;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
+
+import okhttp3.Call;
+import okhttp3.FormBody;
+import okhttp3.Headers;
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+import okhttp3.ResponseBody;
 
 public abstract class BaseClient extends Prepare implements Client {
 
@@ -25,6 +39,22 @@ public abstract class BaseClient extends Prepare implements Client {
     private HttpURLConnection conn;
     private ProgressListener progressListener;
     protected Actuator callbackActuator;
+    private int core = CORE_URL_CONNECTION;
+
+    @Override
+    public boolean setCore(int core) {
+        if (core == CORE_OKHTTP3) {
+            try {
+                Class<?> type = okhttp3.OkHttpClient.class;
+                System.out.println("update core:" + type.getSimpleName());
+            } catch (Exception e) {
+                e.printStackTrace();
+                return false;
+            }
+        }
+        this.core = core;
+        return true;
+    }
 
     /**
      * 设置回调执行器
@@ -107,9 +137,30 @@ public abstract class BaseClient extends Prepare implements Client {
      * 读取http头
      */
     protected void initHeaders(HttpURLConnection connection, Responce responce) {
+        initHeaders(connection.getHeaderFields(), responce);
+//        try {
+//            String cookieskey = "Set-Cookie";
+//            responce.headers = connection.getHeaderFields();
+//            responce.cookieList = responce.headers.get(cookieskey);
+//            if (responce.cookieList == null) {
+//                responce.cookieList = new ArrayList<>();
+//            }
+//            responce.cookies = new ArrayList<>();
+//            for (String cookie : responce.cookieList) {
+//                SetCookie setCookie = SetCookie.parse(cookie);
+//                if (setCookie != null) {
+//                    responce.cookies.add(setCookie);
+//                }
+//            }
+//        } catch (Throwable e) {
+//            System.err.println("lost headers");
+//        }
+    }
+
+    protected void initHeaders(Map<String, List<String>> headers, Responce responce) {
         try {
             String cookieskey = "Set-Cookie";
-            responce.headers = connection.getHeaderFields();
+            responce.headers = headers;
             responce.cookieList = responce.headers.get(cookieskey);
             if (responce.cookieList == null) {
                 responce.cookieList = new ArrayList<>();
@@ -152,13 +203,47 @@ public abstract class BaseClient extends Prepare implements Client {
     @Override
     public Responce get(String urlStr, RequestParams params) {
         Responce responce = new Responce();
-        try {
+        if (params != null) {
+            String strParams = params.packetOutParams("GET");
+            if (!TextUtil.isEmpty(strParams)) {
+                urlStr += params.getSplicing(urlStr, 0) + strParams;
+            }
+        }
+        if (core == CORE_OKHTTP3) {
+            Request.Builder builder = new Request.Builder().url(urlStr);
+            builder.method("GET", null);
             if (params != null) {
-                String strParams = params.packetOutParams("GET");
-                if (!TextUtil.isEmpty(strParams)) {
-                    urlStr += params.getSplicing(urlStr, 0) + strParams;
+                Map<String, String> paramsHeaders = params.getHeaders();
+                for (Map.Entry<String, String> kv : paramsHeaders.entrySet()) {
+                    builder.header(kv.getKey(), kv.getValue());
                 }
             }
+            Request request = builder.build();
+            OkHttpClient okHttpClient = new OkHttpClient();
+            Call call = okHttpClient.newCall(request);
+            try {
+                Response response = call.execute();
+                responce.code = response.code();
+                Headers responseHeaders = response.headers();
+                if (responseHeaders != null) {
+                    Map<String, List<String>> headers = new HashMap<>();
+                    for (String name : responseHeaders.names()) {
+                        List<String> value = responseHeaders.values(name);
+                        headers.put(name, value);
+                    }
+                    initHeaders(headers, responce);
+                }
+                ResponseBody body = response.body();
+                if (body != null) {
+                    responce.result = body.bytes();
+                }
+                response.close();
+            } catch (IOException e) {
+                responce.setThrowable(e);
+            }
+            return responce;
+        }
+        try {
             URL url = new URL(urlStr);
             conn = (HttpURLConnection) url.openConnection();
             if (followRedirects) {
@@ -182,20 +267,96 @@ public abstract class BaseClient extends Prepare implements Client {
 
     @Override
     public Responce post(String urlStr, RequestParams params) {
-        if (params == null || (params.getFiles().size() == 0 && !params.isForceMultiparty())) {
-            Responce responce = new Responce();
-            try {
-                boolean queryParam = false;
-                if (params != null) {
-                    if ((params.isAsJson() && params.getJson() != null)
-                            || params.isForceParamAsQueryForPostOrPut()) {
-                        String strParams = params.packetOutParams("GET");
-                        if (!TextUtil.isEmpty(strParams)) {
-                            urlStr += params.getSplicing(urlStr, 0) + strParams;
-                        }
-                        queryParam = true;
+        Responce responce = new Responce();
+        boolean isMultipart = !(params == null || (params.getFiles().size() == 0 && !params.isForceMultiparty()));
+        boolean queryParam = false;
+        if (!isMultipart) {
+            if (params != null) {
+                if ((params.isAsJson() && params.getJson() != null)
+                        || params.isForceParamAsQueryForPostOrPut()) {
+                    String strParams = params.packetOutParams("GET");
+                    if (!TextUtil.isEmpty(strParams)) {
+                        urlStr += params.getSplicing(urlStr, 0) + strParams;
+                    }
+                    queryParam = true;
+                }
+            }
+        } else {
+            if (params.isForceParamAsQueryForPostOrPut()) {
+                String strParams = params.packetOutParams("GET");
+                if (!TextUtil.isEmpty(strParams)) {
+                    urlStr += params.getSplicing(urlStr, 0) + strParams;
+                }
+            }
+        }
+        if (core == CORE_OKHTTP3) {
+            Request.Builder builder = new Request.Builder().url(urlStr);
+            if (params != null) {
+                Map<String, String> paramsHeaders = params.getHeaders();
+                for (Map.Entry<String, String> kv : paramsHeaders.entrySet()) {
+                    builder.header(kv.getKey(), kv.getValue());
+                }
+            }
+            if (isMultipart) {
+                MultipartBody.Builder body = new okhttp3.MultipartBody.Builder();
+                for (Map.Entry<String, Object> kv : params.getParams().entrySet()) {
+                    Object value = kv.getValue();
+                    if (value instanceof StreamBody) {
+                        StreamBody streamBody = (StreamBody) value;
+                        body.addFormDataPart("attachments", streamBody.getName(), RequestBody.create(MediaType.parse("application/octet-stream"), streamBody.getBytes()));
+                    } else if (!params.isForceParamAsQueryForPostOrPut()) {
+                        body.addFormDataPart(kv.getKey(), String.valueOf(kv.getValue()));
                     }
                 }
+                builder.post(body.build());
+            } else {
+                if (params != null) {
+                    if (params.getJson() != null || params.isAsJson()) {
+                        String json = params.packetOutParams("POST");
+                        RequestBody requestBody = RequestBody.create(MediaType.parse("application/json; charset=utf-8"), json);
+                        builder.post(requestBody);
+                    } else {
+                        if (!queryParam) {
+                            FormBody.Builder body = new FormBody.Builder();
+                            for (Map.Entry<String, Object> kv : params.getParams().entrySet()) {
+                                body.add(kv.getKey(), String.valueOf(kv.getValue()));
+                            }
+                            builder.post(body.build());
+                        } else {
+                            builder.method("POST", null);
+                        }
+                    }
+                } else {
+                    builder.method("POST", null);
+                }
+            }
+            Request request = builder.build();
+            OkHttpClient okHttpClient = new OkHttpClient();
+            Call call = okHttpClient.newCall(request);
+            try {
+                Response response = call.execute();
+                responce.code = response.code();
+                Headers responseHeaders = response.headers();
+                if (responseHeaders != null) {
+                    Map<String, List<String>> headers = new HashMap<>();
+                    for (String name : responseHeaders.names()) {
+                        List<String> value = responseHeaders.values(name);
+                        headers.put(name, value);
+                    }
+                    initHeaders(headers, responce);
+                }
+                ResponseBody body = response.body();
+                if (body != null) {
+                    responce.result = body.bytes();
+                }
+                response.close();
+            } catch (IOException e) {
+                responce.setThrowable(e);
+            }
+            return responce;
+        }
+        if (!isMultipart) {
+            try {
                 URL url = new URL(urlStr);
                 conn = (HttpURLConnection) url.openConnection();
                 if (followRedirects) {
@@ -235,14 +396,7 @@ public abstract class BaseClient extends Prepare implements Client {
             final ProgressListener progressListener = this.progressListener;
             final Actuator callbackActuator = this.callbackActuator;
             List<StreamBody> files = params.getFiles();
-            final Responce responce = new Responce();
             try {
-                if (params.isForceParamAsQueryForPostOrPut()) {
-                    String strParams = params.packetOutParams("GET");
-                    if (!TextUtil.isEmpty(strParams)) {
-                        urlStr += params.getSplicing(urlStr, 0) + strParams;
-                    }
-                }
                 URL url = new URL(urlStr);// 服务器的域名
                 conn = (HttpURLConnection) url.openConnection();
                 if (followRedirects) {
