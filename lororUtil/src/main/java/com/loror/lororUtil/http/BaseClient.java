@@ -2,6 +2,7 @@ package com.loror.lororUtil.http;
 
 import android.os.Build;
 
+import com.loror.lororUtil.http.okhttp.ProgressRequestBody;
 import com.loror.lororUtil.text.TextUtil;
 
 import java.io.File;
@@ -316,7 +317,11 @@ public abstract class BaseClient extends Prepare implements Client {
                         body.addFormDataPart(kv.getKey(), String.valueOf(kv.getValue()));
                     }
                 }
-                builder.post(body.build());
+                if (progressListener != null) {
+                    builder.post(new ProgressRequestBody(body.build(), progressListener, callbackActuator));
+                } else {
+                    builder.post(body.build());
+                }
             } else {
                 if (params != null) {
                     if (params.getJson() != null || params.isAsJson()) {
