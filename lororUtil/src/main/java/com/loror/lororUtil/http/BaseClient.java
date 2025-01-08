@@ -50,7 +50,7 @@ public abstract class BaseClient extends Prepare implements Client {
             try {
                 Class<?> type = okhttp3.OkHttpClient.class;
                 System.out.println("update core:" + type.getSimpleName());
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 e.printStackTrace();
                 return false;
             }
