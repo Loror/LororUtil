@@ -91,6 +91,7 @@ public class StreamBody {
 
     public byte[] getBytes() {
         try {
+            InputStream inputStream = getInputStream();
             if (inputStream != null) {
                 ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
                 byte[] data = new byte[1024 * 1024];
