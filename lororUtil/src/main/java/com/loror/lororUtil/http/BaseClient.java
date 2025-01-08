@@ -39,6 +39,7 @@ public abstract class BaseClient extends Prepare implements Client {
     private int fileReadLength = 1024 * 100;
     private boolean keepStream;
     private HttpURLConnection conn;
+    private okhttp3.Call call;
     private ProgressListener progressListener;
     protected Actuator callbackActuator;
     private int core = CORE_URL_CONNECTION;
@@ -225,6 +226,7 @@ public abstract class BaseClient extends Prepare implements Client {
                     .connectTimeout(timeOut / 1000, TimeUnit.SECONDS)
                     .build();
             Call call = okHttpClient.newCall(request);
+            this.call = call;
             try {
                 Response response = call.execute();
                 responce.code = response.code();
@@ -245,6 +247,7 @@ public abstract class BaseClient extends Prepare implements Client {
             } catch (IOException e) {
                 responce.setThrowable(e);
             }
+            this.call = null;
             return responce;
         }
         try {
@@ -348,6 +351,7 @@ public abstract class BaseClient extends Prepare implements Client {
                     .connectTimeout(timeOut / 1000, TimeUnit.SECONDS)
                     .build();
             Call call = okHttpClient.newCall(request);
+            this.call = call;
             try {
                 Response response = call.execute();
                 responce.code = response.code();
@@ -368,6 +372,7 @@ public abstract class BaseClient extends Prepare implements Client {
             } catch (IOException e) {
                 responce.setThrowable(e);
             }
+            this.call = null;
             return responce;
         }
         if (!isMultipart) {
@@ -696,7 +701,18 @@ public abstract class BaseClient extends Prepare implements Client {
                 return true;
             } catch (Exception e) {
                 e.printStackTrace();
+            } finally {
+                conn = null;
             }
+        }
+        try {
+            if (call != null) {
+                call.cancel();
+                call = null;
+                return true;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         return false;
     }
