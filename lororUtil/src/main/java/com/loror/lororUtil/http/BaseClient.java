@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
@@ -219,7 +220,9 @@ public abstract class BaseClient extends Prepare implements Client {
                 }
             }
             Request request = builder.build();
-            OkHttpClient okHttpClient = new OkHttpClient();
+            OkHttpClient okHttpClient = new OkHttpClient.Builder()
+                    .connectTimeout(timeOut / 1000, TimeUnit.SECONDS)
+                    .build();
             Call call = okHttpClient.newCall(request);
             try {
                 Response response = call.execute();
@@ -336,7 +339,9 @@ public abstract class BaseClient extends Prepare implements Client {
                 }
             }
             Request request = builder.build();
-            OkHttpClient okHttpClient = new OkHttpClient();
+            OkHttpClient okHttpClient = new OkHttpClient.Builder()
+                    .connectTimeout(timeOut / 1000, TimeUnit.SECONDS)
+                    .build();
             Call call = okHttpClient.newCall(request);
             try {
                 Response response = call.execute();

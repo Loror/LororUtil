@@ -6,7 +6,12 @@
 
 ```
 dependencies {
-    compile 'com.github.Loror:LororUtil:1.9.38'
+    //正式版
+    compile 'com.github.Loror:LororUtil:1.9.39'
+    
+    //支持okhttp核心beta版本
+    compile 'com.github.Loror:LororUtil:1.9.40.beta'
+    implementation 'com.squareup.okhttp3:okhttp:4.12.0'
 }
 
 allprojects {
@@ -55,6 +60,7 @@ ImageUtil后台读取图片接口
 ## 网络访问框架
 
 * 类HttpClient
+    * 方法setCore(int core) 设置核心，支持Client.CORE_URL_CONNECTION Client.CORE_OKHTTP3
     * 方法setTimeOut(int timeOut) 设置http连接超时时间
     * 方法setReadTimeOut(int readTimeOut) 设置读取超时时间
     * 方法post(String urlStr, RequestParams params) post网络请求，返回responce对象
