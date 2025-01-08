@@ -303,7 +303,12 @@ public abstract class BaseClient extends Prepare implements Client {
                     Object value = kv.getValue();
                     if (value instanceof StreamBody) {
                         StreamBody streamBody = (StreamBody) value;
-                        body.addFormDataPart("attachments", streamBody.getName(), RequestBody.create(MediaType.parse("application/octet-stream"), streamBody.getBytes()));
+                        if (value instanceof FileBody) {
+                            FileBody fileBody = (FileBody) value;
+                            body.addFormDataPart("attachments", streamBody.getName(), RequestBody.create(MediaType.parse("application/octet-stream"), fileBody.getFile()));
+                        } else {
+                            body.addFormDataPart("attachments", streamBody.getName(), RequestBody.create(MediaType.parse("application/octet-stream"), streamBody.getBytes()));
+                        }
                     } else if (!params.isForceParamAsQueryForPostOrPut()) {
                         body.addFormDataPart(kv.getKey(), String.valueOf(kv.getValue()));
                     }

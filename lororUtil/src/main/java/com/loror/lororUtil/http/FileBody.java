@@ -11,7 +11,6 @@ import java.io.InputStream;
 public class FileBody extends StreamBody {
 
     private File file;
-    private FileInputStream fileInputStream;
 
     public FileBody(String filePath) {
         this(filePath, null);
@@ -50,14 +49,14 @@ public class FileBody extends StreamBody {
     @Override
     public synchronized InputStream getInputStream() {
         if (file != null) {
-            if (fileInputStream == null) {
+            if (inputStream == null) {
                 try {
-                    fileInputStream = new FileInputStream(file);
+                    inputStream = new FileInputStream(file);
                 } catch (FileNotFoundException e) {
                     e.printStackTrace();
                 }
             }
-            return fileInputStream;
+            return inputStream;
         }
         return super.getInputStream();
     }
@@ -67,18 +66,7 @@ public class FileBody extends StreamBody {
         if (file != null) {
             return file.length();
         }
-        return 0;
+        return super.length();
     }
 
-    @Override
-    public synchronized void close() {
-        if (fileInputStream != null) {
-            try {
-                fileInputStream.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            fileInputStream = null;
-        }
-    }
 }

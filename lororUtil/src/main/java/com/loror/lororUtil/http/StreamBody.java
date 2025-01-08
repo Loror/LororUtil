@@ -10,7 +10,7 @@ public class StreamBody {
     private String key;
     private String name;
     private String contentType;
-    private InputStream inputStream;
+    protected InputStream inputStream;
 
     public StreamBody(InputStream inputStream) {
         this(inputStream, null);
@@ -123,10 +123,12 @@ public class StreamBody {
      * 关闭流
      */
     public void close() {
-        try {
-            inputStream.close();
-        } catch (Exception e) {
-            e.printStackTrace();
+        if (inputStream != null) {
+            try {
+                inputStream.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
         inputStream = null;
     }
