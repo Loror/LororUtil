@@ -1,7 +1,7 @@
 package com.loror.lororUtil.http;
 import com.loror.lororUtil.flyweight.ObjectPool;
 
-public class AsyncBaseClient extends BaseClient {
+public class AsyncBaseClient extends Okhttp3Client {
 
     /**
      * 设置回调主线程执行
