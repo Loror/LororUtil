@@ -2,7 +2,9 @@ package com.loror.lororUtil.http;
 
 import java.io.File;
 import java.net.HttpURLConnection;
+import java.net.URL;
 import java.net.URLDecoder;
+import java.net.URLEncoder;
 
 import com.loror.lororUtil.convert.MD5Util;
 import com.loror.lororUtil.text.TextUtil;
@@ -188,26 +190,37 @@ public class Prepare {
      * 获取文件
      */
     protected File getFile(HttpURLConnection conn, String path, String url) throws Exception {
-        return getFile(conn.getURL().toString(), path, url);
+        return getFile(conn.getURL(), path, url);
     }
 
     /**
      * 获取文件
      */
-    protected File getFile(String uri, String path, String url) throws Exception {
+    protected File getFile(URL uri, String path, String url) throws Exception {
         File file = new File(path);
         if (file.exists() && file.isDirectory()) {
             String name = null;
             try {
-                String fn = URLDecoder.decode(uri, "UTF-8");
-                name = fn.substring(fn.lastIndexOf("/") + 1);
+                if (uri != null) {
+                    String fn = URLDecoder.decode(uri.toString(), "UTF-8");
+                    name = fn.substring(fn.lastIndexOf("/") + 1);
+                } else {
+                    int index = url.lastIndexOf("/");
+                    if (index != -1) {
+                        name = url.substring(index + 1);
+                    }
+                }
             } catch (Exception e) {
                 System.out.println("cannot get file name");
             }
             if (TextUtil.isEmpty(name)) {
                 file = new File(file, MD5Util.md5(url));
             } else {
-                file = new File(file, name);
+                try {
+                    file = new File(file, name);
+                } catch (Throwable e) {
+                    file = new File(file, URLEncoder.encode(name, "UTF-8"));
+                }
             }
         }
         return file;

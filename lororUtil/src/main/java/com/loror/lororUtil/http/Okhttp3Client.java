@@ -147,17 +147,16 @@ public class Okhttp3Client extends BaseClient {
             if (isMultipart) {
                 MultipartBody.Builder body = new okhttp3.MultipartBody.Builder();
                 for (Map.Entry<String, Object> kv : params.getParams().entrySet()) {
-                    Object value = kv.getValue();
-                    if (value instanceof StreamBody) {
-                        StreamBody streamBody = (StreamBody) value;
-                        if (value instanceof FileBody) {
-                            FileBody fileBody = (FileBody) value;
-                            body.addFormDataPart("attachments", streamBody.getName(), RequestBody.create(MediaType.parse("application/octet-stream"), fileBody.getFile()));
-                        } else {
-                            body.addFormDataPart("attachments", streamBody.getName(), RequestBody.create(MediaType.parse("application/octet-stream"), streamBody.getBytes()));
-                        }
-                    } else if (!params.isForceParamAsQueryForPostOrPut()) {
+                    if (!params.isForceParamAsQueryForPostOrPut()) {
                         body.addFormDataPart(kv.getKey(), String.valueOf(kv.getValue()));
+                    }
+                }
+                for (StreamBody streamBody : params.getFiles()) {
+                    if (streamBody instanceof FileBody) {
+                        FileBody fileBody = (FileBody) streamBody;
+                        body.addFormDataPart("attachments", streamBody.getName(), RequestBody.create(MediaType.parse("application/octet-stream"), fileBody.getFile()));
+                    } else {
+                        body.addFormDataPart("attachments", streamBody.getName(), RequestBody.create(MediaType.parse("application/octet-stream"), streamBody.getBytes()));
                     }
                 }
                 if (progressListener != null) {
@@ -351,7 +350,7 @@ public class Okhttp3Client extends BaseClient {
                 responce.code = response.code();
                 initHeaders(response, responce);
                 if (responce.code / 100 == 2) {
-                    File file = getFile(responce.getUrl().toString(), path, urlStr);
+                    File file = getFile(responce.getUrl(), path, urlStr);
                     InputStream inputStream = response.body().byteStream();
                     downloadFile(params, responce, file, responce.contentLength, inputStream, cover, progressListener, callbackActuator);
                     responce.result = "success".getBytes();
@@ -359,6 +358,21 @@ public class Okhttp3Client extends BaseClient {
                 response.close();
             } catch (Throwable e) {
                 responce.setThrowable(e);
+            } finally {
+                if (progressListener != null) {
+                    Runnable runnable = new Runnable() {
+
+                        @Override
+                        public void run() {
+                            progressListener.finish(responce.result != null);
+                        }
+                    };
+                    if (callbackActuator != null) {
+                        callbackActuator.run(runnable);
+                    } else {
+                        runnable.run();
+                    }
+                }
             }
             this.call = null;
             return responce;
