@@ -187,12 +187,19 @@ public class Prepare {
     /**
      * 获取文件
      */
-    protected File getFile(HttpURLConnection conn, String path, String url) throws Throwable {
+    protected File getFile(HttpURLConnection conn, String path, String url) throws Exception {
+        return getFile(conn.getURL().toString(), path, url);
+    }
+
+    /**
+     * 获取文件
+     */
+    protected File getFile(String uri, String path, String url) throws Exception {
         File file = new File(path);
         if (file.exists() && file.isDirectory()) {
             String name = null;
             try {
-                String fn = URLDecoder.decode(conn.getURL().toString(), "UTF-8");
+                String fn = URLDecoder.decode(uri, "UTF-8");
                 name = fn.substring(fn.lastIndexOf("/") + 1);
             } catch (Exception e) {
                 System.out.println("cannot get file name");

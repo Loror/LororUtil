@@ -381,77 +381,77 @@ public abstract class BaseClient extends Prepare implements Client {
                 conn = null;
             }
             return responce;
-        } else if (params.isForceMultiparty()) {
-            final ProgressListener progressListener = this.progressListener;
-            final Actuator callbackActuator = this.callbackActuator;
-            List<StreamBody> files = params.getFiles();
-            final Responce responce = new Responce();
-            try {
-                if (params.isForceParamAsQueryForPostOrPut()) {
-                    String strParams = params.packetOutParams("GET");
-                    if (!TextUtil.isEmpty(strParams)) {
-                        urlStr += params.getSplicing(urlStr, 0) + strParams;
-                    }
-                }
-                URL url = new URL(urlStr);// 服务器的域名
-                conn = (HttpURLConnection) url.openConnection();
-                if (followRedirects) {
-                    conn.setInstanceFollowRedirects(true);
-                }
-                if (progressListener != null) {
-                    conn.setUseCaches(false);
-                    conn.setChunkedStreamingMode(fileReadLength);
-                }
-                httpsConfig(conn);
-                preparePutFile(conn, timeOut, readTimeOut, params);
-                OutputStream out = conn.getOutputStream();
-                if (params.isGzip()) {
-                    out = new GZIPOutputStream(out);
-                }
-                if (!params.isForceParamAsQueryForPostOrPut()) {
-                    String strParams = params.packetOutParams("POST_MULTI");
-                    if (!TextUtil.isEmpty(strParams)) {
-                        out.write(strParams.getBytes());
-                    } // 提交参数
-                }
-                if (files != null) {
-                    int index = 0;
-                    for (StreamBody body : files) {
-                        upLoadFile(body, index++, out, progressListener, callbackActuator);
-                    }
-                } // 上传文件
-                // 定义最后数据分隔线，即--加上BOUNDARY再加上--，写上结尾标识
-                byte[] end_data = (MultipartConfig.PREFIX + MultipartConfig.BOUNDARY + MultipartConfig.PREFIX + MultipartConfig.LINEEND).getBytes();
-                out.write(end_data);
-                out.flush();
-                out.close();
-                responce.url = conn.getURL();
-                responce.code = conn.getResponseCode();
-                responce.contentType = conn.getContentType();
-                responce.contentLength = length(conn);
-                responce.contentEncoding = conn.getContentEncoding();
-                initHeaders(conn, responce);
-                readResponce(conn, responce);
-            } catch (Throwable e) {
-                responce.setThrowable(e);
-            } finally {
-                conn = null;
-                if (progressListener != null) {
-                    Runnable runnable = new Runnable() {
-
-                        @Override
-                        public void run() {
-                            progressListener.finish(responce.result != null);
-                        }
-                    };
-                    if (callbackActuator != null) {
-                        callbackActuator.run(runnable);
-                    } else {
-                        runnable.run();
-                    }
-                }
-            }
-            return responce;
+//        } else if (params.isForceMultiparty()) {
+//            final ProgressListener progressListener = this.progressListener;
+//            final Actuator callbackActuator = this.callbackActuator;
+//            List<StreamBody> files = params.getFiles();
+//            final Responce responce = new Responce();
+//            try {
+//                if (params.isForceParamAsQueryForPostOrPut()) {
+//                    String strParams = params.packetOutParams("GET");
+//                    if (!TextUtil.isEmpty(strParams)) {
+//                        urlStr += params.getSplicing(urlStr, 0) + strParams;
+//                    }
+//                }
+//                URL url = new URL(urlStr);// 服务器的域名
+//                conn = (HttpURLConnection) url.openConnection();
+//                if (followRedirects) {
+//                    conn.setInstanceFollowRedirects(true);
+//                }
+//                if (progressListener != null) {
+//                    conn.setUseCaches(false);
+//                    conn.setChunkedStreamingMode(fileReadLength);
+//                }
+//                httpsConfig(conn);
+//                preparePutFile(conn, timeOut, readTimeOut, params);
+//                OutputStream out = conn.getOutputStream();
+//                if (params.isGzip()) {
+//                    out = new GZIPOutputStream(out);
+//                }
+//                if (!params.isForceParamAsQueryForPostOrPut()) {
+//                    String strParams = params.packetOutParams("POST_MULTI");
+//                    if (!TextUtil.isEmpty(strParams)) {
+//                        out.write(strParams.getBytes());
+//                    } // 提交参数
+//                }
+//                if (files != null) {
+//                    int index = 0;
+//                    for (StreamBody body : files) {
+//                        upLoadFile(body, index++, out, progressListener, callbackActuator);
+//                    }
+//                } // 上传文件
+//                // 定义最后数据分隔线，即--加上BOUNDARY再加上--，写上结尾标识
+//                byte[] end_data = (MultipartConfig.PREFIX + MultipartConfig.BOUNDARY + MultipartConfig.PREFIX + MultipartConfig.LINEEND).getBytes();
+//                out.write(end_data);
+//                out.flush();
+//                out.close();
+//                responce.url = conn.getURL();
+//                responce.code = conn.getResponseCode();
+//                responce.contentType = conn.getContentType();
+//                responce.contentLength = length(conn);
+//                responce.contentEncoding = conn.getContentEncoding();
+//                initHeaders(conn, responce);
+//                readResponce(conn, responce);
+//            } catch (Throwable e) {
+//                responce.setThrowable(e);
+//            } finally {
+//                conn = null;
+//                if (progressListener != null) {
+//                    Runnable runnable = new Runnable() {
+//
+//                        @Override
+//                        public void run() {
+//                            progressListener.finish(responce.result != null);
+//                        }
+//                    };
+//                    if (callbackActuator != null) {
+//                        callbackActuator.run(runnable);
+//                    } else {
+//                        runnable.run();
+//                    }
+//                }
+//            }
+//            return responce;
         } else {
             //这种情况只会上传第一个文件，其余参数全部打包到url
             final ProgressListener progressListener = this.progressListener;
@@ -722,7 +722,7 @@ public abstract class BaseClient extends Prepare implements Client {
     /**
      * 通过流接受文件
      */
-    private void downloadFile(RequestParams params, Responce responce, File file, long length, InputStream is, boolean cover,
+    protected void downloadFile(RequestParams params, Responce responce, File file, long length, InputStream is, boolean cover,
                               final ProgressListener progressListener, Actuator actuator) throws Throwable {
         long last = System.currentTimeMillis(), transed = 0;
         FileOutputStream fos = null;

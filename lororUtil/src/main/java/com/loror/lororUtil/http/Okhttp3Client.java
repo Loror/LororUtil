@@ -3,7 +3,8 @@ package com.loror.lororUtil.http;
 import com.loror.lororUtil.http.okhttp.ProgressRequestBody;
 import com.loror.lororUtil.text.TextUtil;
 
-import java.io.IOException;
+import java.io.File;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,6 +41,37 @@ public class Okhttp3Client extends BaseClient {
         return true;
     }
 
+    /**
+     * 读取http头
+     */
+    protected void initHeaders(Response response, Responce responce) {
+        Headers responseHeaders = response.headers();
+        if (responseHeaders != null) {
+            Map<String, List<String>> headers = new HashMap<>();
+            for (String name : responseHeaders.names()) {
+                List<String> value = responseHeaders.values(name);
+                headers.put(name, value);
+            }
+            initHeaders(headers, responce);
+        }
+        responce.contentType = response.header("Content-Type");
+        String contentLengthHeader = response.header("Content-Length");
+        if (contentLengthHeader != null) {
+            responce.contentLength = Long.parseLong(contentLengthHeader);
+        }
+    }
+
+    /**
+     * 获取返回数据
+     */
+    protected void readResponce(Response response, Responce responce) throws Exception {
+        ResponseBody body = response.body();
+        if (body != null) {
+            responce.result = body.bytes();
+        }
+        response.close();
+    }
+
     @Override
     public Responce get(String urlStr, RequestParams params) {
         if (core == CORE_OKHTTP3) {
@@ -68,21 +100,9 @@ public class Okhttp3Client extends BaseClient {
             try {
                 Response response = call.execute();
                 responce.code = response.code();
-                Headers responseHeaders = response.headers();
-                if (responseHeaders != null) {
-                    Map<String, List<String>> headers = new HashMap<>();
-                    for (String name : responseHeaders.names()) {
-                        List<String> value = responseHeaders.values(name);
-                        headers.put(name, value);
-                    }
-                    initHeaders(headers, responce);
-                }
-                ResponseBody body = response.body();
-                if (body != null) {
-                    responce.result = body.bytes();
-                }
-                response.close();
-            } catch (IOException e) {
+                initHeaders(response, responce);
+                readResponce(response, responce);
+            } catch (Exception e) {
                 responce.setThrowable(e);
             }
             this.call = null;
@@ -95,7 +115,7 @@ public class Okhttp3Client extends BaseClient {
     public Responce post(String urlStr, RequestParams params) {
         if (core == CORE_OKHTTP3) {
             Responce responce = new Responce();
-            boolean isMultipart = !(params == null || (params.getFiles().size() == 0 && !params.isForceMultiparty()));
+            boolean isMultipart = !(params == null || (params.getFiles().isEmpty() && !params.isForceMultiparty()));
             boolean queryParam = false;
             if (!isMultipart) {
                 if (params != null) {
@@ -175,27 +195,175 @@ public class Okhttp3Client extends BaseClient {
             try {
                 Response response = call.execute();
                 responce.code = response.code();
-                Headers responseHeaders = response.headers();
-                if (responseHeaders != null) {
-                    Map<String, List<String>> headers = new HashMap<>();
-                    for (String name : responseHeaders.names()) {
-                        List<String> value = responseHeaders.values(name);
-                        headers.put(name, value);
-                    }
-                    initHeaders(headers, responce);
-                }
-                ResponseBody body = response.body();
-                if (body != null) {
-                    responce.result = body.bytes();
-                }
-                response.close();
-            } catch (IOException e) {
+                initHeaders(response, responce);
+                readResponce(response, responce);
+            } catch (Exception e) {
                 responce.setThrowable(e);
             }
             this.call = null;
             return responce;
         }
         return super.post(urlStr, params);
+    }
+
+    @Override
+    public Responce put(String urlStr, RequestParams params) {
+        if (core == CORE_OKHTTP3) {
+            Responce responce = new Responce();
+            Request request;
+            if (params == null || params.getFiles().isEmpty()) {
+                boolean queryParam = false;
+                if (params != null) {
+                    if ((params.isAsJson() && params.getJson() != null)
+                            || params.isForceParamAsQueryForPostOrPut()) {
+                        String strParams = params.packetOutParams("GET");
+                        if (!TextUtil.isEmpty(strParams)) {
+                            urlStr += params.getSplicing(urlStr, 0) + strParams;
+                        }
+                        queryParam = true;
+                    }
+                }
+                Request.Builder builder = new Request.Builder().url(urlStr);
+                if (!queryParam && params != null && !params.getParams().isEmpty()) {
+                    FormBody.Builder body = new FormBody.Builder();
+                    for (Map.Entry<String, Object> kv : params.getParams().entrySet()) {
+                        body.add(kv.getKey(), String.valueOf(kv.getValue()));
+                    }
+                    builder.put(body.build());
+                } else {
+                    builder.method("PUT", null);
+                }
+                if (params != null) {
+                    Map<String, String> paramsHeaders = params.getHeaders();
+                    for (Map.Entry<String, String> kv : paramsHeaders.entrySet()) {
+                        builder.header(kv.getKey(), kv.getValue());
+                    }
+                }
+                request = builder.build();
+            } else {
+                //这种情况只会上传第一个文件，其余参数全部打包到url
+                String strParams = params.packetOutParams("GET");
+                if (!TextUtil.isEmpty(strParams)) {
+                    urlStr += params.getSplicing(urlStr, 0) + strParams;
+                }
+                final ProgressListener progressListener = this.progressListener;
+                final Actuator callbackActuator = this.callbackActuator;
+                StreamBody file = params.getFiles().get(0);
+                RequestBody body = RequestBody.create(file.getBytes(), MediaType.parse(file.getContentType()));
+                Request.Builder builder = new Request.Builder()
+                        .url(urlStr);
+                if (progressListener != null) {
+                    builder.put(new ProgressRequestBody(body, progressListener, callbackActuator));
+                } else {
+                    builder.put(body);
+                }
+                request = builder.build();
+            }
+            OkHttpClient okHttpClient = new OkHttpClient.Builder()
+                    .connectTimeout(timeOut / 1000, TimeUnit.SECONDS)
+                    .build();
+            Call call = okHttpClient.newCall(request);
+            this.call = call;
+            try {
+                Response response = call.execute();
+                responce.code = response.code();
+                initHeaders(response, responce);
+                readResponce(response, responce);
+            } catch (Exception e) {
+                responce.setThrowable(e);
+            }
+            this.call = null;
+            return responce;
+        }
+        return super.put(urlStr, params);
+    }
+
+    @Override
+    public Responce delete(String urlStr, RequestParams params) {
+        if (core == CORE_OKHTTP3) {
+            Responce responce = new Responce();
+            if (params != null) {
+                String strParams = params.packetOutParams("GET");
+                if (!TextUtil.isEmpty(strParams)) {
+                    urlStr += params.getSplicing(urlStr, 0) + strParams;
+                }
+            }
+
+            Request.Builder builder = new Request.Builder().url(urlStr);
+            builder.method("DELETE", null);
+            if (params != null) {
+                Map<String, String> paramsHeaders = params.getHeaders();
+                for (Map.Entry<String, String> kv : paramsHeaders.entrySet()) {
+                    builder.header(kv.getKey(), kv.getValue());
+                }
+            }
+            Request request = builder.build();
+            OkHttpClient okHttpClient = new OkHttpClient.Builder()
+                    .connectTimeout(timeOut / 1000, TimeUnit.SECONDS)
+                    .build();
+            Call call = okHttpClient.newCall(request);
+            this.call = call;
+            try {
+                Response response = call.execute();
+                responce.code = response.code();
+                initHeaders(response, responce);
+                readResponce(response, responce);
+            } catch (Exception e) {
+                responce.setThrowable(e);
+            }
+            this.call = null;
+            return responce;
+        }
+        return super.delete(urlStr, params);
+    }
+
+    @Override
+    public Responce download(String urlStr, RequestParams params, String path, boolean cover) {
+        if (core == CORE_OKHTTP3) {
+            final Responce responce = new Responce();
+            final ProgressListener progressListener = this.progressListener;
+            final Actuator callbackActuator = this.callbackActuator;
+            if (!checkState()) {
+                throw new IllegalArgumentException("no permission to visit file");
+            }
+            if (params != null) {
+                String strParams = params.packetOutParams("GET");
+                if (!TextUtil.isEmpty(strParams)) {
+                    urlStr += params.getSplicing(urlStr, 0) + strParams;
+                }
+            }
+            Request.Builder builder = new Request.Builder().url(urlStr);
+            builder.method("GET", null);
+            if (params != null) {
+                Map<String, String> paramsHeaders = params.getHeaders();
+                for (Map.Entry<String, String> kv : paramsHeaders.entrySet()) {
+                    builder.header(kv.getKey(), kv.getValue());
+                }
+            }
+            Request request = builder.build();
+            OkHttpClient okHttpClient = new OkHttpClient.Builder()
+                    .connectTimeout(timeOut / 1000, TimeUnit.SECONDS)
+                    .build();
+            Call call = okHttpClient.newCall(request);
+            this.call = call;
+            try {
+                Response response = call.execute();
+                responce.code = response.code();
+                initHeaders(response, responce);
+                if (responce.code / 100 == 2) {
+                    File file = getFile(responce.getUrl().toString(), path, urlStr);
+                    InputStream inputStream = response.body().byteStream();
+                    downloadFile(params, responce, file, responce.contentLength, inputStream, cover, progressListener, callbackActuator);
+                    responce.result = "success".getBytes();
+                }
+                response.close();
+            } catch (Throwable e) {
+                responce.setThrowable(e);
+            }
+            this.call = null;
+            return responce;
+        }
+        return super.download(urlStr, params, path, cover);
     }
 
     @Override
