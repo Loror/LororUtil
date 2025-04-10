@@ -154,9 +154,9 @@ public class Okhttp3Client extends BaseClient {
                 for (StreamBody streamBody : params.getFiles()) {
                     if (streamBody instanceof FileBody) {
                         FileBody fileBody = (FileBody) streamBody;
-                        body.addFormDataPart("attachments", streamBody.getName(), RequestBody.create(MediaType.parse("application/octet-stream"), fileBody.getFile()));
+                        body.addFormDataPart(streamBody.getKey(), streamBody.getName(), RequestBody.create(MediaType.parse("application/octet-stream"), fileBody.getFile()));
                     } else {
-                        body.addFormDataPart("attachments", streamBody.getName(), RequestBody.create(MediaType.parse("application/octet-stream"), streamBody.getBytes()));
+                        body.addFormDataPart(streamBody.getKey(), streamBody.getName(), RequestBody.create(MediaType.parse("application/octet-stream"), streamBody.getBytes()));
                     }
                 }
                 if (progressListener != null) {
