@@ -10,7 +10,7 @@ dependencies {
     compile 'com.github.Loror:LororUtil:1.9.39'
     
     //支持okhttp核心beta版本
-    compile 'com.github.Loror:LororUtil:1.9.40.beta'
+    compile 'com.github.Loror:LororUtil:1.9.40.rc3'
     implementation 'com.squareup.okhttp3:okhttp:4.12.0'
 }
 
