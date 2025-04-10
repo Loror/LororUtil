@@ -1,7 +1,10 @@
 package com.loror.lororUtil.http;
+
 import com.loror.lororUtil.flyweight.ObjectPool;
 
 public class AsyncBaseClient extends Okhttp3Client {
+
+    private Actuator callbackActuator;
 
     /**
      * 设置回调主线程执行
@@ -14,6 +17,15 @@ public class AsyncBaseClient extends Okhttp3Client {
                     ObjectPool.getInstance().getHandler().post(runnable);
                 }
             };
+        }
+    }
+
+    @Override
+    protected void executeCallBack(Runnable runnable) {
+        if (callbackActuator != null) {
+            callbackActuator.run(runnable);
+        } else {
+            super.executeCallBack(runnable);
         }
     }
 

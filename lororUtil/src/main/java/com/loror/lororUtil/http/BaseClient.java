@@ -25,14 +25,6 @@ public abstract class BaseClient extends Prepare implements Client {
     private boolean keepStream;
     private HttpURLConnection conn;
     protected ProgressListener progressListener;
-    protected Actuator callbackActuator;
-
-    /**
-     * 设置回调执行器
-     */
-    public void setCallbackActuator(Actuator callbackActuator) {
-        this.callbackActuator = callbackActuator;
-    }
 
     /**
      * 进度监听
@@ -43,6 +35,15 @@ public abstract class BaseClient extends Prepare implements Client {
 
     public ProgressListener getProgressListener() {
         return progressListener;
+    }
+
+    /**
+     * 统一执行回调
+     */
+    protected void executeCallBack(Runnable runnable) {
+        if (runnable != null) {
+            runnable.run();
+        }
     }
 
     /**
@@ -265,7 +266,6 @@ public abstract class BaseClient extends Prepare implements Client {
             return responce;
         } else {
             final ProgressListener progressListener = this.progressListener;
-            final Actuator callbackActuator = this.callbackActuator;
             List<StreamBody> files = params.getFiles();
             try {
                 URL url = new URL(urlStr);// 服务器的域名
@@ -292,7 +292,7 @@ public abstract class BaseClient extends Prepare implements Client {
                 if (files != null) {
                     int index = 0;
                     for (StreamBody body : files) {
-                        upLoadFile(body, index++, out, progressListener, callbackActuator);
+                        upLoadFile(body, index++, out, progressListener);
                     }
                 } // 上传文件
                 // 定义最后数据分隔线，即--加上BOUNDARY再加上--，写上结尾标识
@@ -319,11 +319,7 @@ public abstract class BaseClient extends Prepare implements Client {
                             progressListener.finish(responce.result != null);
                         }
                     };
-                    if (callbackActuator != null) {
-                        callbackActuator.run(runnable);
-                    } else {
-                        runnable.run();
-                    }
+                    executeCallBack(runnable);
                 }
             }
             return responce;
@@ -455,7 +451,6 @@ public abstract class BaseClient extends Prepare implements Client {
         } else {
             //这种情况只会上传第一个文件，其余参数全部打包到url
             final ProgressListener progressListener = this.progressListener;
-            final Actuator callbackActuator = this.callbackActuator;
             List<StreamBody> files = params.getFiles();
             final Responce responce = new Responce();
             try {
@@ -480,7 +475,7 @@ public abstract class BaseClient extends Prepare implements Client {
                 }
                 //上传第一个文件
                 StreamBody body = files.get(0);
-                sendFile(body, out, progressListener, callbackActuator);
+                sendFile(body, out, progressListener);
                 out.flush();
                 out.close();
                 responce.url = conn.getURL();
@@ -502,11 +497,7 @@ public abstract class BaseClient extends Prepare implements Client {
                             progressListener.finish(responce.result != null);
                         }
                     };
-                    if (callbackActuator != null) {
-                        callbackActuator.run(runnable);
-                    } else {
-                        runnable.run();
-                    }
+                    executeCallBack(runnable);
                 }
             }
             return responce;
@@ -562,7 +553,7 @@ public abstract class BaseClient extends Prepare implements Client {
     /**
      * 上传一个文件
      */
-    private void upLoadFile(StreamBody body, final int index, OutputStream out, final ProgressListener progressListener, Actuator actuator) throws Throwable {
+    private void upLoadFile(StreamBody body, final int index, OutputStream out, final ProgressListener progressListener) throws Throwable {
         if (body == null || body.getInputStream() == null) {
             return;
         }
@@ -574,11 +565,7 @@ public abstract class BaseClient extends Prepare implements Client {
                     ((DetailProgressListener) progressListener).fileIndex(index);
                 }
             };
-            if (actuator != null) {
-                actuator.run(runnable);
-            } else {
-                runnable.run();
-            }
+            executeCallBack(runnable);
         }
         StringBuilder sb = new StringBuilder();
         sb.append(MultipartConfig.PREFIX);
@@ -591,14 +578,14 @@ public abstract class BaseClient extends Prepare implements Client {
         sb.append(MultipartConfig.LINEEND);
         out.write(sb.toString().getBytes());
 
-        sendFile(body, out, progressListener, actuator);
+        sendFile(body, out, progressListener);
         out.write(MultipartConfig.LINEEND.getBytes());
     }
 
     /**
      * 通过流发送文件
      */
-    private void sendFile(StreamBody body, OutputStream os, final ProgressListener progressListener, Actuator actuator) throws Throwable {
+    private void sendFile(StreamBody body, OutputStream os, final ProgressListener progressListener) throws Throwable {
         InputStream fis = body.getInputStream();
         final long length = body.length();
         long lastTime = System.currentTimeMillis(), transed = 0;
@@ -623,11 +610,7 @@ public abstract class BaseClient extends Prepare implements Client {
                             progressListener.transing(progress, (int) (finalSpeed * 1000L / timeGo), length);
                         }
                     };
-                    if (actuator != null) {
-                        actuator.run(runnable);
-                    } else {
-                        runnable.run();
-                    }
+                    executeCallBack(runnable);
                 }
                 speed = 0;
                 lastTime = now;
@@ -643,11 +626,7 @@ public abstract class BaseClient extends Prepare implements Client {
                     progressListener.transing(100, timeGo == 0 ? 0 : (int) (finalSpeed * 1000L / timeGo), length);
                 }
             };
-            if (actuator != null) {
-                actuator.run(runnable);
-            } else {
-                runnable.run();
-            }
+            executeCallBack(runnable);
         }
         body.close();
     }
@@ -658,7 +637,6 @@ public abstract class BaseClient extends Prepare implements Client {
     public Responce download(String urlStr, RequestParams params, String path, boolean cover) {
         final Responce responce = new Responce();
         final ProgressListener progressListener = this.progressListener;
-        final Actuator callbackActuator = this.callbackActuator;
         try {
             if (!checkState()) {
                 throw new IllegalArgumentException("no permission to visit file");
@@ -692,7 +670,7 @@ public abstract class BaseClient extends Prepare implements Client {
                     if ("gzip".equals(responce.getContentEncoding())) {
                         inputStream = new GZIPInputStream(inputStream);
                     }
-                    downloadFile(params, responce, file, length, inputStream, cover, progressListener, callbackActuator);
+                    downloadFile(params, responce, file, length, inputStream, cover, progressListener);
                     responce.result = "success".getBytes();
                 }
             }
@@ -709,11 +687,7 @@ public abstract class BaseClient extends Prepare implements Client {
                         progressListener.finish(responce.result != null);
                     }
                 };
-                if (callbackActuator != null) {
-                    callbackActuator.run(runnable);
-                } else {
-                    runnable.run();
-                }
+                executeCallBack(runnable);
             }
         }
         return responce;
@@ -723,7 +697,7 @@ public abstract class BaseClient extends Prepare implements Client {
      * 通过流接受文件
      */
     protected void downloadFile(RequestParams params, Responce responce, File file, long length, InputStream is, boolean cover,
-                              final ProgressListener progressListener, Actuator actuator) throws Throwable {
+                                final ProgressListener progressListener) throws Throwable {
         long last = System.currentTimeMillis(), transed = 0;
         FileOutputStream fos = null;
         byte[] out = new byte[1024 * 100];
@@ -769,11 +743,7 @@ public abstract class BaseClient extends Prepare implements Client {
                             progressListener.transing(progress, (int) (finalSpeed * 1000L / timeGo), finalFileLength);
                         }
                     };
-                    if (actuator != null) {
-                        actuator.run(runnable);
-                    } else {
-                        runnable.run();
-                    }
+                    executeCallBack(runnable);
                 }
                 speed = 0;
                 last = now;
@@ -789,11 +759,7 @@ public abstract class BaseClient extends Prepare implements Client {
                     progressListener.transing(100, timeGo == 0 ? 0 : (int) (finalSpeed * 1000L / timeGo), finalFileLength);
                 }
             };
-            if (actuator != null) {
-                actuator.run(runnable);
-            } else {
-                runnable.run();
-            }
+            executeCallBack(runnable);
         }
         is.close();
         fos.close();

@@ -160,7 +160,13 @@ public class Okhttp3Client extends BaseClient {
                     }
                 }
                 if (progressListener != null) {
-                    builder.post(new ProgressRequestBody(body.build(), progressListener, callbackActuator));
+                    builder.post(new ProgressRequestBody(body.build(), progressListener) {
+                        @Override
+                        protected void execute(Runnable runnable) {
+//                            super.execute(runnable);
+                            executeCallBack(runnable);
+                        }
+                    });
                 } else {
                     builder.post(body.build());
                 }
@@ -246,13 +252,18 @@ public class Okhttp3Client extends BaseClient {
                     urlStr += params.getSplicing(urlStr, 0) + strParams;
                 }
                 final ProgressListener progressListener = this.progressListener;
-                final Actuator callbackActuator = this.callbackActuator;
                 StreamBody file = params.getFiles().get(0);
                 RequestBody body = RequestBody.create(file.getBytes(), MediaType.parse(file.getContentType()));
                 Request.Builder builder = new Request.Builder()
                         .url(urlStr);
                 if (progressListener != null) {
-                    builder.put(new ProgressRequestBody(body, progressListener, callbackActuator));
+                    builder.put(new ProgressRequestBody(body, progressListener) {
+                        @Override
+                        protected void execute(Runnable runnable) {
+//                            super.execute(runnable);
+                            executeCallBack(runnable);
+                        }
+                    });
                 } else {
                     builder.put(body);
                 }
@@ -321,7 +332,6 @@ public class Okhttp3Client extends BaseClient {
         if (core == CORE_OKHTTP3) {
             final Responce responce = new Responce();
             final ProgressListener progressListener = this.progressListener;
-            final Actuator callbackActuator = this.callbackActuator;
             if (!checkState()) {
                 throw new IllegalArgumentException("no permission to visit file");
             }
@@ -352,7 +362,7 @@ public class Okhttp3Client extends BaseClient {
                 if (responce.code / 100 == 2) {
                     File file = getFile(responce.getUrl(), path, urlStr);
                     InputStream inputStream = response.body().byteStream();
-                    downloadFile(params, responce, file, responce.contentLength, inputStream, cover, progressListener, callbackActuator);
+                    downloadFile(params, responce, file, responce.contentLength, inputStream, cover, progressListener);
                     responce.result = "success".getBytes();
                 }
                 response.close();
@@ -367,11 +377,7 @@ public class Okhttp3Client extends BaseClient {
                             progressListener.finish(responce.result != null);
                         }
                     };
-                    if (callbackActuator != null) {
-                        callbackActuator.run(runnable);
-                    } else {
-                        runnable.run();
-                    }
+                    executeCallBack(runnable);
                 }
             }
             this.call = null;

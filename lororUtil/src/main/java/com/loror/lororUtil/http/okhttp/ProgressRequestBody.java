@@ -2,7 +2,6 @@ package com.loror.lororUtil.http.okhttp;
 
 import androidx.annotation.NonNull;
 
-import com.loror.lororUtil.http.Actuator;
 import com.loror.lororUtil.http.ProgressListener;
 
 import java.io.IOException;
@@ -18,12 +17,10 @@ import okhttp3.RequestBody;
 public class ProgressRequestBody extends RequestBody {
     private final RequestBody requestBody;
     private final ProgressListener listener;
-    private final Actuator callbackActuator;
 
-    public ProgressRequestBody(RequestBody requestBody, ProgressListener listener, Actuator callbackActuator) {
+    public ProgressRequestBody(RequestBody requestBody, ProgressListener listener) {
         this.requestBody = requestBody;
         this.listener = listener;
-        this.callbackActuator = callbackActuator;
     }
 
     @Override
@@ -65,11 +62,7 @@ public class ProgressRequestBody extends RequestBody {
                 if (timeGo > 30) {
                     final float progress = (float) (bytesWritten * 1.0 / contentLength * 100);
                     final int finalSpeed = speed;
-                    if (callbackActuator != null) {
-                        callbackActuator.run(() -> listener.transing(progress, (int) (finalSpeed * 1000L / timeGo), contentLength));
-                    } else {
-                        listener.transing(progress, (int) (finalSpeed * 1000L / timeGo), contentLength);
-                    }
+                    execute(() -> listener.transing(progress, (int) (finalSpeed * 1000L / timeGo), contentLength));
                     speed = 0;
                     lastTime = now;
                 }
@@ -78,5 +71,11 @@ public class ProgressRequestBody extends RequestBody {
 
         requestBody.writeTo(bufferedSink);
         bufferedSink.flush();
+    }
+
+    protected void execute(Runnable runnable) {
+        if (runnable != null) {
+            runnable.run();
+        }
     }
 }
