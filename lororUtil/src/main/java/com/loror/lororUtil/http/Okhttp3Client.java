@@ -273,9 +273,9 @@ public class Okhttp3Client extends BaseClient {
                 RequestBody body;
                 if (file instanceof FileBody) {
                     FileBody fileBody = (FileBody) file;
-                    body = RequestBody.create(fileBody.getFile(), MediaType.parse(file.getContentType()));
+                    body = RequestBody.create(MediaType.parse(file.getContentType()), fileBody.getFile());
                 } else {
-                    body = RequestBody.create(file.getBytes(), MediaType.parse(file.getContentType()));
+                    body = RequestBody.create(MediaType.parse(file.getContentType()), file.getBytes());
                 }
                 Request.Builder builder = new Request.Builder()
                         .url(urlStr);
