@@ -6,7 +6,6 @@ import com.loror.lororUtil.http.ProgressListener;
 
 import java.io.IOException;
 
-import okhttp3.MultipartBody;
 import okio.Buffer;
 import okio.BufferedSink;
 import okio.ForwardingSink;
@@ -30,11 +29,7 @@ public class ProgressRequestBody extends RequestBody {
 
     @Override
     public long contentLength() throws IOException {
-        if (requestBody instanceof MultipartBody) {
-            MultipartBody multipartBody = (MultipartBody) requestBody;
-            return multipartBody.contentLength();
-        }
-        return super.contentLength();
+        return requestBody.contentLength();
     }
 
     @Override
