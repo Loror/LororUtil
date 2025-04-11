@@ -14,6 +14,8 @@ import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
+import okhttp3.OkHttpClient;
+
 public class HttpsClient extends HttpClient {
     /*********************************以下为当前HttpsClient设置*******************************/
 
@@ -28,22 +30,7 @@ public class HttpsClient extends HttpClient {
         if (singleSocketFactory != null) {
             if (conn instanceof HttpsURLConnection) {
                 HttpsURLConnection httpsURLConnection = (HttpsURLConnection) conn;
-                httpsURLConnection.setHostnameVerifier(new HostnameVerifier() {
-                    public boolean verify(String s, SSLSession sslsession) {
-                        if (singleHostName == null) {
-                            System.out.println("warning: Hostname is setted not verify.");
-                            return true;
-                        }
-                        for (int i = 0; i < singleHostName.length; i++) {
-                            String host = singleHostName[i];
-                            if ((!TextUtil.isEmpty(host) && host.equals(s))) {
-                                return true;
-                            }
-                        }
-                        System.out.println("error: Hostname is not matched for cert.");
-                        return false;
-                    }
-                });
+                httpsURLConnection.setHostnameVerifier(buildVerifier());
                 if (singleSuiteTSLAndroid4) {
                     httpsURLConnection.setSSLSocketFactory(new SSLSocketFactoryCompat(singleSocketFactory));
                 } else {
@@ -53,6 +40,39 @@ public class HttpsClient extends HttpClient {
             return;
         }
         super.httpsConfig(conn);
+    }
+
+    @Override
+    protected void httpsConfig(OkHttpClient.Builder builder) throws Exception {
+        if (singleSocketFactory != null) {
+            builder.hostnameVerifier(buildVerifier());
+            if (singleSuiteTSLAndroid4) {
+                builder.sslSocketFactory(new SSLSocketFactoryCompat(singleSocketFactory));
+            } else {
+                builder.sslSocketFactory(singleSocketFactory);
+            }
+            return;
+        }
+        super.httpsConfig(builder);
+    }
+
+    private HostnameVerifier buildVerifier() {
+        return new HostnameVerifier() {
+            public boolean verify(String s, SSLSession sslsession) {
+                if (singleHostName == null) {
+                    System.out.println("warning: Hostname is setted not verify.");
+                    return true;
+                }
+                for (int i = 0; i < singleHostName.length; i++) {
+                    String host = singleHostName[i];
+                    if ((!TextUtil.isEmpty(host) && host.equals(s))) {
+                        return true;
+                    }
+                }
+                System.out.println("error: Hostname is not matched for cert.");
+                return false;
+            }
+        };
     }
 
     public void setSingleHostName(String... singleHostName) {
@@ -121,45 +141,70 @@ public class HttpsClient extends HttpClient {
     }
 
     public static class Config {
+
         /**
          * 证书配置处理
          */
         public static void httpsConfig(HttpURLConnection connection) throws Exception {
             if (connection instanceof HttpsURLConnection) {
                 HttpsURLConnection httpsURLConnection = (HttpsURLConnection) connection;
-                if (hostnameVerifier == null) {
-                    hostnameVerifier = new HostnameVerifier() {
-                        public boolean verify(String s, SSLSession sslsession) {
-                            if (hostName == null) {
-                                System.out.println("warning: Hostname is setted not verify.");
+                SSLSocketFactory factory = buildSSL();
+                if (factory != null) {
+                    httpsURLConnection.setHostnameVerifier(buildVerifier());
+                    httpsURLConnection.setSSLSocketFactory(factory);
+                }
+            }
+        }
+
+        /**
+         * 证书配置处理
+         */
+        public static void httpsConfig(OkHttpClient.Builder builder) throws Exception {
+            SSLSocketFactory factory = buildSSL();
+            if (factory != null) {
+                builder.hostnameVerifier(buildVerifier());
+                builder.sslSocketFactory(factory);
+            }
+        }
+
+        private static HostnameVerifier buildVerifier() {
+            if (hostnameVerifier == null) {
+                hostnameVerifier = new HostnameVerifier() {
+                    public boolean verify(String s, SSLSession sslsession) {
+                        if (hostName == null) {
+                            System.out.println("warning: Hostname is setted not verify.");
+                            return true;
+                        }
+                        for (int i = 0; i < hostName.length; i++) {
+                            String host = hostName[i];
+                            if ((!TextUtil.isEmpty(host) && host.equals(s))) {
                                 return true;
                             }
-                            for (int i = 0; i < hostName.length; i++) {
-                                String host = hostName[i];
-                                if ((!TextUtil.isEmpty(host) && host.equals(s))) {
-                                    return true;
-                                }
-                            }
-                            System.out.println("error: Hostname is not matched for cert.");
-                            return false;
                         }
-                    };
-                }
-                httpsURLConnection.setHostnameVerifier(hostnameVerifier);
-                if (socketFactory != null) {
-                    if (suiteTSLAndroid4) {
-                        httpsURLConnection.setSSLSocketFactory(new SSLSocketFactoryCompat(socketFactory));
-                    } else {
-                        httpsURLConnection.setSSLSocketFactory(socketFactory);
+                        System.out.println("error: Hostname is not matched for cert.");
+                        return false;
                     }
-                } else if (trustAll) {
-                    SSLSocketFactory socketFactory = buildUnsafeSSLSocket();
-                    if (suiteTSLAndroid4) {
-                        httpsURLConnection.setSSLSocketFactory(new SSLSocketFactoryCompat(socketFactory));
-                    } else {
-                        httpsURLConnection.setSSLSocketFactory(socketFactory);
-                    }
+                };
+            }
+            return hostnameVerifier;
+        }
+
+        private static SSLSocketFactory buildSSL() throws Exception {
+            if (socketFactory != null) {
+                if (suiteTSLAndroid4) {
+                    return new SSLSocketFactoryCompat(socketFactory);
+                } else {
+                    return socketFactory;
                 }
+            } else if (trustAll) {
+                SSLSocketFactory socketFactory = buildUnsafeSSLSocket();
+                if (suiteTSLAndroid4) {
+                    return new SSLSocketFactoryCompat(socketFactory);
+                } else {
+                    return socketFactory;
+                }
+            } else {
+                return null;
             }
         }
     }

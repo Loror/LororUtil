@@ -41,6 +41,27 @@ public class Okhttp3Client extends BaseClient {
         return true;
     }
 
+    private OkHttpClient.Builder configOkHttp() {
+        OkHttpClient.Builder builder = new OkHttpClient.Builder()
+                .connectTimeout(timeOut / 1000, TimeUnit.SECONDS);
+        if (readTimeOut != 0) {
+            builder.readTimeout(readTimeOut / 1000, TimeUnit.SECONDS);
+        }
+        try {
+            httpsConfig(builder);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return builder;
+    }
+
+    /**
+     * https配置
+     */
+    protected void httpsConfig(OkHttpClient.Builder builder) throws Exception {
+        HttpsClient.Config.httpsConfig(builder);
+    }
+
     /**
      * 读取http头
      */
@@ -92,9 +113,7 @@ public class Okhttp3Client extends BaseClient {
                 }
             }
             Request request = builder.build();
-            OkHttpClient okHttpClient = new OkHttpClient.Builder()
-                    .connectTimeout(timeOut / 1000, TimeUnit.SECONDS)
-                    .build();
+            OkHttpClient okHttpClient = configOkHttp().build();
             Call call = okHttpClient.newCall(request);
             this.call = call;
             try {
@@ -192,9 +211,7 @@ public class Okhttp3Client extends BaseClient {
                 }
             }
             Request request = builder.build();
-            OkHttpClient okHttpClient = new OkHttpClient.Builder()
-                    .connectTimeout(timeOut / 1000, TimeUnit.SECONDS)
-                    .build();
+            OkHttpClient okHttpClient = configOkHttp().build();
             Call call = okHttpClient.newCall(request);
             this.call = call;
             try {
@@ -269,9 +286,7 @@ public class Okhttp3Client extends BaseClient {
                 }
                 request = builder.build();
             }
-            OkHttpClient okHttpClient = new OkHttpClient.Builder()
-                    .connectTimeout(timeOut / 1000, TimeUnit.SECONDS)
-                    .build();
+            OkHttpClient okHttpClient = configOkHttp().build();
             Call call = okHttpClient.newCall(request);
             this.call = call;
             try {
@@ -308,9 +323,7 @@ public class Okhttp3Client extends BaseClient {
                 }
             }
             Request request = builder.build();
-            OkHttpClient okHttpClient = new OkHttpClient.Builder()
-                    .connectTimeout(timeOut / 1000, TimeUnit.SECONDS)
-                    .build();
+            OkHttpClient okHttpClient = configOkHttp().build();
             Call call = okHttpClient.newCall(request);
             this.call = call;
             try {
@@ -350,9 +363,7 @@ public class Okhttp3Client extends BaseClient {
                 }
             }
             Request request = builder.build();
-            OkHttpClient okHttpClient = new OkHttpClient.Builder()
-                    .connectTimeout(timeOut / 1000, TimeUnit.SECONDS)
-                    .build();
+            OkHttpClient okHttpClient = configOkHttp().build();
             Call call = okHttpClient.newCall(request);
             this.call = call;
             try {

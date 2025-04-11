@@ -34,6 +34,7 @@ import java.util.Map;
 
 public class ApiRequest {
 
+    private Method method;
     private String baseUrl, anoBaseUrl;
     private RequestParams params;
     protected HttpClient client;
@@ -156,6 +157,7 @@ public class ApiRequest {
      * 创建RequestParams
      */
     protected void generateParams(Method method, Object[] args) {
+        this.method = method;
         params = new RequestParams();
         DefaultParams defaultParams = method.getAnnotation(DefaultParams.class);
         if (defaultParams != null) {
@@ -389,5 +391,15 @@ public class ApiRequest {
         } else {
             params.addParams(name, array);
         }
+    }
+
+    /**
+     * 获取方法上注解
+     */
+    public <T extends Annotation> T getAnnotation(Class<T> annotationClass) {
+        if (method != null) {
+            return method.getAnnotation(annotationClass);
+        }
+        return null;
     }
 }
