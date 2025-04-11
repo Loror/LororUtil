@@ -6,12 +6,12 @@
 
 ```
 dependencies {
-    //正式版
-    compile 'com.github.Loror:LororUtil:1.9.39'
-    
-    //支持okhttp核心beta版本
+    //支持okhttp核心版本
     compile 'com.github.Loror:LororUtil:1.9.40'
     implementation 'com.squareup.okhttp3:okhttp:4.12.0'
+    
+    //稳定版
+    compile 'com.github.Loror:LororUtil:1.9.39'
 }
 
 allprojects {

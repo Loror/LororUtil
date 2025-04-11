@@ -270,7 +270,13 @@ public class Okhttp3Client extends BaseClient {
                 }
                 final ProgressListener progressListener = this.progressListener;
                 StreamBody file = params.getFiles().get(0);
-                RequestBody body = RequestBody.create(file.getBytes(), MediaType.parse(file.getContentType()));
+                RequestBody body;
+                if (file instanceof FileBody) {
+                    FileBody fileBody = (FileBody) file;
+                    body = RequestBody.create(fileBody.getFile(), MediaType.parse(file.getContentType()));
+                } else {
+                    body = RequestBody.create(file.getBytes(), MediaType.parse(file.getContentType()));
+                }
                 Request.Builder builder = new Request.Builder()
                         .url(urlStr);
                 if (progressListener != null) {
