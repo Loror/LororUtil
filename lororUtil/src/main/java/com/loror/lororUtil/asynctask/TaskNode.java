@@ -21,6 +21,7 @@ class TaskNode<T1, T2> {
             try {
                 return funcNode.func(it);
             } catch (Exception e) {
+                catcher.catchException(e);
                 return null;
             }
         } else {
