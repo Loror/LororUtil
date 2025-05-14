@@ -197,11 +197,17 @@ public class Okhttp3Client extends BaseClient {
                         builder.post(requestBody);
                     } else {
                         if (!queryParam) {
-                            FormBody.Builder body = new FormBody.Builder();
-                            for (Map.Entry<String, Object> kv : params.getParams().entrySet()) {
-                                body.add(kv.getKey(), String.valueOf(kv.getValue()));
+                            if (params.hasBodyConverter()) {
+                                String form = params.packetOutParams("POST");
+                                RequestBody requestBody = RequestBody.create(MediaType.parse("application/x-www-form-urlencoded; charset=utf-8"), form);
+                                builder.post(requestBody);
+                            } else {
+                                FormBody.Builder body = new FormBody.Builder();
+                                for (Map.Entry<String, Object> kv : params.getParams().entrySet()) {
+                                    body.add(kv.getKey(), String.valueOf(kv.getValue()));
+                                }
+                                builder.post(body.build());
                             }
-                            builder.post(body.build());
                         } else {
                             builder.method("POST", null);
                         }

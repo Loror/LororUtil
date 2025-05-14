@@ -491,6 +491,10 @@ public class RequestParams {
         this.bodyConverter = bodyConverter;
     }
 
+    protected boolean hasBodyConverter() {
+        return bodyConverter != null;
+    }
+
     /**
      * 设置拼接符
      */
