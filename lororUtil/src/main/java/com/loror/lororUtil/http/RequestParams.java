@@ -20,7 +20,7 @@ public class RequestParams {
     private List<StreamBody> files;
     private String json;
 
-    private RequestConverter getConverter, postConverter;
+    protected RequestConverter getConverter, postConverter;
     private PacketConverter packetConverter;
     private BodyConverter bodyConverter;
     private SpliceConverter spliceConverter;
@@ -471,14 +471,14 @@ public class RequestParams {
     }
 
     /**
-     * 全局转换
+     * 字段转换，对GET/DELETE生效
      */
     public void setGetConverter(RequestConverter getConverter) {
         this.getConverter = getConverter;
     }
 
     /**
-     * 全局转换
+     * 字段转换，对POST/PUT生效
      */
     public void setPostConverter(RequestConverter postConverter) {
         this.postConverter = postConverter;
@@ -491,8 +491,11 @@ public class RequestParams {
         this.bodyConverter = bodyConverter;
     }
 
+    /**
+     * 是否body整体转换
+     */
     protected boolean hasBodyConverter() {
-        return bodyConverter != null;
+        return bodyConverter != null || packetConverter != null;
     }
 
     /**

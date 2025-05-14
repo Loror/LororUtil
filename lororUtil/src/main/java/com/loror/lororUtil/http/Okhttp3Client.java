@@ -203,8 +203,9 @@ public class Okhttp3Client extends BaseClient {
                                 builder.post(requestBody);
                             } else {
                                 FormBody.Builder body = new FormBody.Builder();
+                                RequestConverter converter = params.postConverter;
                                 for (Map.Entry<String, Object> kv : params.getParams().entrySet()) {
-                                    body.add(kv.getKey(), String.valueOf(kv.getValue()));
+                                    body.add(kv.getKey(), converter == null ? String.valueOf(kv.getValue()) : converter.convert(kv.getKey(), String.valueOf(kv.getValue())));
                                 }
                                 builder.post(body.build());
                             }
@@ -253,11 +254,18 @@ public class Okhttp3Client extends BaseClient {
                 }
                 Request.Builder builder = new Request.Builder().url(urlStr);
                 if (!queryParam && params != null && !params.getParams().isEmpty()) {
-                    FormBody.Builder body = new FormBody.Builder();
-                    for (Map.Entry<String, Object> kv : params.getParams().entrySet()) {
-                        body.add(kv.getKey(), String.valueOf(kv.getValue()));
+                    if (params.hasBodyConverter()) {
+                        String form = params.packetOutParams("POST");
+                        RequestBody requestBody = RequestBody.create(MediaType.parse("application/x-www-form-urlencoded; charset=utf-8"), form);
+                        builder.put(requestBody);
+                    } else {
+                        FormBody.Builder body = new FormBody.Builder();
+                        RequestConverter converter = params.postConverter;
+                        for (Map.Entry<String, Object> kv : params.getParams().entrySet()) {
+                            body.add(kv.getKey(), converter == null ? String.valueOf(kv.getValue()) : converter.convert(kv.getKey(), String.valueOf(kv.getValue())));
+                        }
+                        builder.put(body.build());
                     }
-                    builder.put(body.build());
                 } else {
                     builder.method("PUT", null);
                 }
