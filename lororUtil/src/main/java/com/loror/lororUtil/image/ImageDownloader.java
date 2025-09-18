@@ -115,7 +115,7 @@ public class ImageDownloader {
             conn.setConnectTimeout(10000);
             conn.setDoInput(true);
 //            conn.setRequestProperty("Accept-Encoding", "identity");
-            HttpsClient.Config.httpsConfig(conn);
+            HttpsClient.Config.httpsConfigSSL(conn);
             if (imageDownloaderConfig != null) {
                 imageDownloaderConfig.beforeLoad(urlStr, conn);
             }

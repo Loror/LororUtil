@@ -1,4 +1,4 @@
-package com.loror.lororUtil.example;
+package com.loror.lororUtil.example.bean;
 
 import com.loror.lororUtil.sql.Encryption;
 

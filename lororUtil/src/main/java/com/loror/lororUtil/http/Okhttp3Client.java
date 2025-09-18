@@ -63,6 +63,10 @@ public class Okhttp3Client extends BaseClient {
         HttpsClient.Config.httpsConfig(builder);
     }
 
+    protected void onRequestFinish(Response response) {
+        HttpsClient.Config.onRequestFinish(response);
+    }
+
     /**
      * 读取http头
      */
@@ -91,11 +95,8 @@ public class Okhttp3Client extends BaseClient {
         if (body != null) {
             responce.result = body.bytes();
         }
+        onRequestFinish(response);
         response.close();
-    }
-
-    protected void onRequestFinish(Response response) {
-        HttpsClient.Config.onRequestFinish(response);
     }
 
     @Override

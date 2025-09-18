@@ -80,18 +80,20 @@ public class HttpsClient extends HttpClient {
 
     @Override
     protected void onRequestFinish(HttpURLConnection conn) {
-        super.onRequestFinish(conn);
         if (singleOnHttpsConfig != null) {
             singleOnHttpsConfig.onRequestFinish(conn);
+            return;
         }
+        super.onRequestFinish(conn);
     }
 
     @Override
     protected void onRequestFinish(Response response) {
-        super.onRequestFinish(response);
         if (singleOnHttpsConfig != null) {
             singleOnHttpsConfig.onRequestFinish(response);
+            return;
         }
+        super.onRequestFinish(response);
     }
 
     private HostnameVerifier buildVerifier() {
@@ -177,7 +179,7 @@ public class HttpsClient extends HttpClient {
 
     /**
      * 设置监听https配置
-     * */
+     */
     public static void setOnHttpsConfig(OnHttpsConfig onHttpsConfig) {
         HttpsClient.onHttpsConfig = onHttpsConfig;
     }
@@ -196,6 +198,20 @@ public class HttpsClient extends HttpClient {
                 onHttpsConfig.onHttpsConfig(connection);
                 return;
             }
+            if (connection instanceof HttpsURLConnection) {
+                HttpsURLConnection httpsURLConnection = (HttpsURLConnection) connection;
+                SSLSocketFactory factory = buildSSL();
+                if (factory != null) {
+                    httpsURLConnection.setHostnameVerifier(buildVerifier());
+                    httpsURLConnection.setSSLSocketFactory(factory);
+                }
+            }
+        }
+
+        /**
+         * 证书配置处理
+         */
+        public static void httpsConfigSSL(HttpURLConnection connection) throws Exception {
             if (connection instanceof HttpsURLConnection) {
                 HttpsURLConnection httpsURLConnection = (HttpsURLConnection) connection;
                 SSLSocketFactory factory = buildSSL();

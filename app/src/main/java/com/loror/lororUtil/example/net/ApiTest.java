@@ -1,4 +1,4 @@
-package com.loror.lororUtil.example;
+package com.loror.lororUtil.example.net;
 
 import com.loror.lororUtil.annotation.BaseUrl;
 import com.loror.lororUtil.annotation.GET;
@@ -16,12 +16,12 @@ public interface ApiTest {
     /**
      * 同步访问方式
      */
-    @GET("/")
+    @GET("/s?wd=1")
     String test1();
 
     /**
      * 自定义访问方式
      */
-    @GET("/")
+    @GET("/s?wd=2")
     rx.Observable<String> test2();
 }

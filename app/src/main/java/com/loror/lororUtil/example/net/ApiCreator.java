@@ -1,4 +1,4 @@
-package com.loror.lororUtil.example;
+package com.loror.lororUtil.example.net;
 
 import com.alibaba.fastjson.JSON;
 import com.loror.lororUtil.http.Client;

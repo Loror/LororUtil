@@ -1,4 +1,4 @@
-package com.loror.lororUtil.example;
+package com.loror.lororUtil.example.net;
 
 import com.loror.lororUtil.http.api.ApiTask;
 import com.loror.lororUtil.http.api.ReturnAdapter;
