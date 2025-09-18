@@ -15,12 +15,15 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
 import okhttp3.OkHttpClient;
+import okhttp3.Response;
 
 public class HttpsClient extends HttpClient {
 
     public interface OnHttpsConfig {
 
         void onHttpsConfig(Object connection);
+
+        void onRequestFinish(Object connection);
     }
 
     /*********************************以下为当前HttpsClient设置*******************************/
@@ -73,6 +76,22 @@ public class HttpsClient extends HttpClient {
             return;
         }
         super.httpsConfig(builder);
+    }
+
+    @Override
+    protected void onRequestFinish(HttpURLConnection conn) {
+        super.onRequestFinish(conn);
+        if (singleOnHttpsConfig != null) {
+            singleOnHttpsConfig.onRequestFinish(conn);
+        }
+    }
+
+    @Override
+    protected void onRequestFinish(Response response) {
+        super.onRequestFinish(response);
+        if (singleOnHttpsConfig != null) {
+            singleOnHttpsConfig.onRequestFinish(response);
+        }
     }
 
     private HostnameVerifier buildVerifier() {
@@ -240,6 +259,18 @@ public class HttpsClient extends HttpClient {
                 }
             } else {
                 return null;
+            }
+        }
+
+        public static void onRequestFinish(HttpURLConnection conn) {
+            if (onHttpsConfig != null) {
+                onHttpsConfig.onRequestFinish(conn);
+            }
+        }
+
+        public static void onRequestFinish(Response response) {
+            if (onHttpsConfig != null) {
+                onHttpsConfig.onRequestFinish(response);
             }
         }
     }

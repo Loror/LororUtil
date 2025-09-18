@@ -159,6 +159,7 @@ public abstract class BaseClient extends Prepare implements Client {
         }
         responce.inputStream = inputStream;
         responce.connection = conn;
+        onRequestFinish(conn);
         if (!keepStream) {
             responce.readStream();
             responce.close();
@@ -170,6 +171,10 @@ public abstract class BaseClient extends Prepare implements Client {
      */
     protected void httpsConfig(HttpURLConnection conn) throws Exception {
         HttpsClient.Config.httpsConfig(conn);
+    }
+
+    protected void onRequestFinish(HttpURLConnection conn) {
+        HttpsClient.Config.onRequestFinish(conn);
     }
 
     @Override

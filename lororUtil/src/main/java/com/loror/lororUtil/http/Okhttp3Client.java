@@ -5,6 +5,7 @@ import com.loror.lororUtil.text.TextUtil;
 
 import java.io.File;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -91,6 +92,10 @@ public class Okhttp3Client extends BaseClient {
             responce.result = body.bytes();
         }
         response.close();
+    }
+
+    protected void onRequestFinish(Response response) {
+        HttpsClient.Config.onRequestFinish(response);
     }
 
     @Override
