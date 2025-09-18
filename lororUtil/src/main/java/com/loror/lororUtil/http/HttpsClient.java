@@ -17,6 +17,12 @@ import javax.net.ssl.X509TrustManager;
 import okhttp3.OkHttpClient;
 
 public class HttpsClient extends HttpClient {
+
+    public interface OnHttpsConfig {
+
+        void onHttpsConfig(Object connection);
+    }
+
     /*********************************以下为当前HttpsClient设置*******************************/
 
     //hostName校验
@@ -24,9 +30,18 @@ public class HttpsClient extends HttpClient {
     //是否为安卓4开启TSLv1.2
     private boolean singleSuiteTSLAndroid4 = false;
     private SSLSocketFactory singleSocketFactory;
+    private OnHttpsConfig singleOnHttpsConfig;
+
+    public void setSingleOnHttpsConfig(OnHttpsConfig singleOnHttpsConfig) {
+        this.singleOnHttpsConfig = singleOnHttpsConfig;
+    }
 
     @Override
     protected void httpsConfig(HttpURLConnection conn) throws Exception {
+        if (singleOnHttpsConfig != null) {
+            singleOnHttpsConfig.onHttpsConfig(conn);
+            return;
+        }
         if (singleSocketFactory != null) {
             if (conn instanceof HttpsURLConnection) {
                 HttpsURLConnection httpsURLConnection = (HttpsURLConnection) conn;
@@ -44,6 +59,10 @@ public class HttpsClient extends HttpClient {
 
     @Override
     protected void httpsConfig(OkHttpClient.Builder builder) throws Exception {
+        if (singleOnHttpsConfig != null) {
+            singleOnHttpsConfig.onHttpsConfig(builder);
+            return;
+        }
         if (singleSocketFactory != null) {
             builder.hostnameVerifier(buildVerifier());
             if (singleSuiteTSLAndroid4) {
@@ -97,6 +116,7 @@ public class HttpsClient extends HttpClient {
     private static boolean trustAll = false;
     private static HostnameVerifier hostnameVerifier;
     private static SSLSocketFactory socketFactory;
+    private static OnHttpsConfig onHttpsConfig;
 
     /**
      * 设置域名校验
@@ -136,6 +156,13 @@ public class HttpsClient extends HttpClient {
         HttpsClient.socketFactory = socketFactory;
     }
 
+    /**
+     * 设置监听https配置
+     * */
+    public static void setOnHttpsConfig(OnHttpsConfig onHttpsConfig) {
+        HttpsClient.onHttpsConfig = onHttpsConfig;
+    }
+
     public static SSLSocketFactory getSocketFactory() {
         return socketFactory;
     }
@@ -146,6 +173,10 @@ public class HttpsClient extends HttpClient {
          * 证书配置处理
          */
         public static void httpsConfig(HttpURLConnection connection) throws Exception {
+            if (onHttpsConfig != null) {
+                onHttpsConfig.onHttpsConfig(connection);
+                return;
+            }
             if (connection instanceof HttpsURLConnection) {
                 HttpsURLConnection httpsURLConnection = (HttpsURLConnection) connection;
                 SSLSocketFactory factory = buildSSL();
@@ -160,6 +191,10 @@ public class HttpsClient extends HttpClient {
          * 证书配置处理
          */
         public static void httpsConfig(OkHttpClient.Builder builder) throws Exception {
+            if (onHttpsConfig != null) {
+                onHttpsConfig.onHttpsConfig(builder);
+                return;
+            }
             SSLSocketFactory factory = buildSSL();
             if (factory != null) {
                 builder.hostnameVerifier(buildVerifier());
