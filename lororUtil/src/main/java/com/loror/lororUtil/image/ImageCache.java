@@ -1,5 +1,7 @@
 package com.loror.lororUtil.image;
 
+import android.graphics.Bitmap;
+
 public class ImageCache {
     /**
      * 图片缓存
@@ -10,7 +12,10 @@ public class ImageCache {
         protected int sizeOf(ReadImageResult value) {
             int size = 0;
             for (int i = 0; i < value.getCount(); i++) {
-                size += value.getFrame(i).image.getByteCount();
+                Bitmap image = value.getFrame(i).image;
+                if (image != null) {
+                    size += image.getByteCount();
+                }
             }
             return size / 1024;
         }

@@ -37,7 +37,7 @@ publishing {
         plugin(MavenPublication) {
             groupId = 'com.loror'
             artifactId = 'LororUtil'
-            version = '1.9.42'
+            version = '1.9.44'
             afterEvaluate { artifact(tasks.getByName("bundleReleaseAar")) }
         }
     }

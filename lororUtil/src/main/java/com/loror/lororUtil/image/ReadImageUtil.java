@@ -81,6 +81,7 @@ public class ReadImageUtil {
                 result.addFrame(new Frame(bitmap, 0, widthLimit));
                 return result;
             } catch (IllegalArgumentException e) {
+                result.setErrorCode(-1);
                 e.printStackTrace();
             } finally {
                 retriever.release();
