@@ -70,7 +70,11 @@ public class ApiTask {
     protected void requestAgain(ApiResult apiResult) {
         if (observable != null) {
             apiResult.accept = true;
-            observable.subscribe(observable.getObserver());
+            if (observable.isCall()) {
+                apiResult.responceObject = observable.call();
+            } else {
+                observable.subscribe(observable.getObserver());
+            }
         } else if (ApiClient.returnAdapters.size() == 0) {
             apiResult.accept = true;
             Responce responce = request();
@@ -258,7 +262,7 @@ public class ApiTask {
         this.observable = observable;
     }
 
-    protected Observable<?> getObservable() {
+    public Observable<?> getObservable() {
         return observable;
     }
 

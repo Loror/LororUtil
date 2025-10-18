@@ -14,6 +14,11 @@ public class Observable<T> {
     private Observer<T> observer;
     protected ObservableManager observableManager;
     private static final ExecutorService server = Executors.newFixedThreadPool(3);
+    private boolean isCall;
+
+    public boolean isCall() {
+        return isCall;
+    }
 
     public void setApiTask(ApiTask apiTask) {
         this.apiTask = apiTask;
@@ -41,6 +46,7 @@ public class Observable<T> {
      * 同步执行请求
      */
     public Call<T> call() {
+        isCall = true;
         Call<T> call = new Call<>();
         final Responce responce = apiTask.request();
         if (responce != null) {
@@ -61,6 +67,7 @@ public class Observable<T> {
      * 开始任务并提交监听
      */
     public Observable<T> subscribe(final Observer<T> observer) {
+        isCall = false;
         this.observer = observer;
         if (observer == null) {
             return this;
