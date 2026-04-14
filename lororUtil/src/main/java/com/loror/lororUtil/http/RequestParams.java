@@ -20,7 +20,7 @@ public class RequestParams {
     private List<StreamBody> files;
     private String json;
 
-    protected RequestConverter getConverter, postConverter;
+    protected RequestConverter getConverter, postConverter, jsonConverter;
     private PacketConverter packetConverter;
     private BodyConverter bodyConverter;
     private SpliceConverter spliceConverter;
@@ -38,8 +38,8 @@ public class RequestParams {
     //urlencode转码器
     private static final RequestConverter defaultConverter = new RequestConverter() {
         @Override
-        public String convert(String key, String value) {
-            return value == null ? null : UrlUtf8Util.toUrlString(value);
+        public String convert(String key, Object value) {
+            return value == null ? null : UrlUtf8Util.toUrlString(String.valueOf(value));
         }
     };
 
@@ -485,6 +485,14 @@ public class RequestParams {
     }
 
     /**
+     * 自动打包json时对未知类型字段有效
+     *
+     */
+    public void setJsonConverter(RequestConverter jsonConverter) {
+        this.jsonConverter = jsonConverter;
+    }
+
+    /**
      * 全局转换
      */
     public void setBodyConverter(BodyConverter bodyConverter) {
@@ -531,7 +539,7 @@ public class RequestParams {
             if (json != null) {
                 str = json;
             } else {
-                str = packetConverter != null ? packetConverter.convert(method, params) : getJson(params);
+                str = packetConverter != null ? packetConverter.convert(method, params) : getJson(params, jsonConverter);
             }
         } else {
             //使用外部打包器
@@ -565,7 +573,7 @@ public class RequestParams {
     /**
      * 创建json
      */
-    public static String getJson(Map<String, Object> params) {
+    public static String getJson(Map<String, Object> params, RequestConverter jsonConverter) {
         StringBuilder builder = new StringBuilder("{");
         for (String key : params.keySet()) {
             Object value = params.get(key);
@@ -579,34 +587,54 @@ public class RequestParams {
                         .append(key)
                         .append("\":")
                         .append(value);
-            } else if (value.getClass().isArray()) {
-                Object[] values = (Object[]) value;
-                builder.append("\"")
-                        .append(key)
-                        .append("\":[");
-                for (int i = 0; i < values.length; i++) {
-                    Object val = values[i];
-                    if (val == null) {
-                        builder.append("null");
-                    } else if (val instanceof Number || val instanceof Boolean ||
-                            val instanceof Primitive) {
-                        builder.append(val);
-                    } else {
-                        builder.append("\"")
-                                .append(val)
-                                .append("\"");
-                    }
-                    if (i != values.length - 1) {
-                        builder.append(",");
-                    }
-                }
-                builder.append("]");
-            } else {
+            } else if (value instanceof CharSequence) {
                 builder.append("\"")
                         .append(key)
                         .append("\":\"")
                         .append(value)
                         .append("\"");
+            } else if (value.getClass().isArray()) {
+                if (jsonConverter != null) {
+                    builder.append("\"")
+                            .append(key)
+                            .append("\":")
+                            .append(jsonConverter.convert(key, value));
+                } else {
+                    Object[] values = (Object[]) value;
+                    builder.append("\"")
+                            .append(key)
+                            .append("\":[");
+                    for (int i = 0; i < values.length; i++) {
+                        Object val = values[i];
+                        if (val == null) {
+                            builder.append("null");
+                        } else if (val instanceof Number || val instanceof Boolean ||
+                                val instanceof Primitive) {
+                            builder.append(val);
+                        } else {
+                            builder.append("\"")
+                                    .append(val)
+                                    .append("\"");
+                        }
+                        if (i != values.length - 1) {
+                            builder.append(",");
+                        }
+                    }
+                    builder.append("]");
+                }
+            } else {
+                if (jsonConverter != null) {
+                    builder.append("\"")
+                            .append(key)
+                            .append("\":")
+                            .append(jsonConverter.convert(key, value));
+                } else {
+                    builder.append("\"")
+                            .append(key)
+                            .append("\":\"")
+                            .append(value)
+                            .append("\"");
+                }
             }
             builder.append(",");
         }

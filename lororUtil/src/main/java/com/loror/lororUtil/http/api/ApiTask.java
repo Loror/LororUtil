@@ -162,6 +162,10 @@ public class ApiTask {
             return null;
         }
         final RequestParams params = apiRequest.getParams();
+        JsonParser jsonParser = ApiClient.jsonParser;
+        if (jsonParser != null && params != null) {
+            params.setJsonConverter((key, value) -> jsonParser.objectToJson(value));
+        }
         final String url = apiRequest.getUrl();
         if (apiRequest.isKeepStream() && typeInfo.getType() == Responce.class) {
             client.setKeepStream(true);
