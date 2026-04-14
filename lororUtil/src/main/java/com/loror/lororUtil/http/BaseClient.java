@@ -470,16 +470,26 @@ public abstract class BaseClient extends Prepare implements Client {
                 }
                 if (progressListener != null) {
                     conn.setUseCaches(false);
-                    conn.setChunkedStreamingMode(fileReadLength);
                 }
                 httpsConfig(conn);
                 preparePutSingleFile(conn, timeOut, readTimeOut, params);
+                //上传第一个文件
+                StreamBody body = files.get(0);
+                long length = body.length();
+                if (length > 0) {
+                    try {
+                        conn.setFixedLengthStreamingMode(length);
+                    } catch (Exception e) {
+                        conn.setFixedLengthStreamingMode((int) length);
+                    }
+                } else {
+                    //不知道总长度，分片上传，会给每帧添加一个帧头
+                    conn.setChunkedStreamingMode(fileReadLength);
+                }
                 OutputStream out = conn.getOutputStream();
                 if (params.isGzip()) {
                     out = new GZIPOutputStream(out);
                 }
-                //上传第一个文件
-                StreamBody body = files.get(0);
                 sendFile(body, out, progressListener);
                 out.flush();
                 out.close();
