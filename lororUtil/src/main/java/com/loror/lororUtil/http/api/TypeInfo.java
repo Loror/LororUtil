@@ -2,6 +2,8 @@ package com.loror.lororUtil.http.api;
 
 import androidx.annotation.NonNull;
 
+import com.loror.lororUtil.http.api.helper.ClassUtil;
+
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;

@@ -1,6 +1,7 @@
 package com.loror.lororUtil.http;
 
 import com.loror.lororUtil.convert.UrlUtf8Util;
+import com.loror.lororUtil.http.api.helper.PrimitiveObject;
 import com.loror.lororUtil.text.TextUtil;
 
 import java.io.File;
@@ -583,10 +584,18 @@ public class RequestParams {
                         .append("\":null");
             } else if (value instanceof Number || value instanceof Boolean ||
                     value instanceof Primitive) {
-                builder.append("\"")
-                        .append(key)
-                        .append("\":")
-                        .append(value);
+                if (jsonConverter != null && value instanceof PrimitiveObject) {
+                    PrimitiveObject<?> object = (PrimitiveObject<?>) value;
+                    builder.append("\"")
+                            .append(key)
+                            .append("\":")
+                            .append(jsonConverter.convert(key, object.getData()));
+                } else {
+                    builder.append("\"")
+                            .append(key)
+                            .append("\":")
+                            .append(value);
+                }
             } else if (value instanceof CharSequence) {
                 builder.append("\"")
                         .append(key)

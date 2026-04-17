@@ -8,6 +8,8 @@ import com.loror.lororUtil.http.HttpClient;
 import com.loror.lororUtil.http.Primitive;
 import com.loror.lororUtil.http.ProgressListener;
 import com.loror.lororUtil.http.RequestParams;
+import com.loror.lororUtil.http.api.helper.ClassUtil;
+import com.loror.lororUtil.http.api.helper.PrimitiveObject;
 import com.loror.lororUtil.text.TextUtil;
 import com.loror.lororUtil.annotation.AsJson;
 import com.loror.lororUtil.annotation.Cookie;
@@ -371,8 +373,10 @@ public class ApiRequest {
             params.addParams(name, (Boolean) value);
         } else if (value instanceof Primitive) {
             params.addParams(name, (Primitive) value);
-        } else {
+        } else if (value instanceof CharSequence) {
             params.addParams(name, String.valueOf(value));
+        } else {
+            params.addParams(name, new PrimitiveObject<>(value));
         }
     }
 
